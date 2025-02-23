@@ -1,0 +1,52 @@
+reference: https://www.kaggle.com/code/shtrausslearning/building-an-asset-trading-strategy
+
+btc dataset: https://www.kaggle.com/datasets/mczielinski/bitcoin-historical-data/code?datasetId=1346&sortBy=voteCount
+
+https://www.kaggle.com/datasets/mattiuzc/stock-exchange-data
+
+- show relationship between data/features, before starting the project. 
+	You need to be able to affirm specific problem that a model/algo could tackle, as a relationship/correlation.
+	This shows how the algo/model could learn how to produce the solution.
+
+the btc dataset is lacking enough features, consider other datasets to combine with it, 
+to process in order to find that relationship.
+
+you dont need to slice the data, to predict next item in a sequence. The entire dataset can be trained from
+sequentially. 
+
+
+specs: 
+
+predict market trends, in order to asses the feasibility of using it for profitable trading strats.
+
+
+
+features:
+
+global Stock Exchange Data - daily price
+btc/usd                    - daily price
+stock to flow              - overlayed on the daily price
+
+
+
+
+
+
+
+
+abs
+intro
+problem statement
+objective and aims
+AI approach
+library?
+data cle??
+data vis
+data preprep
+model select
+model eval?
+conclusion
+recommendatsions
+future
+ref
+appendix
