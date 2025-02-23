@@ -27,12 +27,47 @@ global Stock Exchange Data - daily price
 btc/usd                    - daily price
 stock to flow              - overlayed on the daily price
 
+on chain lequidity:
 
+- Illiquid Supply Change (coins moving to cold storage)
+- Exchange Net Position Change (inflows/outflows)
+- Miner Reserve Balance (miner selling pressure)
+- Realized HODL Ratio (long-term vs short-term holder behavior)
 
+Stablecoin Liquidity (Tether/USDC metrics):
 
+# Strong correlation (r ≈ 0.85) between:
+- Aggregate Stablecoin Supply Growth
+- BTC Market Cap Growth (30-60 day lag observed)
+# Data source: CoinMetrics' "Aggregate Stablecoins" chart
 
+Macro Volatility Spillover (measurable via):
 
+# CBOE SKEW Index (black swan pricing)
+# Crude Oil Volatility (OVX) → shows stronger correlation than VIX
+# 2-Year Treasury Yield volatility (MOVE Index)
 
+Energy Market Dynamics (miner cost basis):
+
+# Hashprice (USD/TH/day) vs Electricity Costs
+# Miner Profit Margin Compression → leads to forced selling
+# Data source: Hashrate Index
+
+Currency Debasement Signals (beyond simple M2):
+
+# Track:
+- Emerging Market FX Reserves (inverse correlation)
+- USD Liquidity Conditions (Fed Reverse Repo + TGA)
+- Gold/BTC Ratio (asset rotation signals)
+
+Derivatives Market Structure (CME/Crypto exchanges):
+
+# Key metrics:
+- Futures Basis Spread (CME vs Binance)
+- Options Put/Call Skew
+- Perpetual Funding Rate Divergence
+
+https://arxiv.org/abs/2201.12893
 
 abs
 intro
