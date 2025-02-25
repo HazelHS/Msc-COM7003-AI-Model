@@ -2,7 +2,8 @@ reference: https://www.kaggle.com/code/shtrausslearning/building-an-asset-tradin
 
 btc dataset: https://www.kaggle.com/datasets/mczielinski/bitcoin-historical-data/code?datasetId=1346&sortBy=voteCount
 
-https://www.kaggle.com/datasets/mattiuzc/stock-exchange-data
+https://www.kaggle.com/datasets/mattiuzc/stock-exchange-data - this is useless, we'll use yahoo finance instead.
+add additional Bitcoin-specific features like realized price, NUPL, or mining difficulty
 
 - show relationship between data/features, before starting the project. 
 	You need to be able to affirm specific problem that a model/algo could tackle, as a relationship/correlation.
@@ -18,6 +19,19 @@ sequentially.
 specs: 
 
 predict market trends, in order to asses the feasibility of using it for profitable trading strats.
+
+ - note: gradient decents \\ you are allowed to call an API for handling gradient decent, not expected to build one from scratch. BUT you are expected to show/prove you understand it!
+
+(one hot encoding (bitvector respresentation)
+
+1. have complete and processed dataset.
+1.2: to reduce dimentionality, "sigluar value decomposition"  princeiple component analysis &/or univarate analysis
+2. features selection
+3. apply model
+4. train model
+5. evaluation
+6. redo feature selection with hyperparameter tuning. (grid search, random search, bayesian search[recomended])
+
 
 
 
