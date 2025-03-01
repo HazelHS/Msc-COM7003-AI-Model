@@ -40,6 +40,7 @@ features:
 global Stock Exchange Data - daily price
 btc/usd                    - daily price
 stock to flow              - overlayed on the daily price
+AAII % Bearish (RHS) - (NASDAQ 100) [bearish sentiment index?]
 
 on chain lequidity:
 
@@ -99,3 +100,6 @@ recommendatsions
 future
 ref
 appendix
+
+
+
