@@ -25,11 +25,24 @@ import json
 import re
 from io import StringIO  # Updated import for StringIO
 
-# Define constants
+# Get the absolute directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(SCRIPT_DIR)  # Parent directory
+
+# Define constants with absolute paths
 DATA_DIRS = [
-    '../datasets/additional_features',
-    '../datasets/processed_exchanges'
+    os.path.join(BASE_DIR, 'datasets/additional_features'),
+    os.path.join(BASE_DIR, 'datasets/processed_exchanges')
 ]
+
+# Ensure directories exist
+def ensure_directories_exist():
+    """Create required directories if they don't exist"""
+    for directory in DATA_DIRS:
+        if not os.path.exists(directory):
+            print(f"Creating directory: {directory}")
+            os.makedirs(directory)
+    return True
 
 # Map of file patterns to data sources for validation
 SOURCE_MAPPING = {
@@ -386,6 +399,10 @@ def main():
     """Main function"""
     print("CSV Data Validation Tool")
     print("========================")
+    
+    # Ensure all data directories exist
+    print("Checking and creating required directories...")
+    ensure_directories_exist()
     
     if len(sys.argv) > 1:
         if sys.argv[1] == '--all':

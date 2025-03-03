@@ -1,15 +1,14 @@
 """
-Time Series Structure Analysis
+Time Series Analysis Visualizations
 
-This script provides visualizations for analyzing the structure of time series data,
-including completeness checks, gap analysis, and sampling frequency analysis.
+This script provides visualizations for analyzing time series data structure,
+focusing on trends, seasonality, and cyclic patterns.
 
 Usage:
-    python time_series_analysis.py [csv_file_path]
+    python time_series_analysis.py [csv_file_path] [--output_dir OUTPUT_DIR]
 
 Author: AI Assistant
 Created: March 1, 2025
-Modified: Current date - Simplified to use only pandas and matplotlib
 """
 
 import os
@@ -17,7 +16,17 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 from datetime import datetime, timedelta
+import calendar
+import argparse
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+
+# Set the seaborn style for better visualizations
+sns.set(style="whitegrid")
+plt.rcParams['figure.figsize'] = (12, 8)
+plt.rcParams['font.size'] = 12
 
 def load_data(file_path):
     """Load data from a CSV file"""
@@ -46,266 +55,307 @@ def load_data(file_path):
             print(f"Failed to load {file_path}")
             return None
 
-def check_date_completeness(df):
-    """Plot the time series with focus on gaps and discontinuities"""
-    if df.index.name != 'Date':
-        print("DataFrame must have 'Date' as index for date completeness check.")
-        return
+def check_date_completeness(df, output_dir):
+    """Check for gaps in time series data"""
+    print("Checking date completeness in time series data...")
     
-    # Create output directory
-    output_dir = 'visualization_output'
+    # Ensure DataFrame has Date column
+    if 'Date' not in df.columns:
+        print("Error: DataFrame must have 'Date' column for time series analysis")
+        return None
+    
+    # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     
-    # Get date range information
-    min_date = df.index.min()
-    max_date = df.index.max()
-    date_range_days = (max_date - min_date).days
+    # Create a copy with Date as index
+    df_ts = df.copy()
+    if not isinstance(df_ts.index, pd.DatetimeIndex):
+        df_ts = df_ts.set_index('Date')
     
-    # Choose an appropriate unit based on the range
-    if date_range_days <= 60:  # Less than 2 months
-        unit = 'days'
-        ideal_freq = 'D'
-    elif date_range_days <= 365 * 2:  # Less than 2 years
-        unit = 'weeks'
-        ideal_freq = 'W'
-    else:
-        unit = 'months'
-        ideal_freq = 'M'
+    # Get the date range
+    start_date = df_ts.index.min()
+    end_date = df_ts.index.max()
+    date_range = pd.date_range(start=start_date, end=end_date)
     
-    # Create an ideal date range
-    ideal_dates = pd.date_range(start=min_date, end=max_date, freq=ideal_freq)
+    # Check for missing dates
+    missing_dates = date_range.difference(df_ts.index)
+    completeness = 100 - (len(missing_dates) / len(date_range) * 100)
     
-    # Check which dates from the ideal range exist in the actual data
-    exists = pd.Series(False, index=ideal_dates)
-    for date in df.index:
-        closest_ideal = ideal_dates[ideal_dates.get_indexer([date], method='nearest')[0]]
-        exists[closest_ideal] = True
+    # Create a plot with seaborn
+    plt.figure(figsize=(14, 8))
     
-    # Create a mask to highlight missing dates
-    has_data = exists.astype(int)
-    missing_dates = (~exists).sum()
+    # Plot existing data points
+    key_col = df_ts.select_dtypes(include=['number']).columns[0]  # Use first numeric column
+    sns.lineplot(x=df_ts.index, y=df_ts[key_col], label=f'{key_col}', marker='o', markersize=4)
     
-    # Plot the date completeness
-    plt.figure(figsize=(14, 6))
-    plt.plot(ideal_dates, has_data, marker='o', linestyle='-', markersize=4)
-    plt.title(f'Date Completeness ({missing_dates} missing {unit} out of {len(ideal_dates)})')
-    plt.ylabel('Has Data (1 = Yes, 0 = No)')
-    plt.yticks([0, 1])
+    # Highlight gaps if there are any
+    if len(missing_dates) > 0:
+        # Create a Series with NaN values for missing dates
+        missing_series = pd.Series(index=missing_dates, data=[np.nan] * len(missing_dates))
+        
+        # Plot the gaps as red points
+        if len(missing_dates) < 100:  # Only highlight individual gaps if there aren't too many
+            for date in missing_dates:
+                plt.axvline(x=date, color='red', alpha=0.2, linestyle='--')
+        else:
+            # For many gaps, just highlight problematic areas
+            plt.fill_between(df_ts.index, df_ts[key_col].min(), df_ts[key_col].max(), 
+                            where=df_ts.index.isin(missing_dates), color='red', alpha=0.1)
+    
+    plt.title(f'Time Series Completeness: {completeness:.2f}% Complete\n({len(missing_dates)} missing dates out of {len(date_range)} total dates)', 
+            fontsize=14)
+    plt.xlabel('Date', fontsize=12)
+    plt.ylabel('Value', fontsize=12)
     plt.grid(True, alpha=0.3)
-    
-    # Format x-axis based on date range
-    if unit == 'days':
-        plt.xlabel('Day')
-    elif unit == 'weeks':
-        plt.xlabel('Week')
-    else:
-        plt.xlabel('Month')
-    
-    # Save the plot
     plt.tight_layout()
-    plt.savefig(f"{output_dir}/date_completeness_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+    
+    # Save the figure
+    output_path = os.path.join(output_dir, 'date_completeness.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
     
-    # Return the percent completeness
-    return (1 - missing_dates / len(ideal_dates)) * 100
+    print(f"Date completeness visualization saved to {output_path}")
+    
+    return completeness, missing_dates
 
-def analyze_gaps(df):
-    """Analyze gaps in the time series data"""
-    if df.index.name != 'Date':
-        print("DataFrame must have 'Date' as index for gap analysis.")
-        return
+def analyze_gaps(df, output_dir):
+    """Analyze gaps in time series data"""
+    print("Analyzing gaps in time series data...")
     
-    # Sort the index to ensure chronological order
-    df = df.sort_index()
+    # Ensure DataFrame has Date column
+    if 'Date' not in df.columns:
+        print("Error: DataFrame must have 'Date' column for gap analysis")
+        return None
     
-    # Calculate time differences between consecutive dates
-    time_diffs = df.index.to_series().diff()
-    
-    # Create a gap analysis dataframe
-    gap_analysis = pd.DataFrame({
-        'time_diff_days': time_diffs.dt.total_seconds() / (24 * 3600)
-    })
-    
-    # Identify gaps (where time difference is greater than the median difference)
-    median_diff = gap_analysis['time_diff_days'].median()
-    gap_analysis['is_gap'] = gap_analysis['time_diff_days'] > 2 * median_diff
-    
-    # Create output directory
-    output_dir = 'visualization_output'
+    # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     
-    # Plot histogram of time differences
-    plt.figure(figsize=(12, 6))
-    plt.hist(gap_analysis['time_diff_days'].dropna(), bins=30, color='skyblue', edgecolor='black')
-    plt.axvline(x=median_diff, color='red', linestyle='--', label=f'Median: {median_diff:.2f} days')
-    plt.title('Distribution of Time Gaps Between Consecutive Records')
-    plt.xlabel('Gap Length (days)')
-    plt.ylabel('Frequency')
+    # Ensure Date is datetime
+    df = df.copy()
+    if not pd.api.types.is_datetime64_dtype(df['Date']):
+        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+    
+    # Sort by date
+    df = df.sort_values('Date')
+    
+    # Calculate the time difference between consecutive dates
+    df['days_diff'] = df['Date'].diff().dt.days
+    
+    # Create a DataFrame for gap analysis
+    gaps = df['days_diff'].dropna()
+    
+    # Create a histogram of gaps with seaborn
+    plt.figure(figsize=(12, 8))
+    
+    sns.histplot(gaps, kde=True, bins=20, color='skyblue')
+    
+    plt.title('Distribution of Gaps Between Consecutive Records', fontsize=14)
+    plt.xlabel('Gap Size (Days)', fontsize=12)
+    plt.ylabel('Frequency', fontsize=12)
+    
+    # Add vertical line for most common gap
+    most_common_gap = gaps.mode().iloc[0] if not gaps.empty else 0
+    plt.axvline(x=most_common_gap, color='red', linestyle='--', 
+               label=f'Most Common Gap: {most_common_gap} days')
+    
+    # Add statistics as text
+    stats_text = (
+        f"Mean Gap: {gaps.mean():.2f} days\n"
+        f"Median Gap: {gaps.median():.2f} days\n"
+        f"Max Gap: {gaps.max():.0f} days\n"
+        f"Min Gap: {gaps.min():.0f} days\n"
+        f"Std Dev: {gaps.std():.2f} days"
+    )
+    plt.figtext(0.75, 0.75, stats_text, fontsize=10, 
+               bbox=dict(facecolor='white', alpha=0.8))
+    
     plt.legend()
-    plt.grid(True, alpha=0.3)
-    
-    # Save the plot
     plt.tight_layout()
-    plt.savefig(f"{output_dir}/gap_distribution_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+    
+    # Save the figure
+    output_path = os.path.join(output_dir, 'gap_distribution.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
     
-    # Create a table of significant gaps
-    significant_gaps = gap_analysis[gap_analysis['is_gap']].copy()
-    if len(significant_gaps) > 0:
-        # Add the date information
-        significant_gaps['start_date'] = df.index[:-1][significant_gaps.index - 1]
-        significant_gaps['end_date'] = df.index[1:][significant_gaps.index - 1]
-        
-        # Sort by gap size
-        significant_gaps = significant_gaps.sort_values('time_diff_days', ascending=False)
-        
-        # Plot the top gaps
-        top_n = min(10, len(significant_gaps))
-        plt.figure(figsize=(12, 6))
-        bars = plt.bar(range(top_n), significant_gaps['time_diff_days'].iloc[:top_n], color='salmon')
-        plt.title(f'Top {top_n} Largest Gaps in the Dataset')
-        plt.xlabel('Gap Rank')
-        plt.ylabel('Gap Length (days)')
-        plt.xticks(range(top_n))
-        
-        # Add gap period labels
-        for i, (_, row) in enumerate(significant_gaps.iloc[:top_n].iterrows()):
-            gap_label = f"{row['start_date'].strftime('%Y-%m-%d')} to {row['end_date'].strftime('%Y-%m-%d')}"
-            plt.text(i, row['time_diff_days'] * 0.5, gap_label, ha='center', rotation=90, color='black', fontsize=8)
-        
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        plt.savefig(f"{output_dir}/top_gaps_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-        plt.close()
-        
-        # Save the gap analysis to CSV
-        significant_gaps[['start_date', 'end_date', 'time_diff_days']].to_csv(
-            f"{output_dir}/significant_gaps_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-        )
-    else:
-        print("No significant gaps found in the dataset.")
+    print(f"Gap distribution saved to {output_path}")
+    
+    # Also create a time series plot of gaps over time
+    plt.figure(figsize=(14, 6))
+    
+    sns.scatterplot(x=df['Date'][1:], y=df['days_diff'], hue=df['days_diff'] > most_common_gap, 
+                   palette={False: 'blue', True: 'red'}, legend=False)
+    
+    plt.title('Gaps Between Records Over Time', fontsize=14)
+    plt.xlabel('Date', fontsize=12)
+    plt.ylabel('Gap Size (Days)', fontsize=12)
+    plt.axhline(y=most_common_gap, color='green', linestyle='--', 
+               label=f'Most Common Gap: {most_common_gap} days')
+    plt.legend()
+    plt.tight_layout()
+    
+    # Save the figure
+    output_path = os.path.join(output_dir, 'gaps_over_time.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Gaps over time visualization saved to {output_path}")
+    
+    return gaps
 
-def analyze_sampling_frequency(df):
-    """Analyze the sampling frequency patterns in the dataset"""
-    if df.index.name != 'Date':
-        print("DataFrame must have 'Date' as index for sampling frequency analysis.")
-        return
+def analyze_sampling_frequency(df, output_dir):
+    """Analyze sampling frequency patterns"""
+    print("Analyzing sampling frequency patterns...")
     
-    # Sort the index to ensure chronological order
-    df = df.sort_index()
+    # Ensure DataFrame has Date column
+    if 'Date' not in df.columns:
+        print("Error: DataFrame must have 'Date' column for sampling frequency analysis")
+        return None
     
-    # Calculate time differences between consecutive dates in hours
-    time_diffs = df.index.to_series().diff().dt.total_seconds() / 3600
-    
-    # Create a frequency analysis dataframe
-    freq_analysis = pd.DataFrame({
-        'time_diff_hours': time_diffs
-    })
-    
-    # Create output directory
-    output_dir = 'visualization_output'
+    # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     
-    # Plot histogram of sampling frequencies
-    plt.figure(figsize=(12, 6))
-    plt.hist(freq_analysis['time_diff_hours'].dropna(), bins=50, color='lightgreen', edgecolor='black')
-    plt.title('Distribution of Sampling Intervals')
-    plt.xlabel('Interval (hours)')
-    plt.ylabel('Frequency')
-    plt.grid(True, alpha=0.3)
+    # Ensure Date is datetime
+    df = df.copy()
+    if not pd.api.types.is_datetime64_dtype(df['Date']):
+        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
     
-    # Identify common sampling intervals
-    common_intervals = freq_analysis['time_diff_hours'].value_counts().nlargest(5)
+    # Extract time components
+    df['year'] = df['Date'].dt.year
+    df['month'] = df['Date'].dt.month
+    df['day'] = df['Date'].dt.day
+    df['weekday'] = df['Date'].dt.dayofweek
+    df['hour'] = df['Date'].dt.hour
     
-    # Add text box with common intervals
-    intervals_text = "Common intervals (hours):\n"
-    for interval, count in common_intervals.items():
-        percent = count / len(freq_analysis) * 100
-        intervals_text += f"{interval:.1f}: {count} occurrences ({percent:.1f}%)\n"
+    # Create a heatmap of samples by month and year using seaborn
+    # Aggregate samples by month and year
+    samples_by_month_year = df.groupby(['year', 'month']).size().unstack()
     
-    plt.figtext(0.7, 0.7, intervals_text, fontsize=10, 
-              bbox=dict(facecolor='white', alpha=0.8))
+    # Create a heatmap
+    plt.figure(figsize=(14, 8))
     
-    # Save the plot
+    ax = sns.heatmap(samples_by_month_year, cmap='YlGnBu', annot=True, fmt='g', 
+                     cbar_kws={'label': 'Number of Records'})
+    
+    plt.title('Number of Records by Month and Year', fontsize=14)
+    plt.xlabel('Month', fontsize=12)
+    plt.ylabel('Year', fontsize=12)
     plt.tight_layout()
-    plt.savefig(f"{output_dir}/sampling_frequency_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+    
+    # Save the figure
+    output_path = os.path.join(output_dir, 'sampling_heatmap.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
     
-    # Plot sampling frequency change over time
+    print(f"Sampling frequency heatmap saved to {output_path}")
+    
+    # Create a line plot of records per month over time
     plt.figure(figsize=(14, 6))
-    plt.plot(df.index[1:], freq_analysis['time_diff_hours'], marker='.', linestyle='-', alpha=0.5)
-    plt.title('Sampling Interval Change Over Time')
-    plt.xlabel('Date')
-    plt.ylabel('Interval (hours)')
+    
+    # Extract year-month as a datetime
+    monthly_counts = df.groupby(pd.Grouper(key='Date', freq='M')).size()
+    
+    # Plot with seaborn
+    sns.lineplot(x=monthly_counts.index, y=monthly_counts.values, marker='o')
+    
+    plt.title('Records per Month Over Time', fontsize=14)
+    plt.xlabel('Date', fontsize=12)
+    plt.ylabel('Number of Records', fontsize=12)
     plt.grid(True, alpha=0.3)
-    
-    # Save the plot
     plt.tight_layout()
-    plt.savefig(f"{output_dir}/sampling_frequency_overtime_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-    plt.close()
-
-def check_weekend_data(df):
-    """Check if the dataset contains weekend data"""
-    if df.index.name != 'Date':
-        print("DataFrame must have 'Date' as index for weekend data check.")
-        return
     
-    # Create weekday information
-    weekdays = df.index.weekday
-    is_weekend = (weekdays == 5) | (weekdays == 6)  # 5=Saturday, 6=Sunday
+    # Save the figure
+    output_path = os.path.join(output_dir, 'records_per_month.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Records per month visualization saved to {output_path}")
+    
+    return monthly_counts
+
+def check_weekend_data(df, output_dir):
+    """Check if dataset contains weekend data"""
+    print("Checking for weekend data...")
+    
+    # Ensure DataFrame has Date column
+    if 'Date' not in df.columns:
+        print("Error: DataFrame must have 'Date' column for weekend analysis")
+        return None
+    
+    # Create output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Ensure Date is datetime
+    df = df.copy()
+    if not pd.api.types.is_datetime64_dtype(df['Date']):
+        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+    
+    # Extract weekday
+    df['weekday'] = df['Date'].dt.dayofweek
+    df['weekday_name'] = df['Date'].dt.day_name()
+    df['is_weekend'] = df['weekday'].isin([5, 6])  # 5=Saturday, 6=Sunday
     
     # Count records by day of week
-    weekday_counts = pd.Series(weekdays).value_counts().sort_index()
-    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    weekday_counts.index = [days[i] for i in weekday_counts.index]
+    weekday_counts = df.groupby('weekday_name').size()
     
-    # Create output directory
-    output_dir = 'visualization_output'
-    os.makedirs(output_dir, exist_ok=True)
+    # Sort by day of week (Monday first)
+    days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    weekday_counts = weekday_counts.reindex(days_order)
     
-    # Plot records by day of week
+    # Create a bar plot of records by day of week using seaborn
     plt.figure(figsize=(12, 6))
-    bars = plt.bar(weekday_counts.index, weekday_counts.values, color='skyblue')
     
-    # Highlight weekends
-    weekend_indices = [i for i, day in enumerate(weekday_counts.index) if day in ['Saturday', 'Sunday']]
-    for idx in weekend_indices:
-        if idx < len(bars):
-            bars[idx].set_color('salmon')
+    weekday_plot = sns.barplot(x=weekday_counts.index, y=weekday_counts.values, 
+                              palette=['skyblue' if day not in ['Saturday', 'Sunday'] else 'lightcoral' 
+                                       for day in weekday_counts.index])
     
-    plt.title('Record Count by Day of Week')
-    plt.xlabel('Day of Week')
-    plt.ylabel('Number of Records')
+    # Add count labels on top of bars
+    for i, p in enumerate(weekday_plot.patches):
+        weekday_plot.annotate(f"{weekday_counts.values[i]}", 
+                      (p.get_x() + p.get_width() / 2., p.get_height()), 
+                      ha = 'center', va = 'bottom', fontsize=10)
     
-    # Add value labels on bars
-    for i, v in enumerate(weekday_counts.values):
-        plt.text(i, v + 1, str(v), ha='center')
-    
-    plt.grid(True, alpha=0.3)
+    plt.title('Number of Records by Day of Week', fontsize=14)
+    plt.xlabel('Day of Week', fontsize=12)
+    plt.ylabel('Number of Records', fontsize=12)
+    plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.savefig(f"{output_dir}/weekday_distribution_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+    
+    # Save the figure
+    output_path = os.path.join(output_dir, 'records_by_weekday.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
+    
+    print(f"Records by weekday visualization saved to {output_path}")
     
     # Calculate weekend statistics
-    weekend_count = sum(is_weekend)
-    weekday_count = len(df) - weekend_count
-    weekend_percent = weekend_count / len(df) * 100 if len(df) > 0 else 0
+    weekend_records = df['is_weekend'].sum()
+    total_records = len(df)
+    weekend_percent = (weekend_records / total_records) * 100 if total_records > 0 else 0
     
-    # Create a summary figure
-    plt.figure(figsize=(8, 8))
-    plt.pie(
-        [weekday_count, weekend_count], 
-        labels=['Weekdays', 'Weekends'], 
-        autopct='%1.1f%%', 
-        colors=['skyblue', 'salmon'],
-        explode=(0, 0.1)
-    )
-    plt.title('Weekday vs Weekend Distribution')
-    plt.tight_layout()
-    plt.savefig(f"{output_dir}/weekend_distribution_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+    # Create a pie chart of weekend vs. weekday records
+    plt.figure(figsize=(10, 8))
+    
+    # Use seaborn colors
+    colors = sns.color_palette('pastel')[0:2]
+    
+    plt.pie([total_records - weekend_records, weekend_records], 
+           labels=['Weekday', 'Weekend'], 
+           autopct='%1.1f%%',
+           colors=colors,
+           startangle=90,
+           explode=(0, 0.1))
+    
+    plt.title('Weekend vs. Weekday Records', fontsize=14)
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
+    
+    # Save the figure
+    output_path = os.path.join(output_dir, 'weekend_vs_weekday.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
     
-    return weekend_percent > 5  # Consider the dataset has weekend data if >5% of records are on weekends
+    print(f"Weekend vs. weekday visualization saved to {output_path}")
+    
+    return weekend_percent
 
 def visualize_coverage(df):
     """Visualize data coverage over different time periods"""
@@ -383,39 +433,366 @@ def visualize_coverage(df):
         plt.savefig(f"{output_dir}/yearly_coverage_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
         plt.close()
 
-def run_all_analyses(df, file_name=""):
+def run_all_analyses(df, output_dir, file_name=""):
     """Run all time series structure analyses on the dataframe"""
     print(f"\nAnalyzing time series structure for: {file_name}\n")
     
     # Run all analyses
-    completeness = check_date_completeness(df)
+    completeness, missing_dates = check_date_completeness(df, output_dir)
     print(f"Date completeness: {completeness:.1f}%")
     
-    analyze_gaps(df)
-    analyze_sampling_frequency(df)
+    gaps = analyze_gaps(df, output_dir)
+    analyze_sampling_frequency(df, output_dir)
     
-    has_weekend_data = check_weekend_data(df)
-    print(f"Dataset has weekend data: {has_weekend_data}")
+    has_weekend_data = check_weekend_data(df, output_dir)
+    print(f"Dataset has weekend data: {has_weekend_data:.1f}%")
     
     visualize_coverage(df)
     
-    print(f"\nAnalyses saved to the 'visualization_output' directory.")
+    print(f"\nAnalyses saved to the '{output_dir}' directory.")
+
+def run_all_visualizations(df, output_dir, file_name=""):
+    """Run all time series analysis visualizations on the dataframe"""
+    print(f"\nGenerating time series analysis visualizations for: {file_name}\n")
+    print(f"Output directory: {output_dir}")
+    
+    # Make sure output directory exists
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        print(f"Created output directory: {output_dir}")
+    
+    # Get numeric columns only
+    numeric_df = df.select_dtypes(include=[np.number])
+    
+    if numeric_df.empty:
+        print("No numeric columns found for analysis")
+        return
+    
+    # Run all visualizations (pass the output directory)
+    visualize_time_series(df, output_dir)
+    visualize_seasonal_decomposition(df, output_dir)
+    visualize_autocorrelation(df, output_dir)
+    visualize_seasonal_patterns(df, output_dir)
+    
+    print(f"\nAll visualizations saved to: {output_dir}")
+    # Create a simple HTML index file
+    create_visualization_index(output_dir, file_name)
+
+def create_visualization_index(output_dir, file_name):
+    """Create a simple HTML index file to view all visualizations"""
+    print("Creating visualization index...")
+    
+    # Get all image files
+    image_files = [f for f in os.listdir(output_dir) if f.endswith(('.png', '.jpg'))]
+    
+    # Create HTML content
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Time Series Analysis - {file_name}</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 20px; }}
+            h1 {{ color: #333; }}
+            .image-container {{ margin-bottom: 30px; }}
+            img {{ max-width: 100%; border: 1px solid #ddd; border-radius: 5px; }}
+            .footer {{ margin-top: 30px; font-size: 12px; color: #777; }}
+        </style>
+    </head>
+    <body>
+        <h1>Time Series Analysis Visualizations</h1>
+        <p>Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} for {file_name}</p>
+    """
+    
+    # Add each image
+    for img_file in sorted(image_files):
+        img_title = ' '.join(img_file.replace('.png', '').replace('.jpg', '').replace('_', ' ').title().split())
+        html_content += f"""
+        <div class="image-container">
+            <h2>{img_title}</h2>
+            <img src="{img_file}" alt="{img_title}">
+        </div>
+        """
+    
+    # Close HTML
+    html_content += """
+        <div class="footer">
+            Generated by Time Series Analysis Tool
+        </div>
+    </body>
+    </html>
+    """
+    
+    # Write to file
+    index_path = os.path.join(output_dir, 'index.html')
+    with open(index_path, 'w') as f:
+        f.write(html_content)
+    
+    print(f"Visualization index created at: {index_path}")
+
+def visualize_time_series(df, output_dir):
+    """Visualize the time series data"""
+    print("Generating time series visualization...")
+    
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Only plot numeric columns
+    numeric_df = df.select_dtypes(include=[np.number])
+    
+    if numeric_df.empty:
+        print("No numeric columns found for time series visualization")
+        return
+    
+    # Limit to first 5 columns if there are too many
+    if len(numeric_df.columns) > 5:
+        print(f"Too many columns ({len(numeric_df.columns)}), limiting to first 5...")
+        plot_cols = numeric_df.columns[:5]
+    else:
+        plot_cols = numeric_df.columns
+    
+    # Create figure
+    plt.figure(figsize=(14, 8))
+    
+    # Plot each column
+    for col in plot_cols:
+        plt.plot(numeric_df.index, numeric_df[col], label=col)
+    
+    plt.title('Time Series Visualization', fontsize=16)
+    plt.xlabel('Date', fontsize=14)
+    plt.ylabel('Value', fontsize=14)
+    plt.legend()
+    plt.grid(True)
+    
+    # Format x-axis dates
+    plt.gcf().autofmt_xdate()
+    
+    # Add data source information
+    plt.figtext(0.5, 0.01, f"Source: {os.path.basename(df.name) if hasattr(df, 'name') else 'Unknown'}", 
+                ha='center', fontsize=10, bbox={"facecolor":"orange", "alpha":0.2, "pad":5})
+    
+    # Save the figure
+    output_path = os.path.join(output_dir, 'time_series_visualization.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Time series visualization saved to {output_path}")
+
+def visualize_seasonal_decomposition(df, output_dir):
+    """Visualize seasonal decomposition of time series data"""
+    print("Generating seasonal decomposition visualization...")
+    
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Only plot numeric columns
+    numeric_df = df.select_dtypes(include=[np.number])
+    
+    if numeric_df.empty:
+        print("No numeric columns found for seasonal decomposition")
+        return
+    
+    # For each numeric column (limit to first 3)
+    for i, col in enumerate(numeric_df.columns[:3]):
+        try:
+            # Check for sufficient data
+            if len(numeric_df) < 10:
+                print(f"Not enough data for seasonal decomposition of {col}")
+                continue
+                
+            # Try to perform seasonal decomposition
+            series = numeric_df[col].dropna()
+            
+            # Determine period (default to 30 for monthly data if we have enough points)
+            if len(series) >= 60:
+                period = 30  # Monthly
+            else:
+                period = 7   # Weekly
+            
+            # Perform decomposition
+            decomposition = seasonal_decompose(series, model='additive', period=period)
+            
+            # Plot
+            fig, axes = plt.subplots(4, 1, figsize=(14, 16), sharex=True)
+            
+            # Original
+            axes[0].plot(series.index, series.values)
+            axes[0].set_title(f'Original Series: {col}', fontsize=16)
+            axes[0].grid(True)
+            
+            # Trend
+            axes[1].plot(decomposition.trend.index, decomposition.trend.values, color='tab:orange')
+            axes[1].set_title('Trend Component', fontsize=16)
+            axes[1].grid(True)
+            
+            # Seasonal
+            axes[2].plot(decomposition.seasonal.index, decomposition.seasonal.values, color='tab:green')
+            axes[2].set_title('Seasonal Component', fontsize=16)
+            axes[2].grid(True)
+            
+            # Residual
+            axes[3].plot(decomposition.resid.index, decomposition.resid.values, color='tab:red')
+            axes[3].set_title('Residual Component', fontsize=16)
+            axes[3].grid(True)
+            
+            plt.tight_layout()
+            
+            # Save the figure
+            output_path = os.path.join(output_dir, f'seasonal_decomposition_{col}.png')
+            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            
+            print(f"Seasonal decomposition for {col} saved to {output_path}")
+            
+        except Exception as e:
+            print(f"Error in seasonal decomposition for {col}: {e}")
+
+def visualize_autocorrelation(df, output_dir):
+    """Visualize autocorrelation and partial autocorrelation"""
+    print("Generating autocorrelation visualization...")
+    
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Only plot numeric columns
+    numeric_df = df.select_dtypes(include=[np.number])
+    
+    if numeric_df.empty:
+        print("No numeric columns found for autocorrelation analysis")
+        return
+    
+    # For each numeric column (limit to first 3)
+    for i, col in enumerate(numeric_df.columns[:3]):
+        try:
+            # Check for sufficient data
+            if len(numeric_df) < 10:
+                print(f"Not enough data for autocorrelation of {col}")
+                continue
+                
+            # Get the series
+            series = numeric_df[col].dropna()
+            
+            # Create figure
+            fig, axes = plt.subplots(2, 1, figsize=(12, 10))
+            
+            # ACF plot
+            plot_acf(series, ax=axes[0], lags=30)
+            axes[0].set_title(f'Autocorrelation Function: {col}', fontsize=16)
+            axes[0].grid(True)
+            
+            # PACF plot
+            plot_pacf(series, ax=axes[1], lags=30)
+            axes[1].set_title(f'Partial Autocorrelation Function: {col}', fontsize=16)
+            axes[1].grid(True)
+            
+            plt.tight_layout()
+            
+            # Save the figure
+            output_path = os.path.join(output_dir, f'autocorrelation_{col}.png')
+            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            
+            print(f"Autocorrelation for {col} saved to {output_path}")
+            
+        except Exception as e:
+            print(f"Error in autocorrelation analysis for {col}: {e}")
+
+def visualize_seasonal_patterns(df, output_dir):
+    """Visualize seasonal patterns in time series data"""
+    print("Generating seasonal patterns visualization...")
+    
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Only plot numeric columns
+    numeric_df = df.select_dtypes(include=[np.number])
+    
+    if numeric_df.empty:
+        print("No numeric columns found for seasonal patterns analysis")
+        return
+    
+    # Check if index is datetime
+    if not isinstance(df.index, pd.DatetimeIndex):
+        print("Index is not datetime type, converting to datetime...")
+        try:
+            df.index = pd.to_datetime(df.index)
+        except:
+            print("Failed to convert index to datetime. Skipping seasonal patterns visualization.")
+            return
+    
+    # For each numeric column (limit to first 3)
+    for i, col in enumerate(numeric_df.columns[:3]):
+        try:
+            # Create a copy with datetime components
+            temp_df = numeric_df[[col]].copy()
+            temp_df['year'] = temp_df.index.year
+            temp_df['month'] = temp_df.index.month
+            temp_df['day'] = temp_df.index.day
+            temp_df['dayofweek'] = temp_df.index.dayofweek
+            temp_df['quarter'] = temp_df.index.quarter
+            
+            # Create figure with 2 subplots
+            fig, axes = plt.subplots(2, 1, figsize=(14, 12))
+            
+            # Monthly patterns
+            monthly_data = temp_df.groupby('month')[col].agg(['mean', 'std']).reset_index()
+            monthly_data['month_name'] = monthly_data['month'].apply(lambda x: calendar.month_abbr[x])
+            
+            # Sort by month order
+            monthly_data = monthly_data.sort_values('month')
+            
+            sns.barplot(x='month_name', y='mean', data=monthly_data, ax=axes[0])
+            axes[0].set_title(f'Monthly Patterns: {col}', fontsize=16)
+            axes[0].set_xlabel('Month', fontsize=14)
+            axes[0].set_ylabel('Mean Value', fontsize=14)
+            axes[0].grid(True)
+            
+            # Day of week patterns
+            dow_data = temp_df.groupby('dayofweek')[col].agg(['mean', 'std']).reset_index()
+            dow_data['day_name'] = dow_data['dayofweek'].apply(lambda x: calendar.day_abbr[x])
+            
+            # Sort by day of week order
+            dow_data = dow_data.sort_values('dayofweek')
+            
+            sns.barplot(x='day_name', y='mean', data=dow_data, ax=axes[1])
+            axes[1].set_title(f'Day of Week Patterns: {col}', fontsize=16)
+            axes[1].set_xlabel('Day of Week', fontsize=14)
+            axes[1].set_ylabel('Mean Value', fontsize=14)
+            axes[1].grid(True)
+            
+            plt.tight_layout()
+            
+            # Save the figure
+            output_path = os.path.join(output_dir, f'seasonal_patterns_{col}.png')
+            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            
+            print(f"Seasonal patterns for {col} saved to {output_path}")
+            
+        except Exception as e:
+            print(f"Error in seasonal patterns analysis for {col}: {e}")
 
 def main():
-    """Main function to parse arguments and run analyses"""
-    if len(sys.argv) > 1:
-        file_path = sys.argv[1]
-        if os.path.exists(file_path):
-            df = load_data(file_path)
-            if df is not None:
-                run_all_analyses(df, os.path.basename(file_path))
-            else:
-                print(f"Failed to load data from {file_path}")
+    """Main function to parse arguments and run visualizations"""
+    # Create argument parser
+    parser = argparse.ArgumentParser(description='Generate time series analysis visualizations')
+    parser.add_argument('file_path', help='Path to the CSV file')
+    parser.add_argument('--output_dir', default='visualization_output', 
+                        help='Directory to save visualizations (default: visualization_output)')
+    
+    # Parse arguments
+    args = parser.parse_args()
+    
+    if os.path.exists(args.file_path):
+        print(f"Loading data from: {args.file_path}")
+        df = load_data(args.file_path)
+        if df is not None:
+            print(f"Data loaded successfully. Shape: {df.shape}")
+            run_all_visualizations(df, args.output_dir, os.path.basename(args.file_path))
         else:
-            print(f"File not found: {file_path}")
+            print(f"Failed to load data from {args.file_path}")
     else:
-        print("Usage: python time_series_analysis.py [csv_file_path]")
-        print("Example: python time_series_analysis.py ../datasets/processed_exchanges/BTC_USD.csv")
+        print(f"File not found: {args.file_path}")
 
 if __name__ == "__main__":
     main() 

@@ -1,15 +1,15 @@
 """
-Feature Relationships Visualizations
+Feature Relationship Visualizations
 
 This script provides visualizations for exploring relationships between features in cryptocurrency datasets,
-including correlation analysis, scatter plots, and time-aligned comparisons.
+including correlation analysis, scatter plots, and pair plots.
 
 Usage:
     python feature_relationships.py [csv_file_path]
 
 Author: AI Assistant
 Created: March 1, 2025
-Modified: Current date - Simplified to use only pandas and matplotlib
+Modified: Current date - Enhanced with seaborn for better visualizations
 """
 
 import os
@@ -17,7 +17,11 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 from datetime import datetime
+
+# Set the seaborn style for better visualizations
+sns.set(style="whitegrid")
 
 def load_data(file_path):
     """Load data from a CSV file"""
@@ -46,172 +50,247 @@ def load_data(file_path):
             print(f"Failed to load {file_path}")
             return None
 
-def create_correlation_matrix(df):
-    """Create and visualize a correlation matrix for numeric features"""
-    print("Analyzing feature correlations...")
+def create_correlation_matrix(df, output_dir):
+    """Create a correlation matrix heatmap using seaborn"""
+    print("Generating correlation matrix...")
     
-    # Select only numeric features
-    numeric_df = df.select_dtypes(include=['float64', 'int64'])
+    # Get numeric columns
+    numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
     
-    if len(numeric_df.columns) == 0:
-        print("No numeric features found for correlation analysis.")
-        return
+    # Skip if no numeric columns
+    if len(numeric_cols) < 2:
+        print("Need at least 2 numeric columns for correlation analysis")
+        return None
     
-    # If there are too many features, select a subset
-    if len(numeric_df.columns) > 20:
-        print(f"Too many features ({len(numeric_df.columns)}). Selecting first 20 for correlation matrix.")
-        numeric_df = numeric_df.iloc[:, :20]
-    
-    # Calculate correlation matrix
-    corr_matrix = numeric_df.corr()
-    
-    # Create output directory
-    output_dir = 'visualization_output'
+    # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     
-    # Create correlation matrix visualization
+    # Calculate the correlation matrix
+    corr_matrix = df[numeric_cols].corr()
+    
+    # Create a heatmap using seaborn
     plt.figure(figsize=(12, 10))
     
-    # Plot correlation matrix using imshow
-    im = plt.imshow(corr_matrix, cmap='coolwarm', vmin=-1, vmax=1)
+    # Create a mask for the upper triangle
+    mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
     
-    # Add colorbar
-    plt.colorbar(im, label='Correlation coefficient')
+    # Create the heatmap with seaborn
+    sns.heatmap(corr_matrix, 
+                annot=True,
+                mask=mask,
+                cmap='coolwarm',
+                vmin=-1, vmax=1,
+                linewidths=0.5,
+                fmt=".2f",
+                square=True,
+                cbar_kws={"shrink": .8, "label": "Correlation Coefficient"})
     
-    # Add feature names
-    plt.xticks(range(len(corr_matrix.columns)), corr_matrix.columns, rotation=90)
-    plt.yticks(range(len(corr_matrix.columns)), corr_matrix.columns)
-    
-    # Add correlation values as text
-    for i in range(len(corr_matrix.columns)):
-        for j in range(len(corr_matrix.columns)):
-            text = plt.text(j, i, f'{corr_matrix.iloc[i, j]:.2f}',
-                           ha="center", va="center", color="black" if abs(corr_matrix.iloc[i, j]) < 0.7 else "white",
-                           fontsize=8)
-    
-    plt.title('Feature Correlation Matrix')
+    plt.title('Feature Correlation Matrix', fontsize=16)
     plt.tight_layout()
     
-    # Save the plot
-    plt.savefig(f"{output_dir}/correlation_matrix_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+    # Save the figure
+    output_path = os.path.join(output_dir, 'correlation_matrix.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
     
-    # Save highly correlated pairs to a text file
-    high_corr_threshold = 0.7
-    high_corr_pairs = []
+    print(f"Correlation matrix saved to {output_path}")
     
-    for i in range(len(corr_matrix.columns)):
-        for j in range(i+1, len(corr_matrix.columns)):
-            if abs(corr_matrix.iloc[i, j]) >= high_corr_threshold:
-                high_corr_pairs.append((corr_matrix.columns[i], corr_matrix.columns[j], corr_matrix.iloc[i, j]))
+    # Create a clustermap for hierarchical clustering of correlations
+    plt.figure(figsize=(14, 12))
     
-    # Write to file if there are high correlations
-    if high_corr_pairs:
-        with open(f"{output_dir}/high_correlations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt", 'w') as f:
-            f.write("Highly Correlated Feature Pairs (|correlation| >= 0.7)\n")
-            f.write("=====================================================\n\n")
-            
-            for feat1, feat2, corr in sorted(high_corr_pairs, key=lambda x: abs(x[2]), reverse=True):
-                f.write(f"{feat1} -- {feat2}: {corr:.4f}\n")
+    cluster = sns.clustermap(corr_matrix, 
+                           cmap='coolwarm', 
+                           vmin=-1, vmax=1,
+                           annot=True, 
+                           fmt=".2f",
+                           linewidths=0.5,
+                           figsize=(14, 12),
+                           cbar_kws={"label": "Correlation Coefficient"})
     
-    print(f"Correlation analysis saved to {output_dir}")
+    plt.suptitle('Hierarchical Clustering of Feature Correlations', fontsize=16, y=1.02)
+    
+    # Save the figure
+    output_path = os.path.join(output_dir, 'correlation_clustermap.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Correlation clustermap saved to {output_path}")
+    
     return corr_matrix
 
-def create_scatter_plots(df):
-    """Create scatter plots for pairs of features with high correlation"""
-    print("Creating scatter plots for highly correlated features...")
+def create_scatter_plots(df, output_dir, n_top_pairs=5):
+    """Create scatter plots for the most correlated feature pairs using seaborn"""
+    print("Generating scatter plots for feature relationships...")
     
-    # Get correlation matrix
-    numeric_df = df.select_dtypes(include=['float64', 'int64'])
+    # Get numeric columns
+    numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
     
-    if len(numeric_df.columns) == 0:
-        print("No numeric features found for scatter plot analysis.")
+    # Skip if no numeric columns
+    if len(numeric_cols) < 2:
+        print("Need at least 2 numeric columns for scatter plots")
         return
     
-    corr_matrix = numeric_df.corr()
-    
-    # Create output directory
-    output_dir = 'visualization_output'
+    # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     
-    # Find highly correlated pairs
-    high_corr_threshold = 0.7
-    high_corr_pairs = []
+    # Calculate the correlation matrix
+    corr_matrix = df[numeric_cols].corr().abs()
     
-    for i in range(len(corr_matrix.columns)):
-        for j in range(i+1, len(corr_matrix.columns)):
-            if abs(corr_matrix.iloc[i, j]) >= high_corr_threshold:
-                high_corr_pairs.append((corr_matrix.columns[i], corr_matrix.columns[j], corr_matrix.iloc[i, j]))
+    # Get the upper triangle of correlations
+    upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
     
-    # Sort by absolute correlation (highest first)
-    high_corr_pairs = sorted(high_corr_pairs, key=lambda x: abs(x[2]), reverse=True)
+    # Find the top n_top_pairs feature pairs
+    if not upper.empty:
+        # Sort correlations in descending order
+        sorted_corrs = upper.unstack().sort_values(kind="quicksort", ascending=False)
+        sorted_corrs = sorted_corrs[sorted_corrs > 0]  # Remove zeros
+        top_pairs = sorted_corrs[:n_top_pairs]
+        
+        # Create scatter plots for top pairs
+        for i, ((col1, col2), corr_value) in enumerate(top_pairs.items()):
+            plt.figure(figsize=(10, 8))
+            
+            # Create a scatter plot with regression line using seaborn
+            sns.regplot(x=df[col1], y=df[col2], 
+                      scatter_kws={'alpha':0.5}, 
+                      line_kws={'color':'red'})
+            
+            plt.title(f'Scatter Plot: {col1} vs {col2}\nCorrelation: {corr_value:.3f}', fontsize=14)
+            plt.xlabel(col1, fontsize=12)
+            plt.ylabel(col2, fontsize=12)
+            plt.grid(True, alpha=0.3)
+            plt.tight_layout()
+            
+            # Save the figure
+            output_path = os.path.join(output_dir, f'scatter_{col1}_vs_{col2}.png')
+            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            
+            print(f"Scatter plot for {col1} vs {col2} saved to {output_path}")
+            
+        # Create a pairplot for the features involved in top correlations
+        unique_cols = list(set([pair[0] for pair in top_pairs.index] + [pair[1] for pair in top_pairs.index]))
+        
+        if len(unique_cols) >= 2:
+            print("Generating pairplot for top correlated features...")
+            # Use seaborn's pairplot function
+            pairplot = sns.pairplot(df[unique_cols], height=2.5, diag_kind='kde', plot_kws={'alpha': 0.6})
+            pairplot.fig.suptitle('Pairwise Relationships Between Top Correlated Features', 
+                                  y=1.02, fontsize=16)
+            
+            # Save the figure
+            output_path = os.path.join(output_dir, 'top_features_pairplot.png')
+            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            
+            print(f"Pairplot saved to {output_path}")
+    else:
+        print("No correlations found between features.")
+
+def analyze_price_relationships(df, output_dir):
+    """Analyze relationships between price and other features using seaborn"""
+    print("Analyzing price relationships with other features...")
     
-    # Take top 10 pairs at most
-    high_corr_pairs = high_corr_pairs[:min(10, len(high_corr_pairs))]
+    # Try to identify price-related columns
+    price_cols = [col for col in df.columns if any(term in col.lower() for term in 
+                                                  ['price', 'close', 'open', 'high', 'low', 'btc', 'usd'])]
     
-    if not high_corr_pairs:
-        print("No highly correlated feature pairs found (threshold: 0.7).")
-        
-        # If no high correlation pairs, take top 5 pairs instead
-        all_pairs = []
-        for i in range(len(corr_matrix.columns)):
-            for j in range(i+1, len(corr_matrix.columns)):
-                all_pairs.append((corr_matrix.columns[i], corr_matrix.columns[j], corr_matrix.iloc[i, j]))
-        
-        high_corr_pairs = sorted(all_pairs, key=lambda x: abs(x[2]), reverse=True)[:5]
-        print(f"Showing top 5 correlated pairs instead.")
+    if not price_cols:
+        print("No price-related columns found in the dataset")
+        return
     
-    # Create scatter plots for each pair
-    for feat1, feat2, corr in high_corr_pairs:
-        # Create scatter plot
-        plt.figure(figsize=(10, 6))
+    # Select the first price column
+    price_col = price_cols[0]
+    
+    # Get numeric columns excluding the price column
+    numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
+    numeric_cols = [col for col in numeric_cols if col != price_col]
+    
+    # Skip if no numeric columns
+    if not numeric_cols:
+        print("No numeric columns available for price relationship analysis")
+        return
+    
+    # Create output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Select top correlated features with price
+    correlations = df[[price_col] + numeric_cols].corr()[price_col].drop(price_col).abs()
+    top_features = correlations.sort_values(ascending=False).head(5).index.tolist()
+    
+    if not top_features:
+        print("No significant correlations with price found")
+        return
+    
+    # Create a figure with subplots for each top feature
+    plt.figure(figsize=(15, 12))
+    
+    for i, feature in enumerate(top_features):
+        plt.subplot(len(top_features), 1, i+1)
         
-        # Get data and remove rows with NaN values
-        data = numeric_df[[feat1, feat2]].dropna()
+        # Create a dual-axis plot
+        ax1 = plt.gca()
+        ax2 = ax1.twinx()
         
-        # Skip if not enough data
-        if len(data) < 10:
-            print(f"Not enough data for scatter plot between {feat1} and {feat2}.")
-            continue
+        # Plot the price
+        ax1.plot(df.index if isinstance(df.index, pd.DatetimeIndex) else range(len(df)), 
+                df[price_col], 'b-', label=price_col)
         
-        # Plot scatter with transparency
-        plt.scatter(data[feat1], data[feat2], alpha=0.6, s=30, c='cornflowerblue')
+        # Plot the feature
+        ax2.plot(df.index if isinstance(df.index, pd.DatetimeIndex) else range(len(df)), 
+                df[feature], 'r-', label=feature)
         
-        # Add regression line
-        if len(data) > 1:  # Need at least 2 points for regression
-            try:
-                # Fit a line using numpy's polyfit
-                fit = np.polyfit(data[feat1], data[feat2], 1)
-                fit_fn = np.poly1d(fit)
-                
-                # Create a range of x values for the line
-                x_range = np.linspace(data[feat1].min(), data[feat1].max(), 100)
-                
-                # Plot the line
-                plt.plot(x_range, fit_fn(x_range), '--r', linewidth=2)
-                
-                # Add equation text
-                equation = f'y = {fit[0]:.4f}x + {fit[1]:.4f}'
-                plt.annotate(equation, xy=(0.05, 0.95), xycoords='axes fraction',
-                            bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", alpha=0.8))
-            except:
-                print(f"Could not calculate regression line for {feat1} vs {feat2}.")
+        # Add labels and legends
+        ax1.set_ylabel(price_col, color='b', fontsize=10)
+        ax2.set_ylabel(feature, color='r', fontsize=10)
         
-        # Add correlation coefficient text
-        plt.annotate(f'Correlation: {corr:.4f}', xy=(0.05, 0.9), xycoords='axes fraction',
-                    bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", alpha=0.8))
+        # Add a title with correlation value
+        corr_value = df[[price_col, feature]].corr().iloc[0, 1]
+        plt.title(f'{price_col} vs {feature} (Correlation: {corr_value:.3f})', fontsize=12)
         
-        plt.title(f'Scatter Plot: {feat1} vs {feat2}')
-        plt.xlabel(feat1)
-        plt.ylabel(feat2)
-        plt.grid(True, alpha=0.3)
+        # Add legends
+        lines1, labels1 = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left')
         
-        # Save the plot
-        plt.tight_layout()
-        plt.savefig(f"{output_dir}/scatter_{feat1}_vs_{feat2}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+        if isinstance(df.index, pd.DatetimeIndex):
+            plt.xlabel('Date', fontsize=10)
+        else:
+            plt.xlabel('Index', fontsize=10)
+    
+    plt.tight_layout()
+    
+    # Save the figure
+    output_path = os.path.join(output_dir, 'price_relationships.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Price relationship analysis saved to {output_path}")
+    
+    # Create a joint plot for the feature most correlated with price
+    if top_features:
+        top_feature = top_features[0]
+        
+        # Use seaborn's jointplot function
+        joint_plot = sns.jointplot(
+            data=df, 
+            x=price_col, 
+            y=top_feature,
+            kind="reg",  # with regression line
+            scatter_kws={"alpha": 0.5},
+            height=10,
+            marginal_kws=dict(bins=20, fill=True)
+        )
+        
+        joint_plot.fig.suptitle(f'Relationship between {price_col} and {top_feature}', 
+                               y=1.02, fontsize=16)
+        
+        # Save the figure
+        output_path = os.path.join(output_dir, f'jointplot_{price_col}_vs_{top_feature}.png')
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close()
-    
-    print(f"Scatter plots saved to {output_dir}")
+        
+        print(f"Joint plot saved to {output_path}")
 
 def plot_time_aligned_features(df):
     """Plot time-aligned features to visualize relationships over time"""
@@ -457,8 +536,9 @@ def run_all_analyses(df, file_name=""):
     print(f"\nAnalyzing feature relationships for: {file_name}\n")
     
     # Run all analyses
-    create_correlation_matrix(df)
-    create_scatter_plots(df)
+    create_correlation_matrix(df, 'visualization_output')
+    create_scatter_plots(df, 'visualization_output')
+    analyze_price_relationships(df, 'visualization_output')
     plot_time_aligned_features(df)
     plot_feature_distributions(df)
     

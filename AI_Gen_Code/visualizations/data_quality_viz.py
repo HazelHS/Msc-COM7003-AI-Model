@@ -5,11 +5,11 @@ This script provides visualizations for assessing data quality in cryptocurrency
 including missing values, data distributions, and basic statistics.
 
 Usage:
-    python data_quality_viz.py [csv_file_path]
+    python data_quality_viz.py [csv_file_path] [--output_dir OUTPUT_DIR]
 
 Author: AI Assistant
 Created: March 1, 2025
-Modified: Current date - Simplified to use only pandas and matplotlib
+Modified: Current date - Enhanced with seaborn for better visualizations
 """
 
 import os
@@ -17,7 +17,12 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 from datetime import datetime
+import argparse
+
+# Set the seaborn style for better visualizations
+sns.set(style="whitegrid")
 
 def load_data(file_path):
     """Load data from a CSV file"""
@@ -46,210 +51,277 @@ def load_data(file_path):
             print(f"Failed to load {file_path}")
             return None
 
-def missing_values_heatmap(df):
-    """Create a heatmap of missing values in the dataset"""
-    # Calculate missing values
-    missing = df.isnull().transpose()
+def missing_values_heatmap(df, output_dir):
+    """Create a heatmap of missing values using seaborn"""
+    print("Generating missing values heatmap...")
     
-    # Create output directory
-    output_dir = 'visualization_output'
-    os.makedirs(output_dir, exist_ok=True)
+    # Create a boolean mask for missing values
+    missing_data = df.isna()
     
-    # Create a figure
-    plt.figure(figsize=(12, max(6, len(df.columns) * 0.4)))
+    # Calculate percentage of missing values for each column
+    missing_percent = missing_data.mean().round(4) * 100
     
-    # Plot missing values (light for present, dark for missing)
-    plt.imshow(missing, cmap='Blues', aspect='auto')
+    plt.figure(figsize=(10, 8))
+    # Create a heatmap of missing values
+    ax = sns.heatmap(missing_data, 
+                 cmap='Blues', 
+                 cbar_kws={'label': 'Missing Values'},
+                 yticklabels=False)
     
-    # Add labels and title
-    plt.yticks(range(len(df.columns)), df.columns)
-    plt.xticks([])
-    plt.ylabel('Features')
-    plt.title(f'Missing Values in Dataset ({missing.sum().sum()} total missing values)')
-    
-    # Add text annotation with the percentage of missing values for each feature
-    missing_percentage = df.isnull().mean() * 100
+    # Add percentage annotations on top of the heatmap
     for i, col in enumerate(df.columns):
-        plt.text(
-            len(df) + 5, i, 
-            f"{missing_percentage[col]:.1f}% missing", 
-            va='center'
-        )
+        plt.text(i + 0.5, -0.25, f"{missing_percent[col]:.1f}%", 
+                 ha='center', fontsize=9, color='black')
     
-    # Save the plot
+    plt.title('Missing Values Heatmap', fontsize=14)
+    plt.xlabel('Features', fontsize=12)
+    plt.ylabel('Records', fontsize=12)
     plt.tight_layout()
-    plt.savefig(f"{output_dir}/missing_values_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-    plt.close()
-
-def data_distribution(df):
-    """Create histograms for each numeric feature"""
-    # Get numeric features
-    numeric_df = df.select_dtypes(include=['float64', 'int64'])
-    
-    if len(numeric_df.columns) == 0:
-        print("No numeric features found for distribution analysis.")
-        return
-    
-    # Create output directory
-    output_dir = 'visualization_output'
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Create histograms for each numeric feature
-    for col in numeric_df.columns:
-        plt.figure(figsize=(10, 6))
-        
-        # Plot histogram
-        plt.hist(numeric_df[col].dropna(), bins=30, alpha=0.7, color='skyblue', edgecolor='black')
-        
-        # Add labels and title
-        plt.title(f'Distribution of {col}')
-        plt.xlabel(col)
-        plt.ylabel('Frequency')
-        plt.grid(True, alpha=0.3)
-        
-        # Add basic statistics
-        stats_text = (
-            f"Mean: {numeric_df[col].mean():.2f}\n"
-            f"Median: {numeric_df[col].median():.2f}\n"
-            f"Std Dev: {numeric_df[col].std():.2f}\n"
-            f"Min: {numeric_df[col].min():.2f}\n"
-            f"Max: {numeric_df[col].max():.2f}"
-        )
-        plt.figtext(0.95, 0.7, stats_text, fontsize=10, 
-                  bbox=dict(facecolor='white', alpha=0.8), ha='right')
-        
-        # Save the plot
-        plt.tight_layout()
-        plt.savefig(f"{output_dir}/distribution_{col}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-        plt.close()
-
-def data_summary_table(df):
-    """Create a summary table of the dataset"""
-    # Get basic statistics
-    summary = df.describe(include='all').transpose()
-    
-    # Add missing values information
-    summary['missing'] = df.isnull().sum()
-    summary['missing_pct'] = df.isnull().mean() * 100
-    
-    # Add data types
-    summary['dtype'] = df.dtypes
-    
-    # Create output directory
-    output_dir = 'visualization_output'
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Save to CSV
-    summary.to_csv(f"{output_dir}/data_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
-    
-    # Visualize the summary as a table
-    fig, ax = plt.subplots(figsize=(12, max(6, len(df.columns) * 0.4)))
-    ax.axis('off')
-    ax.axis('tight')
-    
-    # Format the summary for display
-    display_cols = ['count', 'missing', 'missing_pct', 'mean', 'std', 'min', 'max']
-    display_summary = summary.copy()
-    for col in display_cols:
-        if col in display_summary:
-            if col == 'missing_pct':
-                display_summary[col] = display_summary[col].apply(lambda x: f"{x:.1f}%")
-            elif col in ['mean', 'std', 'min', 'max']:
-                display_summary[col] = display_summary[col].apply(lambda x: f"{x:.2f}" if isinstance(x, (int, float)) else x)
-    
-    display_data = display_summary[display_cols].reset_index()
-    display_data.columns = ['Feature', 'Count', 'Missing', 'Missing %', 'Mean', 'Std Dev', 'Min', 'Max']
-    
-    # Create the table
-    table = ax.table(cellText=display_data.values, colLabels=display_data.columns, loc='center', cellLoc='center')
-    table.auto_set_font_size(False)
-    table.set_fontsize(9)
-    table.scale(1, 1.5)
-    
-    # Set title
-    plt.title('Dataset Summary Statistics', fontsize=14, pad=20)
     
     # Save the figure
-    plt.tight_layout()
-    plt.savefig(f"{output_dir}/data_summary_table_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+    output_path = os.path.join(output_dir, 'missing_values_heatmap.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
-
-def time_series_overview(df):
-    """Plot a time series overview of key numeric columns"""
-    if df.index.name != 'Date':
-        print("DataFrame must have 'Date' as index for time series overview.")
-        return
     
-    # Get numeric features
-    numeric_df = df.select_dtypes(include=['float64', 'int64'])
+    print(f"Missing values heatmap saved to {output_path}")
     
-    if len(numeric_df.columns) == 0:
-        print("No numeric features found for time series overview.")
-        return
+    # Additionally, create a bar plot of missing values percentage
+    plt.figure(figsize=(12, 6))
+    missing_bar = sns.barplot(x=missing_percent.index, y=missing_percent.values)
     
-    # Choose key features (up to 4)
-    price_keywords = ['price', 'close', 'value', 'btc', 'usd']
-    key_features = []
+    # Add percentage labels on top of bars
+    for i, p in enumerate(missing_bar.patches):
+        missing_bar.annotate(f"{missing_percent.values[i]:.1f}%", 
+                      (p.get_x() + p.get_width() / 2., p.get_height()), 
+                      ha = 'center', va = 'bottom', fontsize=9)
     
-    # First try to find price-related columns
-    for col in numeric_df.columns:
-        if any(keyword in col.lower() for keyword in price_keywords) and len(key_features) < 4:
-            key_features.append(col)
-    
-    # If we don't have enough, add other numeric columns
-    remaining_slots = 4 - len(key_features)
-    for col in numeric_df.columns:
-        if col not in key_features and len(key_features) < 4:
-            key_features.append(col)
-    
-    # Create output directory
-    output_dir = 'visualization_output'
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Plot time series
-    plt.figure(figsize=(14, 8))
-    
-    for col in key_features:
-        plt.plot(df.index, numeric_df[col], label=col)
-    
-    plt.title('Time Series Overview')
-    plt.xlabel('Date')
-    plt.ylabel('Value')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    
-    # Save the plot
+    plt.title('Percentage of Missing Values by Feature', fontsize=14)
+    plt.xlabel('Features', fontsize=12)
+    plt.ylabel('Missing Values (%)', fontsize=12)
+    plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
-    plt.savefig(f"{output_dir}/time_series_overview_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+    
+    # Save the figure
+    output_path = os.path.join(output_dir, 'missing_values_percentage.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
+    
+    print(f"Missing values percentage plot saved to {output_path}")
 
-def run_all_visualizations(df, file_name=""):
+def data_distribution(df, output_dir):
+    """Create distribution plots for each numeric feature"""
+    print("Generating data distribution visualizations...")
+    
+    # Get numeric columns
+    numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
+    
+    # Create distributions for each numeric column
+    for i, col in enumerate(numeric_cols):
+        plt.figure(figsize=(12, 6))
+        
+        # Create a subplot with 1 row and 2 columns
+        grid = plt.GridSpec(1, 2, width_ratios=[3, 1])
+        
+        # Plot 1: Distribution with KDE
+        ax0 = plt.subplot(grid[0])
+        sns.histplot(df[col].dropna(), kde=True, ax=ax0)
+        plt.title(f'Distribution of {col}', fontsize=14)
+        plt.xlabel(col, fontsize=12)
+        plt.ylabel('Frequency', fontsize=12)
+        
+        # Plot 2: Box plot
+        ax1 = plt.subplot(grid[1])
+        sns.boxplot(y=df[col].dropna(), ax=ax1)
+        plt.title('Box Plot', fontsize=14)
+        plt.ylabel(col, fontsize=12)
+        
+        # Add statistics text
+        stats = df[col].describe()
+        stats_text = (f"Mean: {stats['mean']:.2f}\n"
+                     f"Median: {stats['50%']:.2f}\n"
+                     f"Std Dev: {stats['std']:.2f}\n"
+                     f"Min: {stats['min']:.2f}\n"
+                     f"Max: {stats['max']:.2f}")
+        
+        plt.figtext(0.92, 0.5, stats_text, fontsize=10, 
+                   bbox=dict(facecolor='white', alpha=0.8))
+        
+        plt.tight_layout()
+        
+        # Save the figure
+        output_path = os.path.join(output_dir, f'distribution_{col}.png')
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.close()
+        
+    print(f"Distribution visualizations saved to {output_dir}")
+
+def data_summary_table(df, output_dir=None):
+    """Create a summary table of data statistics"""
+    print("Generating data summary table...")
+    
+    # Calculate basic statistics
+    summary = df.describe().T
+    
+    # Add additional statistics
+    summary['missing'] = df.isnull().sum()
+    summary['missing_pct'] = (df.isnull().sum() / len(df) * 100).round(2)
+    summary['unique'] = df.nunique()
+    
+    # Print summary table
+    print("\nData Summary:")
+    pd.set_option('display.max_columns', None)
+    print(summary)
+    
+    # Save to CSV if output_dir is provided
+    if output_dir:
+        summary_path = os.path.join(output_dir, 'data_summary.csv')
+        summary.to_csv(summary_path)
+        print(f"Summary table saved to {summary_path}")
+
+def time_series_overview(df, output_dir):
+    """Plot time series overview of key numeric columns"""
+    print("Generating time series overview...")
+    
+    # Ensure DataFrame has Date as index
+    if 'Date' in df.columns:
+        df_ts = df.set_index('Date')
+    else:
+        df_ts = df.copy()
+    
+    # Get numeric columns (exclude Date if it exists)
+    numeric_cols = df_ts.select_dtypes(include=['number']).columns.tolist()
+    
+    # Limit to top 4 most important columns if there are too many
+    if len(numeric_cols) > 4:
+        numeric_cols = numeric_cols[:4]
+    
+    # Create a time series plot with seaborn
+    plt.figure(figsize=(14, 10))
+    
+    for i, col in enumerate(numeric_cols):
+        plt.subplot(len(numeric_cols), 1, i+1)
+        sns.lineplot(data=df_ts, x=df_ts.index, y=col, linewidth=1.5)
+        plt.title(f'Time Series: {col}', fontsize=12)
+        plt.tight_layout()
+    
+    # Save the figure
+    output_path = os.path.join(output_dir, 'time_series_overview.png')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Time series overview saved to {output_path}")
+    
+    # Create a pairplot for correlations between numeric features
+    if len(numeric_cols) >= 2:
+        plt.figure(figsize=(10, 8))
+        correlation = df_ts[numeric_cols].corr()
+        
+        # Create a heatmap of correlations
+        sns.heatmap(correlation, annot=True, cmap='coolwarm', fmt=".2f",
+                    linewidths=0.5, vmin=-1, vmax=1)
+        plt.title('Feature Correlation Heatmap', fontsize=14)
+        plt.tight_layout()
+        
+        # Save the figure
+        output_path = os.path.join(output_dir, 'correlation_heatmap.png')
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        print(f"Correlation heatmap saved to {output_path}")
+
+def run_all_visualizations(df, output_dir, file_name=""):
     """Run all data quality visualizations on the dataframe"""
     print(f"\nGenerating data quality visualizations for: {file_name}\n")
+    print(f"Output directory: {output_dir}")
+    
+    # Make sure output directory exists
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        print(f"Created output directory: {output_dir}")
     
     # Run all visualizations
-    missing_values_heatmap(df)
-    data_distribution(df)
-    data_summary_table(df)
-    time_series_overview(df)
+    missing_values_heatmap(df, output_dir)
+    data_distribution(df, output_dir)
+    data_summary_table(df, output_dir)
+    time_series_overview(df, output_dir)
     
-    print(f"\nVisualizations saved to the 'visualization_output' directory.")
+    print(f"\nAll visualizations saved to: {output_dir}")
+    # Create a simple HTML index file to view all visualizations
+    create_visualization_index(output_dir, file_name)
+
+def create_visualization_index(output_dir, file_name):
+    """Create a simple HTML index file to view all visualizations"""
+    print("Creating visualization index...")
+    
+    # Get all image files
+    image_files = [f for f in os.listdir(output_dir) if f.endswith(('.png', '.jpg'))]
+    
+    # Create HTML content
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Data Quality Visualizations - {file_name}</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 20px; }}
+            h1 {{ color: #333; }}
+            .image-container {{ margin-bottom: 30px; }}
+            img {{ max-width: 100%; border: 1px solid #ddd; border-radius: 5px; }}
+            .footer {{ margin-top: 30px; font-size: 12px; color: #777; }}
+        </style>
+    </head>
+    <body>
+        <h1>Data Quality Visualizations</h1>
+        <p>Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} for {file_name}</p>
+    """
+    
+    # Add each image
+    for img_file in sorted(image_files):
+        img_title = ' '.join(img_file.replace('.png', '').replace('.jpg', '').replace('_', ' ').title().split())
+        html_content += f"""
+        <div class="image-container">
+            <h2>{img_title}</h2>
+            <img src="{img_file}" alt="{img_title}">
+        </div>
+        """
+    
+    # Close HTML
+    html_content += """
+        <div class="footer">
+            Generated by Data Quality Visualization Tool
+        </div>
+    </body>
+    </html>
+    """
+    
+    # Write to file
+    index_path = os.path.join(output_dir, 'index.html')
+    with open(index_path, 'w') as f:
+        f.write(html_content)
+    
+    print(f"Visualization index created at: {index_path}")
 
 def main():
     """Main function to parse arguments and run visualizations"""
-    if len(sys.argv) > 1:
-        file_path = sys.argv[1]
-        if os.path.exists(file_path):
-            df = load_data(file_path)
-            if df is not None:
-                run_all_visualizations(df, os.path.basename(file_path))
-            else:
-                print(f"Failed to load data from {file_path}")
+    # Create argument parser
+    parser = argparse.ArgumentParser(description='Generate data quality visualizations for a CSV file')
+    parser.add_argument('file_path', help='Path to the CSV file')
+    parser.add_argument('--output_dir', default='visualization_output', 
+                        help='Directory to save visualizations (default: visualization_output)')
+    
+    # Parse arguments
+    args = parser.parse_args()
+    
+    if os.path.exists(args.file_path):
+        print(f"Loading data from: {args.file_path}")
+        df = load_data(args.file_path)
+        if df is not None:
+            print(f"Data loaded successfully. Shape: {df.shape}")
+            run_all_visualizations(df, args.output_dir, os.path.basename(args.file_path))
         else:
-            print(f"File not found: {file_path}")
+            print(f"Failed to load data from {args.file_path}")
     else:
-        print("Usage: python data_quality_viz.py [csv_file_path]")
-        print("Example: python data_quality_viz.py ../datasets/processed_exchanges/BTC_USD.csv")
+        print(f"File not found: {args.file_path}")
 
 if __name__ == "__main__":
     main() 

@@ -1,7 +1,5 @@
 # Data Source: Alternative.me Fear & Greed Index API (https://alternative.me/crypto/fear-and-greed-index/)
 Date,FearGreedValue,FearGreedClassification
-2022-06-05,10,Extreme Fear
-2022-06-06,13,Extreme Fear
 2022-06-07,15,Extreme Fear
 2022-06-08,17,Extreme Fear
 2022-06-09,11,Extreme Fear
@@ -1000,3 +998,5 @@ Date,FearGreedValue,FearGreedClassification
 2025-02-27,10,Extreme Fear
 2025-02-28,16,Extreme Fear
 2025-03-01,20,Extreme Fear
+2025-03-02,26,Fear
+2025-03-03,33,Fear

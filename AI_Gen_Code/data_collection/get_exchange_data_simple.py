@@ -22,76 +22,103 @@ INDEX_SYMBOLS = {
     'J203.JO': 'J203.JO'   # JSE All Share
 }
 
-def get_exchange_data(index_symbol, start_date, end_date, currency, max_retries=3):
+def get_exchange_data(index_symbol, start_date, end_date=None, currency='USD', max_retries=3):
     """
-    Fetch historical data for a given index from Yahoo Finance with retry logic
+    Fetch historical data for a given index from Yahoo Finance
     
     Args:
-        index_symbol (str): Yahoo Finance ticker symbol for the index
+        index_symbol (str): The symbol for the index (e.g., 'NYA' for NYSE)
         start_date (str): Start date in YYYY-MM-DD format
-        end_date (str): End date in YYYY-MM-DD format, None for current date
-        currency (str): Currency code for the index
-        max_retries (int): Maximum number of retries for API calls
+        end_date (str, optional): End date in YYYY-MM-DD format. Defaults to current date.
+        currency (str, optional): Currency of the index. Defaults to 'USD'.
+        max_retries (int, optional): Maximum number of retry attempts. Defaults to 3.
         
     Returns:
-        pd.DataFrame: DataFrame containing the historical data
+        pandas.DataFrame or None: DataFrame with historical data or None if fetching fails
     """
-    # Get the correct Yahoo Finance ticker
-    ticker = INDEX_SYMBOLS.get(index_symbol, index_symbol)
-    print(f"Fetching data for {ticker} (original: {index_symbol})...")
+    # Add ^ prefix for indices if not already present
+    if not index_symbol.startswith('^'):
+        ticker = f"^{index_symbol}"
+    else:
+        ticker = index_symbol
     
-    for retry in range(max_retries):
+    original_symbol = index_symbol
+    
+    print(f"Fetching data for {ticker} (original: {original_symbol})...")
+    
+    # Try to fetch data with exponential backoff
+    for attempt in range(1, max_retries + 1):
         try:
-            # Download data from Yahoo Finance
-            data = yf.download(ticker, start=start_date, end=end_date, progress=False)
+            # Use yfinance to download data
+            data = yf.download(
+                ticker,
+                start=start_date,
+                end=end_date,
+                progress=False
+            )
             
-            if data.empty:
-                if retry < max_retries - 1:
-                    sleep_time = (2 ** retry) + 1
-                    print(f"  No data received, retrying in {sleep_time} seconds...")
-                    time.sleep(sleep_time)
+            # Check if data is empty or has only Date column
+            if data.empty or (len(data.columns) <= 1):
+                if attempt < max_retries:
+                    wait_time = 2 ** attempt  # Exponential backoff
+                    print(f"  Error: Empty data or insufficient columns, retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
                     continue
                 else:
-                    print(f"  Failed to retrieve data after {max_retries} attempts")
+                    print(f"  Failed after {max_retries} attempts: Empty data or insufficient columns")
                     return None
             
             # Reset index to make Date a column
-            data.reset_index(inplace=True)
+            data = data.reset_index()
             
-            # Add metadata columns
-            data['Index'] = index_symbol
-            data['Currency'] = currency
+            # Check for required columns
+            required_columns = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume']
+            missing_columns = [col for col in required_columns if col not in data.columns]
             
-            # Clean up the data
-            # Handle NaN values in price columns
-            for col in ['Open', 'High', 'Low', 'Close', 'Adj Close']:
-                if col in data.columns:
-                    # Forward fill first, then backward fill
-                    data[col] = data[col].fillna(method='ffill').fillna(method='bfill')
+            if missing_columns:
+                if attempt < max_retries:
+                    wait_time = 2 ** attempt
+                    print(f"  Error: Missing columns {missing_columns}, retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    print(f"  Failed after {max_retries} attempts: Missing columns {missing_columns}")
+                    return None
             
-            # Handle NaN values in Volume column if it exists
-            if 'Volume' in data.columns:
-                data['Volume'] = data['Volume'].fillna(0)
+            # Convert Date to datetime if it's not already
+            if not pd.api.types.is_datetime64_any_dtype(data['Date']):
+                data['Date'] = pd.to_datetime(data['Date'])
+            
+            # Format Date as string in YYYY-MM-DD format
+            data['Date'] = data['Date'].dt.strftime('%Y-%m-%d')
             
             # Check for duplicate dates
-            duplicates = data.duplicated(subset=['Date']).sum()
-            if duplicates > 0:
-                print(f"  Warning: Found {duplicates} duplicate dates, removing...")
+            if data['Date'].duplicated().any():
+                print(f"  Warning: Found {data['Date'].duplicated().sum()} duplicate dates, keeping first occurrence")
                 data = data.drop_duplicates(subset=['Date'], keep='first')
             
-            # Convert Date to consistent string format
-            if pd.api.types.is_datetime64_any_dtype(data['Date']):
-                data['Date'] = data['Date'].dt.strftime('%Y-%m-%d')
+            # Fill NaN values in numeric columns
+            numeric_columns = ['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']
+            for col in numeric_columns:
+                if col in data.columns:
+                    # Use forward fill then backward fill to handle NaN values
+                    # Updated to use ffill() and bfill() instead of fillna(method=...)
+                    data[col] = data[col].ffill().bfill()
             
+            # Add Index and Currency columns
+            data['Index'] = original_symbol
+            data['Currency'] = currency
+            
+            print(f"  Successfully fetched {len(data)} rows of data")
             return data
             
         except Exception as e:
-            if retry < max_retries - 1:
-                sleep_time = (2 ** retry) + 1
-                print(f"  Error: {e}, retrying in {sleep_time} seconds...")
-                time.sleep(sleep_time)
+            if attempt < max_retries:
+                wait_time = 2 ** attempt
+                print(f"  Error: {str(e)}, retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
             else:
-                print(f"  Failed after {max_retries} attempts: {e}")
+                print(f"  Failed after {max_retries} attempts: {str(e)}")
                 return None
     
     return None
@@ -136,6 +163,100 @@ def process_exchange_data(data, index_symbol):
         # Calculate volatility (rolling standard deviation)
         data['Volatility_20'] = data['Daily_Return'].rolling(window=20).std()
         
+        # Add CloseUSD column with proper currency conversion
+        if 'Currency' in data.columns:
+            # For USD indices, CloseUSD is the same as Close
+            if data['Currency'].iloc[0] == 'USD':
+                data['CloseUSD'] = data['Close']
+                print(f"  {index_symbol} is in USD - direct copy to CloseUSD")
+            else:
+                # For non-USD indices, we need to convert
+                # Since we don't have real forex data, we'll use this enhanced approach
+                currency = data['Currency'].iloc[0]
+                
+                # Enhanced currency conversion rates with more currencies and updated values
+                # In a production environment, these would be fetched from a forex API
+                conversion_rates = {
+                    'EUR': 1.08,    # 1 EUR = 1.08 USD
+                    'GBP': 1.26,    # 1 GBP = 1.26 USD
+                    'JPY': 0.0067,  # 1 JPY = 0.0067 USD
+                    'CNY': 0.14,    # 1 CNY = 0.14 USD
+                    'INR': 0.012,   # 1 INR = 0.012 USD
+                    'CAD': 0.74,    # 1 CAD = 0.74 USD
+                    'CHF': 1.13,    # 1 CHF = 1.13 USD
+                    'KRW': 0.00075, # 1 KRW = 0.00075 USD
+                    'TWD': 0.032,   # 1 TWD = 0.032 USD
+                    'AUD': 0.67,    # 1 AUD = 0.67 USD
+                    'HKD': 0.128,   # 1 HKD = 0.128 USD
+                    'SGD': 0.74,    # 1 SGD = 0.74 USD
+                    'NZD': 0.61,    # 1 NZD = 0.61 USD
+                    'MXN': 0.059,   # 1 MXN = 0.059 USD
+                    'BRL': 0.18,    # 1 BRL = 0.18 USD
+                    'ZAR': 0.055,   # 1 ZAR = 0.055 USD
+                    'RUB': 0.011,   # 1 RUB = 0.011 USD
+                    'TRY': 0.031,   # 1 TRY = 0.031 USD
+                    'SEK': 0.096,   # 1 SEK = 0.096 USD
+                    'NOK': 0.095,   # 1 NOK = 0.095 USD
+                    'DKK': 0.145,   # 1 DKK = 0.145 USD
+                    'PLN': 0.25,    # 1 PLN = 0.25 USD
+                    'ILS': 0.27,    # 1 ILS = 0.27 USD
+                    'THB': 0.028,   # 1 THB = 0.028 USD
+                    'IDR': 0.000064,# 1 IDR = 0.000064 USD
+                    'MYR': 0.21,    # 1 MYR = 0.21 USD
+                    'PHP': 0.018,   # 1 PHP = 0.018 USD
+                }
+                
+                # Apply conversion if rate exists, otherwise use a reasonable estimate
+                if currency in conversion_rates:
+                    rate = conversion_rates[currency]
+                    data['CloseUSD'] = data['Close'] * rate
+                    print(f"  {index_symbol} in {currency} converted to USD (rate: {rate})")
+                else:
+                    # For unknown currencies, log a warning and use a fallback method
+                    print(f"  WARNING: No conversion rate available for {currency}. Using fallback method.")
+                    
+                    # Fallback method: Try to estimate based on the magnitude of the values
+                    # This is a heuristic approach and should be replaced with actual rates
+                    avg_close = data['Close'].mean()
+                    
+                    # Heuristic: If average close is very large (>1000), it's likely a currency with low USD value
+                    if avg_close > 10000:
+                        estimated_rate = 0.001  # Very small conversion rate
+                    elif avg_close > 1000:
+                        estimated_rate = 0.01   # Small conversion rate
+                    elif avg_close > 100:
+                        estimated_rate = 0.1    # Medium-small conversion rate
+                    elif avg_close > 10:
+                        estimated_rate = 0.5    # Medium conversion rate
+                    elif avg_close > 1:
+                        estimated_rate = 1.0    # 1:1 conversion rate
+                    else:
+                        estimated_rate = 10.0   # Large conversion rate for very small values
+                    
+                    data['CloseUSD'] = data['Close'] * estimated_rate
+                    print(f"  {index_symbol} in {currency} - using estimated conversion rate: {estimated_rate}")
+        else:
+            # If no currency column, assume USD but log a warning
+            print(f"  WARNING: No currency information for {index_symbol} - assuming USD")
+            data['CloseUSD'] = data['Close']
+            
+        # Ensure no NaN values in CloseUSD
+        if data['CloseUSD'].isna().any():
+            nan_count = data['CloseUSD'].isna().sum()
+            print(f"  WARNING: Found {nan_count} NaN values in CloseUSD column. Filling with interpolated values.")
+            
+            # Try to interpolate missing values
+            data['CloseUSD'] = data['CloseUSD'].interpolate(method='linear')
+            
+            # If any NaN values remain (at the beginning/end), fill with the closest valid value
+            if data['CloseUSD'].isna().any():
+                data['CloseUSD'] = data['CloseUSD'].ffill().bfill()
+                
+            # Final check - if any NaN values still remain, use Close values as a last resort
+            if data['CloseUSD'].isna().any():
+                print("  WARNING: Unable to interpolate all NaN values. Using Close values as fallback.")
+                data.loc[data['CloseUSD'].isna(), 'CloseUSD'] = data.loc[data['CloseUSD'].isna(), 'Close']
+        
         # Convert Date back to string for export
         data['Date'] = data['Date'].dt.strftime('%Y-%m-%d')
         
@@ -160,10 +281,23 @@ def process_all_exchanges():
     output_dir = '../datasets/processed_exchanges'
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+        print(f"Created output directory: {output_dir}")
     
     # Read indexInfo.csv
     try:
-        index_info = pd.read_csv('indexInfo.csv')
+        # First try in the current directory
+        if os.path.exists('indexInfo.csv'):
+            index_info = pd.read_csv('indexInfo.csv')
+            print(f"Using indexInfo.csv from current directory")
+        else:
+            # Try in the same directory as this script
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            info_path = os.path.join(script_dir, 'indexInfo.csv')
+            if os.path.exists(info_path):
+                index_info = pd.read_csv(info_path)
+                print(f"Using indexInfo.csv from script directory: {info_path}")
+            else:
+                raise FileNotFoundError(f"Could not find indexInfo.csv in either current directory or {script_dir}")
     except Exception as e:
         print(f"Error reading indexInfo.csv: {e}")
         # Create a minimal default if file not found

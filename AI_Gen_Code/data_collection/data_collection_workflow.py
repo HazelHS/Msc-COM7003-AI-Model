@@ -40,19 +40,38 @@ logging.basicConfig(
 )
 logger = logging.getLogger('data_collection')
 
-# Define paths to collection scripts
+# Get the absolute directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Define paths to collection scripts with absolute paths
 COLLECTION_SCRIPTS = {
     'crypto': [
-        '../get_crypto_data.py',
-        '../get_crypto_features.py'
+        os.path.join(SCRIPT_DIR, 'crypto_features_collector.py')
     ],
     'exchange': [
-        '../get_exchange_data_simple.py'
+        os.path.join(SCRIPT_DIR, 'get_exchange_data_simple.py')
     ],
     'features': [
-        '../collect_individual_features.py'
+        os.path.join(SCRIPT_DIR, 'collect_individual_features.py')
     ]
 }
+
+# Ensure necessary directories exist
+def ensure_directories_exist():
+    """Create required directories if they don't exist"""
+    base_dir = os.path.dirname(SCRIPT_DIR)  # Get parent directory
+    directories = [
+        os.path.join(base_dir, 'datasets'),
+        os.path.join(base_dir, 'datasets/processed_exchanges'),
+        os.path.join(base_dir, 'datasets/additional_features')
+    ]
+    
+    for directory in directories:
+        if not os.path.exists(directory):
+            logger.info(f"Creating directory: {directory}")
+            os.makedirs(directory)
+            
+    return True
 
 def check_script_exists(script_path):
     """Check if a script exists at the given path"""
@@ -66,7 +85,7 @@ def run_script(script_path, args=None):
     if not check_script_exists(script_path):
         return False
 
-    cmd = ['python', script_path]
+    cmd = [sys.executable, script_path]
     if args:
         cmd.extend(args)
     
@@ -111,10 +130,11 @@ def run_validation():
     logger.info("Running data validation...")
     
     # Import the validation module
-    validation_module = import_module_from_file('validation.py')
+    validation_path = os.path.join(SCRIPT_DIR, 'validation.py')
+    validation_module = import_module_from_file(validation_path)
     if validation_module is None:
         logger.error("Could not import validation module. Running as subprocess instead.")
-        return run_script('validation.py', ['--all'])
+        return run_script(validation_path, ['--all'])
     
     try:
         # Run the validation directly
@@ -155,16 +175,16 @@ def print_summary(collection_results, validation_result):
     # Collection summary
     logger.info("\nData Collection Results:")
     for data_type, success in collection_results.items():
-        status = "✓ Success" if success else "✗ Failed"
+        status = "Success" if success else "Failed"
         logger.info(f"  {data_type}: {status}")
     
     # Validation summary
-    validation_status = "✓ All files valid" if validation_result else "✗ Some files have issues"
+    validation_status = "All files valid" if validation_result else "Some files have issues"
     logger.info(f"\nData Validation: {validation_status}")
     
     # Overall status
     all_collection_success = all(collection_results.values())
-    overall_status = "✓ Success" if all_collection_success and validation_result else "✗ Issues detected"
+    overall_status = "Success" if all_collection_success and validation_result else "Issues detected"
     logger.info(f"\nOverall Status: {overall_status}")
     
     logger.info("\nNext Steps:")
@@ -181,6 +201,9 @@ def print_summary(collection_results, validation_result):
 def main():
     """Main function"""
     logger.info("Starting Integrated Data Collection Workflow")
+    
+    # Ensure directories exist
+    ensure_directories_exist()
     
     # Parse command line arguments
     if len(sys.argv) > 1:

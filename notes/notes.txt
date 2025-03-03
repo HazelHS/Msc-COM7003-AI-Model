@@ -141,7 +141,18 @@ This exploratory data analysis phase is critical for cryptocurrency price predic
 - By visualizing first, you'll develop a more effective processing strategy and ultimately build a more accurate TensorFlow model.
 
 
+MVRV Z-Score data:
 
-
+Calculation Method
+The script calculates MVRV Z-Score using:
+Market Value (current price × circulating supply)
+Realized Value (average price when coins last moved × circulating supply)
+Z-score (standard deviation measurement between market and realized values)
+Conclusion
+While TradingView offers this indicator as a visualization tool, it's not designed to be an API data source. If you need MVRV Z-Score data for your project, you would still need to:
+Find a specialized crypto data provider with MVRV Z-Score (paid options like Glassnode)
+Calculate it yourself using raw blockchain data (market value and realized value data)
+Implement the formula using the Pine Script logic shown on TradingView (requires cryptocurrency price history and on-chain data)
+The TradingView script is valuable as a reference for understanding how MVRV Z-Score is calculated, but doesn't solve the fundamental issue of needing a free data source for this metric.
 
 

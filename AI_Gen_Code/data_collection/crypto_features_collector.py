@@ -27,9 +27,10 @@ from dateutil.relativedelta import relativedelta
 import matplotlib.pyplot as plt
 
 # Create output directory
-OUTPUT_DIR = 'additional_features'
+OUTPUT_DIR = '../datasets/additional_features'
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
+    print(f"Created output directory: {OUTPUT_DIR}")
 
 # Define time periods
 DEFAULT_START_DATE = '2012-01-01'
@@ -356,21 +357,54 @@ def get_volatility_indices(start_date=DEFAULT_START_DATE):
         
         # Calculate ratios if both indices exist in the data
         try:
-            if 'CBOE SKEW Index' in all_data.columns and 'CBOE Volatility Index (VIX)' in all_data.columns:
-                # Fill NaN values to avoid division issues
-                skew_data = all_data['CBOE SKEW Index'].fillna(method='ffill').fillna(method='bfill')
-                vix_data = all_data['CBOE Volatility Index (VIX)'].fillna(method='ffill').fillna(method='bfill')
+            # Check if we have a MultiIndex for columns
+            is_multi_index = isinstance(all_data.columns, pd.MultiIndex)
+            
+            # Get the column names for SKEW and VIX based on index type
+            if is_multi_index:
+                skew_col = [col for col in all_data.columns if 'SKEW' in col[0]]
+                vix_col = [col for col in all_data.columns if 'VIX' in col[0]]
                 
-                # Only calculate where VIX is not zero to avoid division by zero
-                valid_vix = vix_data > 0
-                
-                # Initialize ratio column with NaN
-                all_data['SKEW/VIX Ratio'] = np.nan
-                
-                # Calculate ratio only for valid rows
-                all_data.loc[valid_vix, 'SKEW/VIX Ratio'] = skew_data[valid_vix] / vix_data[valid_vix]
+                if skew_col and vix_col:
+                    skew_col = skew_col[0]
+                    vix_col = vix_col[0]
+                    
+                    # Fill NaN values using more modern syntax to avoid deprecation warnings
+                    skew_data = all_data[skew_col].ffill().bfill()
+                    vix_data = all_data[vix_col].ffill().bfill()
+                    
+                    # Only calculate where VIX is not zero to avoid division by zero
+                    valid_vix = vix_data > 0
+                    
+                    # Create a new column for the ratio
+                    ratio_col = ('SKEW/VIX Ratio', '')
+                    all_data[ratio_col] = np.nan
+                    
+                    # Calculate ratio only for valid rows
+                    all_data.loc[valid_vix, ratio_col] = skew_data[valid_vix] / vix_data[valid_vix]
+                    print(f"Successfully calculated SKEW/VIX ratio for {valid_vix.sum()} entries")
+            else:
+                # Original code for non-MultiIndex columns
+                if 'CBOE SKEW Index' in all_data.columns and 'CBOE Volatility Index (VIX)' in all_data.columns:
+                    # Fill NaN values using more modern syntax to avoid deprecation warnings
+                    skew_data = all_data['CBOE SKEW Index'].ffill().bfill()
+                    vix_data = all_data['CBOE Volatility Index (VIX)'].ffill().bfill()
+                    
+                    # Only calculate where VIX is not zero to avoid division by zero
+                    valid_vix = vix_data > 0
+                    
+                    # Initialize ratio column with NaN
+                    all_data['SKEW/VIX Ratio'] = np.nan
+                    
+                    # Calculate ratio only for valid rows
+                    all_data.loc[valid_vix, 'SKEW/VIX Ratio'] = skew_data[valid_vix] / vix_data[valid_vix]
+                    print(f"Successfully calculated SKEW/VIX ratio for {valid_vix.sum()} entries")
         except Exception as e:
             print(f"Error calculating SKEW/VIX ratio: {e}")
+            # Debug information
+            print(f"Column type: {type(all_data.columns)}")
+            print(f"Columns in the data: {all_data.columns.tolist()}")
+            print(f"Data index format: {type(all_data.index)} with {len(all_data.index)} entries")
         
         # Save the data if we have any
         if not all_data.empty:

@@ -9,7 +9,7 @@ Usage:
 
 Author: AI Assistant
 Created: March 1, 2025
-Modified: Current date - Simplified to use only pandas and matplotlib
+Modified: Current date - Enhanced with seaborn for better visualizations
 """
 
 import os
@@ -17,8 +17,12 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 from datetime import datetime
 import calendar
+
+# Set the seaborn style for better visualizations
+sns.set(style="whitegrid")
 
 def load_data(file_path):
     """Load data from a CSV file"""
