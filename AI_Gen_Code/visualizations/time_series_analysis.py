@@ -43,6 +43,11 @@ def load_data(file_path):
         if 'Date' in df.columns:
             df.set_index('Date', inplace=True)
             
+        # If Date is already the index, ensure it's datetime
+        if isinstance(df.index, pd.DatetimeIndex):
+            # Add Date column for functions that expect it
+            df['Date'] = df.index
+            
         return df
     except Exception as e:
         print(f"Error loading data: {e}")
@@ -51,6 +56,17 @@ def load_data(file_path):
         try:
             df = pd.read_csv(file_path)
             print("Loaded without date parsing")
+            
+            # Try to convert index to datetime if it's not already
+            if not isinstance(df.index, pd.DatetimeIndex):
+                try:
+                    df.index = pd.to_datetime(df.index)
+                except:
+                    pass
+                    
+            # Add Date column for functions that expect it
+            df['Date'] = df.index
+            
             return df
         except:
             print(f"Failed to load {file_path}")

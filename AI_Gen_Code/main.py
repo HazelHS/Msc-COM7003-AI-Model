@@ -79,6 +79,10 @@ RENAME_SCRIPT = os.path.join(SCRIPT_DIR, "data_collection/rename_validated_files
 UPDATE_CURRENCY_SCRIPT = os.path.join(SCRIPT_DIR, "data_collection/update_currency_metrics.py")
 COMBINED_DATASET_SCRIPT = os.path.join(SCRIPT_DIR, "data_collection/create_combined_dataset.py")
 
+# Add specific script paths for data processing pipeline
+AVERAGE_EXCHANGES_SCRIPT = os.path.join(SCRIPT_DIR, "data_processing", "combining", "average_exchanges.py")
+FILTER_DATASET_SCRIPT = os.path.join(SCRIPT_DIR, "data_processing", "combining", "filter_combined_dataset.py")
+
 # Optional processing scripts
 PROCESSING_SCRIPTS = [
     UPDATE_CURRENCY_SCRIPT,
@@ -251,71 +255,117 @@ def print_summary(collection_results, validation_result):
     
     logger.info("="*80)
 
-def run_pipeline(data_types=None, rename_validated=False):
-    """Run the complete data processing pipeline"""
-    start_time = time.time()
+def run_data_processing_pipeline():
+    """
+    Run the complete data processing pipeline:
+    1. Average exchange data
+    2. Create the combined dataset
+    3. Filter the dataset to include only specified columns with proper naming
+    """
+    logger.info("\n" + "="*80)
+    logger.info("STARTING COMPLETE DATA PROCESSING PIPELINE")
+    logger.info("="*80)
     
-    # Step 1: Ensure directories exist
-    logger.info("Step 1: Ensuring directories exist")
+    # Step 1: Average exchange data
+    logger.info("\n" + "="*80)
+    logger.info("STEP 1: Average Exchange Data")
+    logger.info("="*80)
+    if not run_script(AVERAGE_EXCHANGES_SCRIPT):
+        logger.error("Error in averaging exchanges step. Pipeline stopped.")
+        return False
+    
+    # Step 2: Create combined dataset
+    logger.info("\n" + "="*80)
+    logger.info("STEP 2: Create Combined Dataset")
+    logger.info("="*80)
+    if not run_script(COMBINED_DATASET_SCRIPT):
+        logger.error("Error in combined dataset creation step. Pipeline stopped.")
+        return False
+    
+    # Step 3: Filter combined dataset
+    logger.info("\n" + "="*80)
+    logger.info("STEP 3: Filter Combined Dataset")
+    logger.info("="*80)
+    if not run_script(FILTER_DATASET_SCRIPT):
+        logger.error("Error in filtering dataset step. Pipeline stopped.")
+        return False
+    
+    logger.info("\n" + "="*80)
+    logger.info("COMPLETE DATA PROCESSING PIPELINE EXECUTED SUCCESSFULLY!")
+    logger.info("="*80)
+    
+    return True
+
+def run_pipeline(data_types=None, rename_validated=False, run_processing=False):
+    """Run the complete data pipeline"""
     ensure_directories_exist()
-    
-    # Step 2: Update environment variables for child processes
     update_script_env_vars()
     
-    # Step 3: Run data collection workflow
-    if data_types is None:
-        data_types = ['crypto', 'exchange', 'features', 'validation']
+    # Default to all data types if none specified
+    if not data_types:
+        data_types = ['crypto', 'exchange', 'features']
     
-    logger.info(f"Step 3: Collecting data for: {', '.join(data_types)}")
+    # Run data collection
     collection_results = collect_data(data_types)
     
-    # Step 4: Validate the collected data
-    logger.info("Step 4: Validating collected data")
+    # Run validation
     validation_result = run_validation()
     
-    # Step 5: Run additional data processing scripts
-    if PROCESSING_SCRIPTS:
-        logger.info("Step 5: Running additional data processing scripts")
-        for script in PROCESSING_SCRIPTS:
-            script_name = os.path.basename(script)
-            logger.info(f"Running script: {script_name}")
-            success = run_script(script)
-            if not success:
-                logger.warning(f"Script {script_name} had issues, but continuing with pipeline")
-    
-    # Step 6: Rename validated files if requested
-    if rename_validated:
-        logger.info("Step 6: Renaming validated files to replace originals")
-        run_script(RENAME_SCRIPT)
-    
-    # Step 7: Print summary
+    # Print summary of collection and validation
     print_summary(collection_results, validation_result)
     
-    # Calculate elapsed time
-    elapsed_time = time.time() - start_time
-    logger.info(f"Pipeline completed in {elapsed_time:.2f} seconds")
+    # Rename validated files if requested
+    if rename_validated and validation_result:
+        logger.info("\nRenaming validated files to replace originals...")
+        run_script(RENAME_SCRIPT)
     
-    logger.info("Data processing pipeline complete!")
+    # Run processing scripts if requested
+    if run_processing:
+        logger.info("\nRunning data processing pipeline...")
+        return run_data_processing_pipeline()
+    
+    return True
 
 def main():
-    """Parse arguments and run the pipeline"""
-    parser = argparse.ArgumentParser(description="Run the data processing pipeline")
-    parser.add_argument("--data-type", type=str, default="all",
-                       choices=["crypto", "exchange", "features", "validation", "all"],
-                       help="Specify data type to collect")
-    parser.add_argument("--rename-validated", action="store_true", 
-                        help="Replace original files with validated versions")
+    """Main entry point for the script"""
+    parser = argparse.ArgumentParser(description='Run the complete data processing pipeline')
+    parser.add_argument('--data-type', 
+                        choices=['crypto', 'exchange', 'features', 'all'],
+                        help='Specify data type to collect (crypto, exchange, features, all)')
+    parser.add_argument('--rename-validated', 
+                        action='store_true',
+                        help='Replace original files with validated versions')
+    parser.add_argument('--process-data', 
+                        action='store_true',
+                        help='Run the data processing pipeline after collection')
+    parser.add_argument('--pipeline-only', 
+                        action='store_true',
+                        help='Run only the data processing pipeline (skip collection)')
     
     args = parser.parse_args()
     
-    # Determine which data types to process
-    if args.data_type == 'all':
-        data_types = ['crypto', 'exchange', 'features', 'validation']
-    else:
-        data_types = [args.data_type]
+    # Set up data types to process
+    data_types = []
+    if args.data_type:
+        if args.data_type == 'all':
+            data_types = ['crypto', 'exchange', 'features']
+        else:
+            data_types = [args.data_type]
     
-    logger.info(f"Starting data processing pipeline")
-    run_pipeline(data_types=data_types, rename_validated=args.rename_validated)
+    # If pipeline-only is specified, just run the processing pipeline
+    if args.pipeline_only:
+        logger.info("Running only the data processing pipeline...")
+        return 0 if run_data_processing_pipeline() else 1
+    
+    # Otherwise run the complete pipeline including collection if requested
+    success = run_pipeline(
+        data_types=data_types, 
+        rename_validated=args.rename_validated,
+        run_processing=args.process_data
+    )
+    
+    return 0 if success else 1
 
 if __name__ == "__main__":
-    main() 
+    exit_code = main()
+    sys.exit(exit_code) 

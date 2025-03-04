@@ -1,0 +1,325 @@
+2025-03-04 16:24:30,695 - data_pipeline - INFO - Running only the data processing pipeline...
+2025-03-04 16:24:30,697 - data_pipeline - INFO - 
+================================================================================
+2025-03-04 16:24:30,697 - data_pipeline - INFO - STARTING COMPLETE DATA PROCESSING PIPELINE
+2025-03-04 16:24:30,697 - data_pipeline - INFO - ================================================================================
+2025-03-04 16:24:30,698 - data_pipeline - INFO - 
+================================================================================
+2025-03-04 16:24:30,699 - data_pipeline - INFO - STEP 1: Average Exchange Data
+2025-03-04 16:24:30,699 - data_pipeline - INFO - ================================================================================
+2025-03-04 16:24:30,699 - data_pipeline - INFO - Running: C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\.venv\Scripts\python.exe C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\AI_Gen_Code\data_processing\combining\average_exchanges.py
+2025-03-04 16:25:36,564 - data_pipeline - INFO - OUTPUT: Starting exchange averaging process...
+2025-03-04 16:25:36,565 - data_pipeline - INFO - OUTPUT: Reading from directory: C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets\processed_exchanges
+2025-03-04 16:25:36,565 - data_pipeline - INFO - OUTPUT: Loaded 399001_SZ_processed with 3189 rows and 10 columns
+2025-03-04 16:25:36,566 - data_pipeline - INFO - OUTPUT: Warning: all_indices_processed.csv has 35793 duplicate dates. Aggregating by date...
+2025-03-04 16:25:36,566 - data_pipeline - INFO - OUTPUT: Loaded all_indices_processed with 3429 rows and 63 columns
+2025-03-04 16:25:36,566 - data_pipeline - INFO - OUTPUT: Loaded GDAXI_processed with 3337 rows and 15 columns
+2025-03-04 16:25:36,566 - data_pipeline - INFO - OUTPUT: Loaded GSPTSE_processed with 3304 rows and 15 columns
+2025-03-04 16:25:36,566 - data_pipeline - INFO - OUTPUT: Loaded HSI_processed with 3237 rows and 15 columns
+2025-03-04 16:25:36,567 - data_pipeline - INFO - OUTPUT: Loaded IXIC_processed with 3310 rows and 15 columns
+2025-03-04 16:25:36,568 - data_pipeline - INFO - OUTPUT: Loaded J203_JO_processed with 3285 rows and 15 columns
+2025-03-04 16:25:36,568 - data_pipeline - INFO - OUTPUT: Loaded KS11_processed with 3232 rows and 15 columns
+2025-03-04 16:25:36,569 - data_pipeline - INFO - OUTPUT: Loaded N100_processed with 3366 rows and 15 columns
+2025-03-04 16:25:36,570 - data_pipeline - INFO - OUTPUT: Loaded N225_processed with 3220 rows and 15 columns
+2025-03-04 16:25:36,571 - data_pipeline - INFO - OUTPUT: Loaded NSEI_processed with 3231 rows and 15 columns
+2025-03-04 16:25:36,571 - data_pipeline - INFO - OUTPUT: Loaded NYA_processed with 3310 rows and 15 columns
+2025-03-04 16:25:36,572 - data_pipeline - INFO - OUTPUT: Loaded SSMI_processed with 3293 rows and 15 columns
+2025-03-04 16:25:36,572 - data_pipeline - INFO - OUTPUT: Loaded TWII_processed with 3203 rows and 15 columns
+2025-03-04 16:25:36,573 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:36,573 - data_pipeline - INFO - OUTPUT: Processing 14 exchange files:
+2025-03-04 16:25:36,574 - data_pipeline - INFO - OUTPUT: - 399001_SZ_processed.csv
+2025-03-04 16:25:36,575 - data_pipeline - INFO - OUTPUT: - all_indices_processed.csv
+2025-03-04 16:25:36,575 - data_pipeline - INFO - OUTPUT: - GDAXI_processed.csv
+2025-03-04 16:25:36,576 - data_pipeline - INFO - OUTPUT: - GSPTSE_processed.csv
+2025-03-04 16:25:36,576 - data_pipeline - INFO - OUTPUT: - HSI_processed.csv
+2025-03-04 16:25:36,576 - data_pipeline - INFO - OUTPUT: - IXIC_processed.csv
+2025-03-04 16:25:36,577 - data_pipeline - INFO - OUTPUT: - J203_JO_processed.csv
+2025-03-04 16:25:36,577 - data_pipeline - INFO - OUTPUT: - KS11_processed.csv
+2025-03-04 16:25:36,577 - data_pipeline - INFO - OUTPUT: - N100_processed.csv
+2025-03-04 16:25:36,578 - data_pipeline - INFO - OUTPUT: - N225_processed.csv
+2025-03-04 16:25:36,578 - data_pipeline - INFO - OUTPUT: - NSEI_processed.csv
+2025-03-04 16:25:36,579 - data_pipeline - INFO - OUTPUT: - NYA_processed.csv
+2025-03-04 16:25:36,579 - data_pipeline - INFO - OUTPUT: - SSMI_processed.csv
+2025-03-04 16:25:36,580 - data_pipeline - INFO - OUTPUT: - TWII_processed.csv
+2025-03-04 16:25:36,580 - data_pipeline - INFO - OUTPUT: Calculating averages...
+2025-03-04 16:25:36,581 - data_pipeline - INFO - OUTPUT: Starting to average exchanges...
+2025-03-04 16:25:36,581 - data_pipeline - INFO - OUTPUT: Processing 399001_SZ_processed...
+2025-03-04 16:25:36,581 - data_pipeline - INFO - OUTPUT: Processing all_indices_processed...
+2025-03-04 16:25:36,582 - data_pipeline - INFO - OUTPUT: Processing GDAXI_processed...
+2025-03-04 16:25:36,582 - data_pipeline - INFO - OUTPUT: Processing GSPTSE_processed...
+2025-03-04 16:25:36,582 - data_pipeline - INFO - OUTPUT: Processing HSI_processed...
+2025-03-04 16:25:36,583 - data_pipeline - INFO - OUTPUT: Processing IXIC_processed...
+2025-03-04 16:25:36,583 - data_pipeline - INFO - OUTPUT: Processing J203_JO_processed...
+2025-03-04 16:25:36,584 - data_pipeline - INFO - OUTPUT: Processing KS11_processed...
+2025-03-04 16:25:36,584 - data_pipeline - INFO - OUTPUT: Processing N100_processed...
+2025-03-04 16:25:36,585 - data_pipeline - INFO - OUTPUT: Processing N225_processed...
+2025-03-04 16:25:36,585 - data_pipeline - INFO - OUTPUT: Processing NSEI_processed...
+2025-03-04 16:25:36,586 - data_pipeline - INFO - OUTPUT: Processing NYA_processed...
+2025-03-04 16:25:36,586 - data_pipeline - INFO - OUTPUT: Processing SSMI_processed...
+2025-03-04 16:25:36,587 - data_pipeline - INFO - OUTPUT: Processing TWII_processed...
+2025-03-04 16:25:36,587 - data_pipeline - INFO - OUTPUT: Saved averaged exchange data to C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets\processed_exchanges\averaged_exchanges_20250304_162534.csv
+2025-03-04 16:25:36,588 - data_pipeline - INFO - OUTPUT: Saved latest version to C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets\processed_exchanges\averaged_exchanges.csv
+2025-03-04 16:25:36,589 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:36,590 - data_pipeline - INFO - OUTPUT: Averaging process completed successfully!
+2025-03-04 16:25:36,590 - data_pipeline - INFO - OUTPUT: Output saved to: C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets\processed_exchanges\averaged_exchanges_20250304_162534.csv
+2025-03-04 16:25:36,592 - data_pipeline - INFO - OUTPUT: Latest version saved to: C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets\processed_exchanges\averaged_exchanges.csv
+2025-03-04 16:25:36,593 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:36,593 - data_pipeline - INFO - OUTPUT: Summary of averaged data:
+2025-03-04 16:25:36,594 - data_pipeline - INFO - OUTPUT: Date range: 2012-01-02 00:00:00 to 2025-03-03 00:00:00
+2025-03-04 16:25:36,596 - data_pipeline - INFO - OUTPUT: Number of columns: 71
+2025-03-04 16:25:36,596 - data_pipeline - INFO - OUTPUT: Number of rows: 3430
+2025-03-04 16:25:36,596 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:36,597 - data_pipeline - INFO - OUTPUT: Columns included:
+2025-03-04 16:25:36,597 - data_pipeline - INFO - OUTPUT: - Volume.3: 3429 non-null values
+2025-03-04 16:25:36,598 - data_pipeline - INFO - OUTPUT: - Volume.9: 3429 non-null values
+2025-03-04 16:25:36,598 - data_pipeline - INFO - OUTPUT: - Low.4: 3429 non-null values
+2025-03-04 16:25:36,598 - data_pipeline - INFO - OUTPUT: - Close.4: 3429 non-null values
+2025-03-04 16:25:36,599 - data_pipeline - INFO - OUTPUT: - Open.8: 3429 non-null values
+2025-03-04 16:25:36,599 - data_pipeline - INFO - OUTPUT: - Low.5: 3429 non-null values
+2025-03-04 16:25:36,600 - data_pipeline - INFO - OUTPUT: - CloseUSD: 3430 non-null values
+2025-03-04 16:25:36,600 - data_pipeline - INFO - OUTPUT: - Open.2: 3429 non-null values
+2025-03-04 16:25:36,601 - data_pipeline - INFO - OUTPUT: - Close.9: 3429 non-null values
+2025-03-04 16:25:36,601 - data_pipeline - INFO - OUTPUT: - Index: 0 non-null values
+2025-03-04 16:25:36,602 - data_pipeline - INFO - OUTPUT: - High.6: 3429 non-null values
+2025-03-04 16:25:36,602 - data_pipeline - INFO - OUTPUT: - Open.10: 3429 non-null values
+2025-03-04 16:25:36,603 - data_pipeline - INFO - OUTPUT: - Volume.5: 3429 non-null values
+2025-03-04 16:25:36,603 - data_pipeline - INFO - OUTPUT: - Close.3: 3429 non-null values
+2025-03-04 16:25:36,603 - data_pipeline - INFO - OUTPUT: - Volume.4: 3429 non-null values
+2025-03-04 16:25:36,604 - data_pipeline - INFO - OUTPUT: - Close.7: 3429 non-null values
+2025-03-04 16:25:36,604 - data_pipeline - INFO - OUTPUT: - Low: 3430 non-null values
+2025-03-04 16:25:36,605 - data_pipeline - INFO - OUTPUT: - High.7: 3429 non-null values
+2025-03-04 16:25:36,605 - data_pipeline - INFO - OUTPUT: - High.8: 3429 non-null values
+2025-03-04 16:25:36,605 - data_pipeline - INFO - OUTPUT: - High.11: 3429 non-null values
+2025-03-04 16:25:36,606 - data_pipeline - INFO - OUTPUT: - Volume.1: 3429 non-null values
+2025-03-04 16:25:36,606 - data_pipeline - INFO - OUTPUT: - Open.7: 3429 non-null values
+2025-03-04 16:25:36,607 - data_pipeline - INFO - OUTPUT: - Close.6: 3429 non-null values
+2025-03-04 16:25:36,607 - data_pipeline - INFO - OUTPUT: - MA_5: 3426 non-null values
+2025-03-04 16:25:36,607 - data_pipeline - INFO - OUTPUT: - Low.3: 3429 non-null values
+2025-03-04 16:25:36,608 - data_pipeline - INFO - OUTPUT: - Low.1: 3429 non-null values
+2025-03-04 16:25:36,608 - data_pipeline - INFO - OUTPUT: - High.3: 3429 non-null values
+2025-03-04 16:25:36,609 - data_pipeline - INFO - OUTPUT: - Low.11: 3429 non-null values
+2025-03-04 16:25:36,609 - data_pipeline - INFO - OUTPUT: - Open.6: 3429 non-null values
+2025-03-04 16:25:36,610 - data_pipeline - INFO - OUTPUT: - Open.9: 3429 non-null values
+2025-03-04 16:25:36,610 - data_pipeline - INFO - OUTPUT: - Volatility_20: 3410 non-null values
+2025-03-04 16:25:36,611 - data_pipeline - INFO - OUTPUT: - MA_50: 3381 non-null values
+2025-03-04 16:25:36,612 - data_pipeline - INFO - OUTPUT: - Open.5: 3429 non-null values
+2025-03-04 16:25:36,612 - data_pipeline - INFO - OUTPUT: - Volume.8: 3429 non-null values
+2025-03-04 16:25:36,613 - data_pipeline - INFO - OUTPUT: - Open.1: 3429 non-null values
+2025-03-04 16:25:36,613 - data_pipeline - INFO - OUTPUT: - Low.8: 3429 non-null values
+2025-03-04 16:25:36,614 - data_pipeline - INFO - OUTPUT: - Low.9: 3429 non-null values
+2025-03-04 16:25:36,614 - data_pipeline - INFO - OUTPUT: - Daily_Return: 3429 non-null values
+2025-03-04 16:25:36,614 - data_pipeline - INFO - OUTPUT: - Close.1: 3429 non-null values
+2025-03-04 16:25:36,615 - data_pipeline - INFO - OUTPUT: - Close: 3430 non-null values
+2025-03-04 16:25:36,615 - data_pipeline - INFO - OUTPUT: - Low.7: 3429 non-null values
+2025-03-04 16:25:36,616 - data_pipeline - INFO - OUTPUT: - Close.10: 3429 non-null values
+2025-03-04 16:25:36,616 - data_pipeline - INFO - OUTPUT: - Open.4: 3429 non-null values
+2025-03-04 16:25:36,616 - data_pipeline - INFO - OUTPUT: - Volume.7: 3429 non-null values
+2025-03-04 16:25:36,621 - data_pipeline - INFO - OUTPUT: - Low.2: 3429 non-null values
+2025-03-04 16:25:36,622 - data_pipeline - INFO - OUTPUT: - Volume.2: 3429 non-null values
+2025-03-04 16:25:36,622 - data_pipeline - INFO - OUTPUT: - High.5: 3429 non-null values
+2025-03-04 16:25:36,623 - data_pipeline - INFO - OUTPUT: - Volume.10: 3429 non-null values
+2025-03-04 16:25:36,623 - data_pipeline - INFO - OUTPUT: - Close.11: 3429 non-null values
+2025-03-04 16:25:36,624 - data_pipeline - INFO - OUTPUT: - MA_20: 3411 non-null values
+2025-03-04 16:25:36,624 - data_pipeline - INFO - OUTPUT: - Close.8: 3429 non-null values
+2025-03-04 16:25:36,625 - data_pipeline - INFO - OUTPUT: - Open: 3430 non-null values
+2025-03-04 16:25:36,625 - data_pipeline - INFO - OUTPUT: - High.10: 3429 non-null values
+2025-03-04 16:25:36,626 - data_pipeline - INFO - OUTPUT: - Volume: 3430 non-null values
+2025-03-04 16:25:36,626 - data_pipeline - INFO - OUTPUT: - High.9: 3429 non-null values
+2025-03-04 16:25:36,627 - data_pipeline - INFO - OUTPUT: - Close.5: 3429 non-null values
+2025-03-04 16:25:36,628 - data_pipeline - INFO - OUTPUT: - Currency: 0 non-null values
+2025-03-04 16:25:36,628 - data_pipeline - INFO - OUTPUT: - Close.2: 3429 non-null values
+2025-03-04 16:25:36,629 - data_pipeline - INFO - OUTPUT: - Open.11: 3429 non-null values
+2025-03-04 16:25:36,629 - data_pipeline - INFO - OUTPUT: - Volume.6: 3429 non-null values
+2025-03-04 16:25:36,629 - data_pipeline - INFO - OUTPUT: - Low.6: 3429 non-null values
+2025-03-04 16:25:36,646 - data_pipeline - INFO - OUTPUT: - Open.3: 3429 non-null values
+2025-03-04 16:25:36,646 - data_pipeline - INFO - OUTPUT: - Adj Close: 3429 non-null values
+2025-03-04 16:25:36,647 - data_pipeline - INFO - OUTPUT: - High.4: 3429 non-null values
+2025-03-04 16:25:36,647 - data_pipeline - INFO - OUTPUT: - Low.10: 3429 non-null values
+2025-03-04 16:25:36,648 - data_pipeline - INFO - OUTPUT: - High.1: 3429 non-null values
+2025-03-04 16:25:36,649 - data_pipeline - INFO - OUTPUT: - High: 3430 non-null values
+2025-03-04 16:25:36,649 - data_pipeline - INFO - OUTPUT: - Volume.11: 3429 non-null values
+2025-03-04 16:25:36,771 - data_pipeline - INFO - OUTPUT: - MA_200: 3227 non-null values
+2025-03-04 16:25:36,799 - data_pipeline - INFO - OUTPUT: - High.2: 3429 non-null values
+2025-03-04 16:25:36,799 - data_pipeline - INFO - Script C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\AI_Gen_Code\data_processing\combining\average_exchanges.py completed successfully
+2025-03-04 16:25:36,799 - data_pipeline - INFO - 
+================================================================================
+2025-03-04 16:25:36,799 - data_pipeline - INFO - STEP 2: Create Combined Dataset
+2025-03-04 16:25:36,803 - data_pipeline - INFO - ================================================================================
+2025-03-04 16:25:36,803 - data_pipeline - INFO - Running: C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\.venv\Scripts\python.exe C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\AI_Gen_Code\data_collection/create_combined_dataset.py
+2025-03-04 16:25:38,722 - data_pipeline - INFO - OUTPUT: Starting creation of combined dataset for AI training...
+2025-03-04 16:25:38,724 - data_pipeline - INFO - OUTPUT: Using default paths:
+2025-03-04 16:25:38,725 - data_pipeline - INFO - OUTPUT:   Base directory: C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets
+2025-03-04 16:25:38,726 - data_pipeline - INFO - OUTPUT:   Combined directory: C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets\combined_dataset
+2025-03-04 16:25:38,726 - data_pipeline - INFO - OUTPUT: Ensured output directory exists: C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets\combined_dataset
+2025-03-04 16:25:38,727 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:38,727 - data_pipeline - INFO - OUTPUT: Processing averaged exchange data...
+2025-03-04 16:25:38,727 - data_pipeline - INFO - OUTPUT:   Exchange data date range: 2012-01-02 to 2025-03-03
+2025-03-04 16:25:38,728 - data_pipeline - INFO - OUTPUT:   Exchange data has 3430 rows
+2025-03-04 16:25:38,728 - data_pipeline - INFO - OUTPUT:   Added 7 averaged exchange columns
+2025-03-04 16:25:38,728 - data_pipeline - INFO - OUTPUT: Found 7 additional feature files to process
+2025-03-04 16:25:38,729 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:38,729 - data_pipeline - INFO - OUTPUT: Processing additional features files...
+2025-03-04 16:25:38,730 - data_pipeline - INFO - OUTPUT: Processing currency_metrics.csv...
+2025-03-04 16:25:38,731 - data_pipeline - INFO - OUTPUT:   Skipping comment line in currency_metrics.csv
+2025-03-04 16:25:38,731 - data_pipeline - INFO - OUTPUT:   currency_metrics.csv date range: 2012-01-03 to 2025-02-28
+2025-03-04 16:25:38,732 - data_pipeline - INFO - OUTPUT:   Adding special column BTC/USD without prefix
+2025-03-04 16:25:38,732 - data_pipeline - INFO - OUTPUT:   Adding special column Gold/BTC Ratio without prefix
+2025-03-04 16:25:38,733 - data_pipeline - INFO - OUTPUT:   Added 4 columns from currency_metrics.csv
+2025-03-04 16:25:38,733 - data_pipeline - INFO - OUTPUT:   Current merged dataset has 3430 rows
+2025-03-04 16:25:38,733 - data_pipeline - INFO - OUTPUT: Processing fear_greed_index.csv...
+2025-03-04 16:25:38,734 - data_pipeline - INFO - OUTPUT:   Skipping comment line in fear_greed_index.csv
+2025-03-04 16:25:38,735 - data_pipeline - INFO - OUTPUT:   fear_greed_index.csv date range: 2022-06-07 to 2025-03-03
+2025-03-04 16:25:38,735 - data_pipeline - INFO - OUTPUT:   Added 2 columns from fear_greed_index.csv
+2025-03-04 16:25:38,737 - data_pipeline - INFO - OUTPUT:   Current merged dataset has 3715 rows
+2025-03-04 16:25:38,738 - data_pipeline - INFO - OUTPUT: Processing miner_revenue.csv...
+2025-03-04 16:25:38,739 - data_pipeline - INFO - OUTPUT:   Skipping comment line in miner_revenue.csv
+2025-03-04 16:25:38,741 - data_pipeline - INFO - OUTPUT:   miner_revenue.csv date range: 2012-01-02 to 2025-03-02
+2025-03-04 16:25:38,742 - data_pipeline - INFO - OUTPUT:   Skipping Miner Revenue (USD) column as requested
+2025-03-04 16:25:38,750 - data_pipeline - INFO - OUTPUT:   Added 1 columns from miner_revenue.csv
+2025-03-04 16:25:38,751 - data_pipeline - INFO - OUTPUT:   Current merged dataset has 4490 rows
+2025-03-04 16:25:38,751 - data_pipeline - INFO - OUTPUT: Processing mining_difficulty.csv...
+2025-03-04 16:25:38,752 - data_pipeline - INFO - OUTPUT:   Skipping comment line in mining_difficulty.csv
+2025-03-04 16:25:38,752 - data_pipeline - INFO - OUTPUT:   mining_difficulty.csv date range: 2012-01-02 to 2025-03-02
+2025-03-04 16:25:38,753 - data_pipeline - INFO - OUTPUT:   Added 1 columns from mining_difficulty.csv
+2025-03-04 16:25:38,753 - data_pipeline - INFO - OUTPUT:   Current merged dataset has 4490 rows
+2025-03-04 16:25:38,754 - data_pipeline - INFO - OUTPUT: Processing onchain_metrics.csv...
+2025-03-04 16:25:38,754 - data_pipeline - INFO - OUTPUT:   Skipping comment line in onchain_metrics.csv
+2025-03-04 16:25:38,755 - data_pipeline - INFO - OUTPUT:   onchain_metrics.csv date range: 2012-01-02 to 2025-03-02
+2025-03-04 16:25:38,757 - data_pipeline - INFO - OUTPUT:   Skipping Miner Revenue (USD) column as requested
+2025-03-04 16:25:38,758 - data_pipeline - INFO - OUTPUT:   Added 8 columns from onchain_metrics.csv
+2025-03-04 16:25:38,758 - data_pipeline - INFO - OUTPUT:   Current merged dataset has 4490 rows
+2025-03-04 16:25:38,759 - data_pipeline - INFO - OUTPUT: Processing volatility_currency_combined.csv...
+2025-03-04 16:25:38,759 - data_pipeline - INFO - OUTPUT:   No Date column found in volatility_currency_combined.csv, skipping.
+2025-03-04 16:25:38,760 - data_pipeline - INFO - OUTPUT: Processing volatility_indices.csv...
+2025-03-04 16:25:38,760 - data_pipeline - INFO - OUTPUT:   Skipping comment line in volatility_indices.csv
+2025-03-04 16:25:38,761 - data_pipeline - INFO - OUTPUT:   No Date column found in volatility_indices.csv, skipping.
+2025-03-04 16:25:38,761 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:38,762 - data_pipeline - INFO - OUTPUT: Data date range check:
+2025-03-04 16:25:38,763 - data_pipeline - INFO - OUTPUT:   Earliest date: 2012-01-02
+2025-03-04 16:25:38,763 - data_pipeline - INFO - OUTPUT:   Latest date: 2025-03-03
+2025-03-04 16:25:38,764 - data_pipeline - INFO - OUTPUT:   Total date range spans 4490 unique days
+2025-03-04 16:25:38,764 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:38,764 - data_pipeline - INFO - OUTPUT: Filling missing values...
+2025-03-04 16:25:38,765 - data_pipeline - INFO - OUTPUT: Missing values after filling: 0
+2025-03-04 16:25:38,765 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:38,766 - data_pipeline - INFO - OUTPUT: Removing Currency columns...
+2025-03-04 16:25:38,766 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:38,766 - data_pipeline - INFO - OUTPUT: Date distribution by year:
+2025-03-04 16:25:38,767 - data_pipeline - INFO - OUTPUT:   - 2012: 326 rows
+2025-03-04 16:25:38,767 - data_pipeline - INFO - OUTPUT:   - 2013: 330 rows
+2025-03-04 16:25:38,768 - data_pipeline - INFO - OUTPUT:   - 2014: 333 rows
+2025-03-04 16:25:38,768 - data_pipeline - INFO - OUTPUT:   - 2015: 312 rows
+2025-03-04 16:25:38,769 - data_pipeline - INFO - OUTPUT:   - 2016: 325 rows
+2025-03-04 16:25:38,769 - data_pipeline - INFO - OUTPUT:   - 2017: 339 rows
+2025-03-04 16:25:38,770 - data_pipeline - INFO - OUTPUT:   - 2018: 336 rows
+2025-03-04 16:25:38,770 - data_pipeline - INFO - OUTPUT:   - 2019: 338 rows
+2025-03-04 16:25:38,773 - data_pipeline - INFO - OUTPUT:   - 2020: 348 rows
+2025-03-04 16:25:38,778 - data_pipeline - INFO - OUTPUT:   - 2021: 351 rows
+2025-03-04 16:25:38,779 - data_pipeline - INFO - OUTPUT:   - 2022: 360 rows
+2025-03-04 16:25:38,780 - data_pipeline - INFO - OUTPUT:   - 2023: 365 rows
+2025-03-04 16:25:38,780 - data_pipeline - INFO - OUTPUT:   - 2024: 365 rows
+2025-03-04 16:25:38,780 - data_pipeline - INFO - OUTPUT:   - 2025: 62 rows
+2025-03-04 16:25:38,781 - data_pipeline - INFO - OUTPUT: Combined dataset saved to: C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets\combined_dataset\combined_dataset_20250304_162538.csv
+2025-03-04 16:25:38,781 - data_pipeline - INFO - OUTPUT: Created backup of original dataset
+2025-03-04 16:25:38,795 - data_pipeline - INFO - OUTPUT: Updated combined_dataset_latest.csv successfully
+2025-03-04 16:25:38,803 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:38,838 - data_pipeline - INFO - OUTPUT: Combined dataset created successfully!
+2025-03-04 16:25:38,847 - data_pipeline - INFO - OUTPUT: Rows: 4490
+2025-03-04 16:25:38,847 - data_pipeline - INFO - OUTPUT: Columns: 22
+2025-03-04 16:25:38,848 - data_pipeline - INFO - OUTPUT: Date range: from 2012-01-02 to 2025-03-03
+2025-03-04 16:25:38,848 - data_pipeline - INFO - OUTPUT: Output saved to:
+2025-03-04 16:25:38,849 - data_pipeline - INFO - OUTPUT: - C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets\combined_dataset\combined_dataset_20250304_162538.csv
+2025-03-04 16:25:38,849 - data_pipeline - INFO - OUTPUT: - C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets\combined_dataset\combined_dataset_latest.csv
+2025-03-04 16:25:38,851 - data_pipeline - INFO - Script C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\AI_Gen_Code\data_collection/create_combined_dataset.py completed successfully
+2025-03-04 16:25:38,852 - data_pipeline - INFO - 
+================================================================================
+2025-03-04 16:25:38,852 - data_pipeline - INFO - STEP 3: Filter Combined Dataset
+2025-03-04 16:25:38,853 - data_pipeline - INFO - ================================================================================
+2025-03-04 16:25:38,853 - data_pipeline - INFO - Running: C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\.venv\Scripts\python.exe C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\AI_Gen_Code\data_processing\combining\filter_combined_dataset.py
+2025-03-04 16:25:41,696 - data_pipeline - INFO - OUTPUT: Starting filtering of combined dataset...
+2025-03-04 16:25:41,701 - data_pipeline - INFO - OUTPUT: Reading combined dataset from: C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets\combined_dataset\combined_dataset_latest.csv
+2025-03-04 16:25:41,701 - data_pipeline - INFO - OUTPUT: Original dataset: 4490 rows, 22 columns
+2025-03-04 16:25:41,702 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:41,702 - data_pipeline - INFO - OUTPUT: Keeping 15 columns out of 22 total
+2025-03-04 16:25:41,702 - data_pipeline - INFO - OUTPUT: Renaming: AVG Volume -> Volume
+2025-03-04 16:25:41,703 - data_pipeline - INFO - OUTPUT: Renaming: AVG CloseUSD -> CloseUSD
+2025-03-04 16:25:41,703 - data_pipeline - INFO - OUTPUT: Removed 'AVG' prefix from 2 columns
+2025-03-04 16:25:41,703 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:41,703 - data_pipeline - INFO - OUTPUT: Columns after renaming:
+2025-03-04 16:25:41,704 - data_pipeline - INFO - OUTPUT:   - Date
+2025-03-04 16:25:41,725 - data_pipeline - INFO - OUTPUT:   - Volume
+2025-03-04 16:25:41,727 - data_pipeline - INFO - OUTPUT:   - CloseUSD
+2025-03-04 16:25:41,728 - data_pipeline - INFO - OUTPUT:   - currency US Dollar Index
+2025-03-04 16:25:41,729 - data_pipeline - INFO - OUTPUT:   - currency Gold Futures
+2025-03-04 16:25:41,729 - data_pipeline - INFO - OUTPUT:   - BTC/USD
+2025-03-04 16:25:41,730 - data_pipeline - INFO - OUTPUT:   - Gold/BTC Ratio
+2025-03-04 16:25:41,730 - data_pipeline - INFO - OUTPUT:   - fear FearGreedValue
+2025-03-04 16:25:41,731 - data_pipeline - INFO - OUTPUT:   - onchain Active Addresses
+2025-03-04 16:25:41,731 - data_pipeline - INFO - OUTPUT:   - onchain Transaction Count
+2025-03-04 16:25:41,732 - data_pipeline - INFO - OUTPUT:   - onchain Mempool Size
+2025-03-04 16:25:41,732 - data_pipeline - INFO - OUTPUT:   - onchain Hash Rate (GH/s)
+2025-03-04 16:25:41,734 - data_pipeline - INFO - OUTPUT:   - onchain Mining Difficulty
+2025-03-04 16:25:41,734 - data_pipeline - INFO - OUTPUT:   - onchain Transaction Fees (BTC)
+2025-03-04 16:25:41,735 - data_pipeline - INFO - OUTPUT:   - onchain Median Confirmation Time (min)
+2025-03-04 16:25:41,735 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:41,736 - data_pipeline - INFO - OUTPUT: Date distribution by year:
+2025-03-04 16:25:41,736 - data_pipeline - INFO - OUTPUT:   - 2012: 326 rows
+2025-03-04 16:25:41,738 - data_pipeline - INFO - OUTPUT:   - 2013: 330 rows
+2025-03-04 16:25:41,738 - data_pipeline - INFO - OUTPUT:   - 2014: 333 rows
+2025-03-04 16:25:41,739 - data_pipeline - INFO - OUTPUT:   - 2015: 312 rows
+2025-03-04 16:25:41,739 - data_pipeline - INFO - OUTPUT:   - 2016: 325 rows
+2025-03-04 16:25:41,739 - data_pipeline - INFO - OUTPUT:   - 2017: 339 rows
+2025-03-04 16:25:41,740 - data_pipeline - INFO - OUTPUT:   - 2018: 336 rows
+2025-03-04 16:25:41,740 - data_pipeline - INFO - OUTPUT:   - 2019: 338 rows
+2025-03-04 16:25:41,741 - data_pipeline - INFO - OUTPUT:   - 2020: 348 rows
+2025-03-04 16:25:41,741 - data_pipeline - INFO - OUTPUT:   - 2021: 351 rows
+2025-03-04 16:25:41,741 - data_pipeline - INFO - OUTPUT:   - 2022: 360 rows
+2025-03-04 16:25:41,803 - data_pipeline - INFO - OUTPUT:   - 2023: 365 rows
+2025-03-04 16:25:41,989 - data_pipeline - INFO - OUTPUT:   - 2024: 365 rows
+2025-03-04 16:25:42,045 - data_pipeline - INFO - OUTPUT:   - 2025: 62 rows
+2025-03-04 16:25:42,240 - data_pipeline - INFO - OUTPUT: Saved filtered dataset to: C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\datasets\combined_dataset\filtered_dataset_20250304_162541.csv
+2025-03-04 16:25:42,334 - data_pipeline - INFO - OUTPUT: Created backup of original dataset
+2025-03-04 16:25:42,385 - data_pipeline - INFO - OUTPUT: Updated combined_dataset_latest.csv with filtered columns
+2025-03-04 16:25:42,393 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:42,434 - data_pipeline - INFO - OUTPUT: Filtered dataset summary:
+2025-03-04 16:25:42,450 - data_pipeline - INFO - OUTPUT: Rows: 4490
+2025-03-04 16:25:42,604 - data_pipeline - INFO - OUTPUT: Columns: 15
+2025-03-04 16:25:42,678 - data_pipeline - INFO - OUTPUT: Date range: from 2012-01-02 to 2025-03-03
+2025-03-04 16:25:42,707 - data_pipeline - INFO - OUTPUT: 
+2025-03-04 16:25:42,776 - data_pipeline - INFO - OUTPUT: Columns included:
+2025-03-04 16:25:42,789 - data_pipeline - INFO - OUTPUT:   - Date: 4490 non-null values
+2025-03-04 16:25:42,791 - data_pipeline - INFO - OUTPUT:   - Volume: 4490 non-null values
+2025-03-04 16:25:42,952 - data_pipeline - INFO - OUTPUT:   - CloseUSD: 4490 non-null values
+2025-03-04 16:25:43,479 - data_pipeline - INFO - OUTPUT:   - currency US Dollar Index: 4490 non-null values
+2025-03-04 16:25:43,670 - data_pipeline - INFO - OUTPUT:   - currency Gold Futures: 4490 non-null values
+2025-03-04 16:25:43,787 - data_pipeline - INFO - OUTPUT:   - BTC/USD: 4490 non-null values
+2025-03-04 16:25:43,835 - data_pipeline - INFO - OUTPUT:   - Gold/BTC Ratio: 4490 non-null values
+2025-03-04 16:25:43,947 - data_pipeline - INFO - OUTPUT:   - fear FearGreedValue: 4490 non-null values
+2025-03-04 16:25:44,100 - data_pipeline - INFO - OUTPUT:     Fear/Greed data by year:
+2025-03-04 16:25:44,272 - data_pipeline - INFO - OUTPUT:       - 2012: values range from 15.0 to 26.0
+2025-03-04 16:25:44,321 - data_pipeline - INFO - OUTPUT:       - 2013: values range from 15.0 to 26.0
+2025-03-04 16:25:44,329 - data_pipeline - INFO - OUTPUT:       - 2014: values range from 15.0 to 26.0
+2025-03-04 16:25:44,450 - data_pipeline - INFO - OUTPUT:       - 2015: values range from 15.0 to 26.0
+2025-03-04 16:25:44,459 - data_pipeline - INFO - OUTPUT:       - 2016: values range from 15.0 to 26.0
+2025-03-04 16:25:44,490 - data_pipeline - INFO - OUTPUT:       - 2017: values range from 15.0 to 26.0
+2025-03-04 16:25:44,522 - data_pipeline - INFO - OUTPUT:       - 2018: values range from 15.0 to 26.0
+2025-03-04 16:25:44,595 - data_pipeline - INFO - OUTPUT:       - 2019: values range from 15.0 to 26.0
+2025-03-04 16:25:44,611 - data_pipeline - INFO - OUTPUT:       - 2020: values range from 15.0 to 26.0
+2025-03-04 16:25:44,647 - data_pipeline - INFO - OUTPUT:       - 2021: values range from 15.0 to 26.0
+2025-03-04 16:25:44,695 - data_pipeline - INFO - OUTPUT:       - 2022: values range from 6.0 to 47.0
+2025-03-04 16:25:44,699 - data_pipeline - INFO - OUTPUT:       - 2023: values range from 25.0 to 75.0
+2025-03-04 16:25:44,707 - data_pipeline - INFO - OUTPUT:       - 2024: values range from 17.0 to 94.0
+2025-03-04 16:25:44,761 - data_pipeline - INFO - OUTPUT:       - 2025: values range from 10.0 to 84.0
+2025-03-04 16:25:44,825 - data_pipeline - INFO - OUTPUT:     Note: Data before 2022 is filled with placeholder values
+2025-03-04 16:25:44,835 - data_pipeline - INFO - OUTPUT:   - onchain Active Addresses: 4490 non-null values
+2025-03-04 16:25:44,866 - data_pipeline - INFO - OUTPUT:   - onchain Transaction Count: 4490 non-null values
+2025-03-04 16:25:44,887 - data_pipeline - INFO - OUTPUT:   - onchain Mempool Size: 4490 non-null values
+2025-03-04 16:25:44,955 - data_pipeline - INFO - OUTPUT:   - onchain Hash Rate (GH/s): 4490 non-null values
+2025-03-04 16:25:45,048 - data_pipeline - INFO - OUTPUT:   - onchain Mining Difficulty: 4490 non-null values
+2025-03-04 16:25:45,327 - data_pipeline - INFO - OUTPUT:   - onchain Transaction Fees (BTC): 4490 non-null values
+2025-03-04 16:25:45,398 - data_pipeline - INFO - OUTPUT:   - onchain Median Confirmation Time (min): 4490 non-null values
+2025-03-04 16:25:45,511 - data_pipeline - INFO - Script C:\Users\aws.admin\OneDrive - Leeds Trinity University\Documents\LocalProjects\Msc-COM7003-AI-Model\AI_Gen_Code\data_processing\combining\filter_combined_dataset.py completed successfully
+2025-03-04 16:25:45,543 - data_pipeline - INFO - 
+================================================================================
+2025-03-04 16:25:45,645 - data_pipeline - INFO - COMPLETE DATA PROCESSING PIPELINE EXECUTED SUCCESSFULLY!
+2025-03-04 16:25:45,694 - data_pipeline - INFO - ================================================================================

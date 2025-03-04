@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from datetime import datetime
+import argparse
 
 # Set the seaborn style for better visualizations
 sns.set(style="whitegrid")
@@ -161,8 +162,12 @@ def create_scatter_plots(df, output_dir, n_top_pairs=5):
             plt.grid(True, alpha=0.3)
             plt.tight_layout()
             
-            # Save the figure
-            output_path = os.path.join(output_dir, f'scatter_{col1}_vs_{col2}.png')
+            # Create safe filenames by replacing special characters
+            safe_col1 = col1.replace(" ", "_").replace("(", "").replace(")", "").replace("/", "_")
+            safe_col2 = col2.replace(" ", "_").replace("(", "").replace(")", "").replace("/", "_") 
+            
+            # Save the figure with safe filenames
+            output_path = os.path.join(output_dir, f'scatter_{safe_col1}_vs_{safe_col2}.png')
             plt.savefig(output_path, dpi=300, bbox_inches='tight')
             plt.close()
             
@@ -178,14 +183,14 @@ def create_scatter_plots(df, output_dir, n_top_pairs=5):
             pairplot.fig.suptitle('Pairwise Relationships Between Top Correlated Features', 
                                   y=1.02, fontsize=16)
             
-            # Save the figure
-            output_path = os.path.join(output_dir, 'top_features_pairplot.png')
-            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            # Save the pairplot
+            output_path = os.path.join(output_dir, 'pairplot_top_features.png')
+            pairplot.savefig(output_path, dpi=300, bbox_inches='tight')
             plt.close()
             
             print(f"Pairplot saved to {output_path}")
     else:
-        print("No correlations found between features.")
+        print("No correlations found for scatter plots.")
 
 def analyze_price_relationships(df, output_dir):
     """Analyze relationships between price and other features using seaborn"""
@@ -285,8 +290,12 @@ def analyze_price_relationships(df, output_dir):
         joint_plot.fig.suptitle(f'Relationship between {price_col} and {top_feature}', 
                                y=1.02, fontsize=16)
         
-        # Save the figure
-        output_path = os.path.join(output_dir, f'jointplot_{price_col}_vs_{top_feature}.png')
+        # Create safe filenames by replacing special characters
+        safe_price_col = price_col.replace(" ", "_").replace("(", "").replace(")", "").replace("/", "_")
+        safe_top_feature = top_feature.replace(" ", "_").replace("(", "").replace(")", "").replace("/", "_")
+        
+        # Save the figure with safe filenames
+        output_path = os.path.join(output_dir, f'jointplot_{safe_price_col}_vs_{safe_top_feature}.png')
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close()
         
@@ -531,34 +540,51 @@ def plot_feature_distributions(df):
     
     print(f"Feature distribution analysis saved to {output_dir}")
 
-def run_all_analyses(df, file_name=""):
-    """Run all feature relationship analyses on the dataframe"""
-    print(f"\nAnalyzing feature relationships for: {file_name}\n")
+def run_all_analyses(df, output_dir='visualization_output', file_name=""):
+    """Run all visualization analyses"""
+    print(f"\nRunning feature relationship analyses on {file_name if file_name else 'data'}...")
     
-    # Run all analyses
-    create_correlation_matrix(df, 'visualization_output')
-    create_scatter_plots(df, 'visualization_output')
-    analyze_price_relationships(df, 'visualization_output')
-    plot_time_aligned_features(df)
-    plot_feature_distributions(df)
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+    print(f"Output will be saved to: {output_dir}")
     
-    print(f"\nFeature relationship analyses saved to the 'visualization_output' directory.")
+    create_correlation_matrix(df, output_dir)
+    create_scatter_plots(df, output_dir)
+    
+    # Try to identify price column and run price-specific analyses
+    analyze_price_relationships(df, output_dir)
+    
+    print(f"\nAll feature relationship analyses completed for {file_name if file_name else 'data'}")
+    print(f"Results saved to: {output_dir}")
 
 def main():
     """Main function to parse arguments and run analyses"""
-    if len(sys.argv) > 1:
-        file_path = sys.argv[1]
-        if os.path.exists(file_path):
-            df = load_data(file_path)
-            if df is not None:
-                run_all_analyses(df, os.path.basename(file_path))
-            else:
-                print(f"Failed to load data from {file_path}")
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description='Analyze feature relationships in a dataset')
+    parser.add_argument('file_path', help='Path to the CSV file to analyze')
+    parser.add_argument('--output_dir', default='visualization_output',
+                        help='Directory to save visualization outputs (default: visualization_output)')
+    
+    # Parse arguments
+    args = parser.parse_args()
+    
+    # Check if file exists
+    if os.path.exists(args.file_path):
+        print(f"\nAnalyzing feature relationships for: {os.path.basename(args.file_path)}")
+        
+        # Create output directory if it doesn't exist
+        os.makedirs(args.output_dir, exist_ok=True)
+        print(f"Output directory: {args.output_dir}")
+        
+        # Load the data
+        df = load_data(args.file_path)
+        if df is not None:
+            # Run all analyses with the specified output directory
+            run_all_analyses(df, args.output_dir, os.path.basename(args.file_path))
         else:
-            print(f"File not found: {file_path}")
+            print(f"Failed to load data from {args.file_path}")
     else:
-        print("Usage: python feature_relationships.py [csv_file_path]")
-        print("Example: python feature_relationships.py ../datasets/processed_exchanges/BTC_USD.csv")
+        print(f"File not found: {args.file_path}")
 
 if __name__ == "__main__":
     main() 
