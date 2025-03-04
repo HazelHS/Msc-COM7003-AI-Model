@@ -23,6 +23,7 @@ import argparse
 from statsmodels.tsa.stattools import adfuller, kpss
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from scipy import stats
+import re  # Add import for regex
 
 # Set the seaborn style for better visualizations
 sns.set(style="whitegrid")
@@ -904,253 +905,260 @@ def visualize_stationarity_tests(df, output_dir):
 
 def visualize_differencing(df, output_dir):
     """Visualize the effect of differencing on time series data"""
-    print("Visualizing differencing effects...")
+    print("Generating differencing visualizations...")
     
-    # Ensure output directory exists
+    # Make sure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
     
-    # Get numeric columns
-    numeric_df = df.select_dtypes(include=[np.number])
-    
-    if numeric_df.empty:
-        print("No numeric columns found for differencing visualization")
+    # Check if the dataframe has a date column
+    if 'Date' not in df.columns:
+        print("Warning: No 'Date' column found. Skipping differencing visualization.")
         return
     
-    # For each numeric column (limit to first 3)
-    for i, col in enumerate(numeric_df.columns[:3]):
+    # Set Date as index if it's not already
+    if not isinstance(df.index, pd.DatetimeIndex):
+        df = df.copy()
+        df['Date'] = pd.to_datetime(df['Date'])
+        df.set_index('Date', inplace=True)
+    
+    # Filter for numeric columns only
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    
+    for col in numeric_cols:
         try:
-            # Get series and create differences
-            series = numeric_df[col].dropna()
+            # Get a complete time series without missing values
+            series = df[col].dropna()
             
-            if len(series) < 10:
-                print(f"Not enough data for differencing visualization of {col}")
+            # Skip if too few data points
+            if len(series) < 30:
+                print(f"  Skipping {col}: insufficient data points")
                 continue
             
-            # Calculate first and second differences
-            diff1 = series.diff().dropna()
-            diff2 = diff1.diff().dropna()
-            
-            # Plot original and differenced series
-            fig, axes = plt.subplots(3, 1, figsize=(12, 15), sharex=True)
+            # Create the plot
+            fig, axes = plt.subplots(3, 1, figsize=(14, 12))
             
             # Original series
-            axes[0].plot(series.index, series.values, color='steelblue')
+            axes[0].plot(series.index, series.values)
             axes[0].set_title(f'Original Series: {col}', fontsize=14)
             axes[0].grid(True)
             
-            # First difference
-            axes[1].plot(diff1.index, diff1.values, color='orange')
-            axes[1].set_title(f'First Difference: {col}', fontsize=14)
+            # First differencing
+            diff1 = series.diff().dropna()
+            axes[1].plot(diff1.index, diff1.values)
+            axes[1].set_title('First Differencing', fontsize=14)
             axes[1].grid(True)
             
-            # Second difference
-            axes[2].plot(diff2.index, diff2.values, color='green')
-            axes[2].set_title(f'Second Difference: {col}', fontsize=14)
+            # Second differencing
+            diff2 = diff1.diff().dropna()
+            axes[2].plot(diff2.index, diff2.values)
+            axes[2].set_title('Second Differencing', fontsize=14)
             axes[2].grid(True)
             
-            # Format x-axis dates
-            plt.gcf().autofmt_xdate()
-            
-            # Save figure
             plt.tight_layout()
-            output_path = os.path.join(output_dir, f'differencing_{col}.png')
+            
+            # Sanitize column name for filename
+            safe_col_name = sanitize_filename(col)
+            
+            # Save the figure
+            output_path = os.path.join(output_dir, f'differencing_{safe_col_name}.png')
             plt.savefig(output_path, dpi=300, bbox_inches='tight')
             plt.close()
             
-            print(f"Differencing visualization for {col} saved to {output_path}")
+            # Also create ACF and PACF plots for each level of differencing
+            from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
             
-            # Also plot ACF and PACF for each
-            fig, axes = plt.subplots(3, 2, figsize=(15, 15))
+            fig, axes = plt.subplots(3, 2, figsize=(14, 12))
             
-            # Original series
-            plot_acf(series, ax=axes[0, 0], lags=30)
-            axes[0, 0].set_title(f'ACF: Original {col}', fontsize=12)
-            plot_pacf(series, ax=axes[0, 1], lags=30)
-            axes[0, 1].set_title(f'PACF: Original {col}', fontsize=12)
+            # Original ACF/PACF
+            plot_acf(series, ax=axes[0, 0], lags=40, alpha=0.05)
+            axes[0, 0].set_title(f'ACF - Original: {col}', fontsize=12)
             
-            # First difference
-            plot_acf(diff1, ax=axes[1, 0], lags=30)
-            axes[1, 0].set_title(f'ACF: First Difference {col}', fontsize=12)
-            plot_pacf(diff1, ax=axes[1, 1], lags=30)
-            axes[1, 1].set_title(f'PACF: First Difference {col}', fontsize=12)
+            plot_pacf(series, ax=axes[0, 1], lags=40, alpha=0.05)
+            axes[0, 1].set_title(f'PACF - Original: {col}', fontsize=12)
             
-            # Second difference
-            plot_acf(diff2, ax=axes[2, 0], lags=30)
-            axes[2, 0].set_title(f'ACF: Second Difference {col}', fontsize=12)
-            plot_pacf(diff2, ax=axes[2, 1], lags=30)
-            axes[2, 1].set_title(f'PACF: Second Difference {col}', fontsize=12)
+            # First differencing ACF/PACF
+            plot_acf(diff1, ax=axes[1, 0], lags=40, alpha=0.05)
+            axes[1, 0].set_title('ACF - First Differencing', fontsize=12)
             
-            # Save figure
+            plot_pacf(diff1, ax=axes[1, 1], lags=40, alpha=0.05)
+            axes[1, 1].set_title('PACF - First Differencing', fontsize=12)
+            
+            # Second differencing ACF/PACF
+            plot_acf(diff2, ax=axes[2, 0], lags=40, alpha=0.05)
+            axes[2, 0].set_title('ACF - Second Differencing', fontsize=12)
+            
+            plot_pacf(diff2, ax=axes[2, 1], lags=40, alpha=0.05)
+            axes[2, 1].set_title('PACF - Second Differencing', fontsize=12)
+            
             plt.tight_layout()
-            output_path = os.path.join(output_dir, f'differencing_acf_pacf_{col}.png')
+            
+            # Save the figure
+            output_path = os.path.join(output_dir, f'differencing_acf_pacf_{safe_col_name}.png')
             plt.savefig(output_path, dpi=300, bbox_inches='tight')
             plt.close()
-            
-            print(f"ACF/PACF for differencing of {col} saved to {output_path}")
             
         except Exception as e:
-            print(f"Error in differencing visualization for {col}: {e}")
+            print(f"  Error analyzing {col}: {str(e)}")
+    
+    print(f"Differencing visualizations saved to {output_dir}")
 
 def visualize_transformations(df, output_dir):
-    """Visualize common transformations for non-stationary data"""
-    print("Visualizing data transformations...")
+    """Visualize various transformations for stationarity"""
+    print("Generating transformations visualizations...")
     
-    # Ensure output directory exists
+    # Make sure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
     
-    # Get numeric columns
-    numeric_df = df.select_dtypes(include=[np.number])
-    
-    if numeric_df.empty:
-        print("No numeric columns found for transformation visualization")
+    # Check if the dataframe has a date column
+    if 'Date' not in df.columns:
+        print("Warning: No 'Date' column found. Skipping transformations visualization.")
         return
     
-    # For each numeric column (limit to first 3)
-    for i, col in enumerate(numeric_df.columns[:3]):
+    # Set Date as index if it's not already
+    if not isinstance(df.index, pd.DatetimeIndex):
+        df = df.copy()
+        df['Date'] = pd.to_datetime(df['Date'])
+        df.set_index('Date', inplace=True)
+    
+    # Filter for numeric columns only
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    
+    from scipy import stats
+    
+    for col in numeric_cols:
         try:
-            # Get series and ensure it's positive for log transform
-            series = numeric_df[col].dropna()
+            # Get a complete time series without missing values
+            series = df[col].dropna()
             
-            if len(series) < 10:
-                print(f"Not enough data for transformation visualization of {col}")
+            # Skip if too few data points
+            if len(series) < 30:
+                print(f"  Skipping {col}: insufficient data points")
                 continue
             
-            # Create transformations
-            # Log transform (handle zeros/negatives by adding min + 1 if needed)
-            min_val = series.min()
-            if min_val <= 0:
-                offset = abs(min_val) + 1
-                log_series = np.log(series + offset)
-                log_label = f'Log(x + {offset})'
-            else:
-                log_series = np.log(series)
-                log_label = 'Log(x)'
+            # Skip series with non-positive values
+            if (series <= 0).any():
+                print(f"  Skipping {col}: contains non-positive values")
+                continue
             
-            # Square root transform (handle negatives if needed)
-            if min_val < 0:
-                offset = abs(min_val) + 1
-                sqrt_series = np.sqrt(series + offset)
-                sqrt_label = f'Sqrt(x + {offset})'
-            else:
-                sqrt_series = np.sqrt(series)
-                sqrt_label = 'Sqrt(x)'
-            
-            # Box-Cox transform (only for positive values)
-            if min_val > 0:
-                # Try different lambda values
-                lambda_values = [-1, -0.5, 0, 0.5, 1]
-                boxcox_series = {}
-                
-                for lam in lambda_values:
-                    if lam == 0:
-                        # Lambda=0 is equivalent to log transform
-                        boxcox_series[lam] = np.log(series)
-                    else:
-                        boxcox_series[lam] = (series**lam - 1) / lam
-            
-            # Plot transformations
-            fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+            # Create the plot
+            fig, axes = plt.subplots(3, 2, figsize=(14, 12))
             
             # Original series
-            axes[0, 0].plot(series.index, series.values, color='steelblue')
-            axes[0, 0].set_title(f'Original Series: {col}', fontsize=14)
+            axes[0, 0].plot(series.index, series.values)
+            axes[0, 0].set_title(f'Original Series: {col}', fontsize=12)
             axes[0, 0].grid(True)
             
-            # Log transform
-            axes[0, 1].plot(series.index, log_series.values, color='orange')
-            axes[0, 1].set_title(f'{log_label} Transform', fontsize=14)
+            # Log transformation
+            log_series = np.log(series)
+            axes[0, 1].plot(log_series.index, log_series.values)
+            axes[0, 1].set_title('Log Transformation', fontsize=12)
             axes[0, 1].grid(True)
             
-            # Square root transform
-            axes[1, 0].plot(series.index, sqrt_series.values, color='green')
-            axes[1, 0].set_title(f'{sqrt_label} Transform', fontsize=14)
+            # Square root transformation
+            sqrt_series = np.sqrt(series)
+            axes[1, 0].plot(sqrt_series.index, sqrt_series.values)
+            axes[1, 0].set_title('Square Root Transformation', fontsize=12)
             axes[1, 0].grid(True)
             
-            # Box-Cox transform (if available)
-            if min_val > 0:
-                for lam, boxcox in boxcox_series.items():
-                    if lam == 0:
-                        # Skip lambda=0 as it's same as log transform
-                        continue
-                    axes[1, 1].plot(series.index, boxcox.values, label=f'λ={lam}')
-                
-                axes[1, 1].set_title('Box-Cox Transforms', fontsize=14)
-                axes[1, 1].legend()
-                axes[1, 1].grid(True)
-            else:
-                axes[1, 1].text(0.5, 0.5, 'Box-Cox transform unavailable for non-positive data', 
-                               ha='center', va='center', transform=axes[1, 1].transAxes)
-                axes[1, 1].set_title('Box-Cox Transform (Unavailable)', fontsize=14)
+            # Box-Cox transformation
+            boxcox_series, _ = stats.boxcox(series)
+            boxcox_series = pd.Series(boxcox_series, index=series.index)
+            axes[1, 1].plot(boxcox_series.index, boxcox_series.values)
+            axes[1, 1].set_title('Box-Cox Transformation', fontsize=12)
+            axes[1, 1].grid(True)
             
-            # Format x-axis dates
-            plt.gcf().autofmt_xdate()
+            # Difference of log transformation
+            diff_log = log_series.diff().dropna()
+            axes[2, 0].plot(diff_log.index, diff_log.values)
+            axes[2, 0].set_title('Difference of Log Transformation', fontsize=12)
+            axes[2, 0].grid(True)
             
-            # Save figure
+            # Percent change
+            pct_change = series.pct_change().dropna()
+            axes[2, 1].plot(pct_change.index, pct_change.values)
+            axes[2, 1].set_title('Percent Change', fontsize=12)
+            axes[2, 1].grid(True)
+            
             plt.tight_layout()
-            output_path = os.path.join(output_dir, f'transformations_{col}.png')
+            
+            # Sanitize column name for filename
+            safe_col_name = sanitize_filename(col)
+            
+            # Save the figure
+            output_path = os.path.join(output_dir, f'transformations_{safe_col_name}.png')
             plt.savefig(output_path, dpi=300, bbox_inches='tight')
             plt.close()
             
-            print(f"Transformation visualization for {col} saved to {output_path}")
-            
         except Exception as e:
-            print(f"Error in transformation visualization for {col}: {e}")
+            print(f"  Error analyzing {col}: {str(e)}")
+    
+    print(f"Transformation visualizations saved to {output_dir}")
 
 def visualize_rolling_statistics(df, output_dir):
-    """Visualize rolling mean and standard deviation to check for stationarity"""
-    print("Visualizing rolling statistics...")
+    """Visualize rolling mean and standard deviation"""
+    print("Generating rolling statistics visualizations...")
     
-    # Ensure output directory exists
+    # Make sure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
     
-    # Get numeric columns
-    numeric_df = df.select_dtypes(include=[np.number])
-    
-    if numeric_df.empty:
-        print("No numeric columns found for rolling statistics")
+    # Check if the dataframe has a date column
+    if 'Date' not in df.columns:
+        print("Warning: No 'Date' column found. Skipping rolling statistics visualization.")
         return
     
-    # For each numeric column (limit to first 3)
-    for i, col in enumerate(numeric_df.columns[:3]):
+    # Set Date as index if it's not already
+    if not isinstance(df.index, pd.DatetimeIndex):
+        df = df.copy()
+        df['Date'] = pd.to_datetime(df['Date'])
+        df.set_index('Date', inplace=True)
+    
+    # Filter for numeric columns only
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    
+    for col in numeric_cols:
         try:
-            # Get series 
-            series = numeric_df[col].dropna()
+            # Get a complete time series without missing values
+            series = df[col].dropna()
             
-            if len(series) < 10:
-                print(f"Not enough data for rolling statistics of {col}")
+            # Skip if too few data points
+            if len(series) < 60:  # Need enough points for rolling window
+                print(f"  Skipping {col}: insufficient data points")
                 continue
             
-            # Calculate window size - at least 10, at most 1/4 of series length
-            window = max(10, min(30, len(series) // 4))
-            
             # Calculate rolling statistics
-            rolling_mean = series.rolling(window=window).mean()
-            rolling_std = series.rolling(window=window).std()
+            rolling_mean = series.rolling(window=30).mean()
+            rolling_std = series.rolling(window=30).std()
             
-            # Plot the series and rolling statistics
-            plt.figure(figsize=(12, 8))
+            # Create the plot
+            plt.figure(figsize=(14, 8))
             
-            plt.plot(series.index, series.values, label='Original', color='blue')
-            plt.plot(rolling_mean.index, rolling_mean.values, label=f'Rolling Mean ({window} periods)', color='red')
-            plt.plot(rolling_std.index, rolling_std.values, label=f'Rolling STD ({window} periods)', color='green')
+            # Original series
+            plt.plot(series.index, series.values, label='Original', linewidth=1)
             
-            plt.title(f'Rolling Statistics: {col}', fontsize=16)
-            plt.legend()
+            # Rolling mean
+            plt.plot(rolling_mean.index, rolling_mean.values, label='Rolling Mean (30)', color='red', linewidth=2)
+            
+            # Rolling standard deviation
+            plt.plot(rolling_std.index, rolling_std.values, label='Rolling Std (30)', color='green', linewidth=2)
+            
+            plt.title(f'Rolling Statistics: {col}', fontsize=14)
+            plt.legend(loc='best')
             plt.grid(True)
             
-            # Format x-axis dates
-            plt.gcf().autofmt_xdate()
-            
-            # Save figure
             plt.tight_layout()
-            output_path = os.path.join(output_dir, f'rolling_statistics_{col}.png')
+            
+            # Sanitize column name for filename
+            safe_col_name = sanitize_filename(col)
+            
+            # Save the figure
+            output_path = os.path.join(output_dir, f'rolling_statistics_{safe_col_name}.png')
             plt.savefig(output_path, dpi=300, bbox_inches='tight')
             plt.close()
             
-            print(f"Rolling statistics for {col} saved to {output_path}")
-            
         except Exception as e:
-            print(f"Error in rolling statistics for {col}: {e}")
+            print(f"  Error analyzing {col}: {str(e)}")
+    
+    print(f"Rolling statistics visualizations saved to {output_dir}")
 
 def main():
     """Main function to parse arguments and run visualizations"""

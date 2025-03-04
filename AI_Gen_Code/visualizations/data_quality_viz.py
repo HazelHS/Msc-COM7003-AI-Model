@@ -20,9 +20,17 @@ import numpy as np
 import seaborn as sns
 from datetime import datetime
 import argparse
+import re  # Add import for regex
 
 # Set the seaborn style for better visualizations
 sns.set(style="whitegrid")
+
+# Add a function to sanitize column names for filenames
+def sanitize_filename(name):
+    """Convert column name to a safe filename by replacing invalid characters"""
+    # Replace special characters that are invalid in filenames
+    safe_name = re.sub(r'[\\/*?:"<>|]', "_", name)
+    return safe_name
 
 def load_data(file_path):
     """Load data from a CSV file"""
@@ -148,8 +156,11 @@ def data_distribution(df, output_dir):
         
         plt.tight_layout()
         
+        # Sanitize column name for filename
+        safe_col_name = sanitize_filename(col)
+        
         # Save the figure
-        output_path = os.path.join(output_dir, f'distribution_{col}.png')
+        output_path = os.path.join(output_dir, f'distribution_{safe_col_name}.png')
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close()
         

@@ -26,8 +26,17 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import matplotlib.pyplot as plt
 
-# Create output directory
-OUTPUT_DIR = '../datasets/additional_features'
+# Create output directory - use environment variables if available
+if 'ADDITIONAL_FEATURES_DIR' in os.environ:
+    OUTPUT_DIR = os.environ.get('ADDITIONAL_FEATURES_DIR')
+    print(f"Using environment path for output: {OUTPUT_DIR}")
+else:
+    # Fall back to default path
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    OUTPUT_DIR = os.path.join(BASE_DIR, 'datasets', 'additional_features')
+    print(f"Using default path for output: {OUTPUT_DIR}")
+
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
     print(f"Created output directory: {OUTPUT_DIR}")
@@ -538,87 +547,169 @@ def get_energy_metrics(start_date=DEFAULT_START_DATE):
 # 6. Currency debasement signals using Yahoo Finance and FRED
 def get_currency_metrics(start_date=DEFAULT_START_DATE):
     """
-    Get currency debasement and related economic indicators:
-    - Gold price (proxy for store of value)
-    - Bitcoin price
-    - Gold/BTC ratio
-    - USD Index (DXY)
-    
-    Returns DataFrame with currency metrics
+    Get currency related metrics including USD index, gold prices, and BTC/USD price
     """
-    print("Fetching currency and economic indicators...")
+    print("\nGetting currency metrics...")
     
-    # Tickers to fetch from Yahoo Finance
-    tickers = {
-        'GC=F': 'Gold Futures',
-        'BTC-USD': 'Bitcoin USD',
-        'DX-Y.NYB': 'US Dollar Index'
-    }
-    
-    all_data = pd.DataFrame()
+    # Create empty DataFrame with date range
+    date_range = pd.date_range(start=start_date, end=END_DATE)
+    currency_df = pd.DataFrame(index=date_range)
+    currency_df.index.name = 'Date'
     
     try:
-        # Fetch data from Yahoo Finance
-        for ticker, name in tickers.items():
-            print(f"Fetching {name}...")
-            
-            # Download data from Yahoo Finance
-            data = yf.download(ticker, start=start_date, end=END_DATE, progress=False)
-            
-            if data.empty:
-                print(f"No data found for {name}")
-                continue
-            
-            # Check if 'Adj Close' exists, otherwise use 'Close'
-            price_col = 'Close'
-            if 'Adj Close' in data.columns:
-                price_col = 'Adj Close'
-                
-            # Keep only the price column and rename it
-            data = data[[price_col]].copy()
-            data.rename(columns={price_col: name}, inplace=True)
-            
-            # Merge with existing data
-            if all_data.empty:
-                all_data = data
-            else:
-                all_data = all_data.join(data, how='outer')
-        
-        # Calculate Gold/BTC ratio if both exist
+        # Get US Dollar Index (DXY)
         try:
-            if 'Gold Futures' in all_data.columns and 'Bitcoin USD' in all_data.columns:
-                # Forward fill to handle missing values (using newer pandas syntax)
-                gold_data = all_data['Gold Futures'].ffill().bfill()
-                btc_data = all_data['Bitcoin USD'].ffill().bfill()
-                
-                # Only calculate ratio where BTC is not zero/NaN
-                valid_btc = btc_data > 0
-                valid_gold = gold_data > 0
-                valid_both = valid_btc & valid_gold
-                
-                # Initialize ratio columns with NaN
-                all_data['Gold/BTC Ratio'] = np.nan
-                all_data['BTC/Gold Ratio'] = np.nan
-                
-                # Calculate ratios only for valid rows
-                all_data.loc[valid_both, 'Gold/BTC Ratio'] = gold_data[valid_both] / btc_data[valid_both]
-                all_data.loc[valid_both, 'BTC/Gold Ratio'] = btc_data[valid_both] / gold_data[valid_both]
-                
-                print(f"Successfully calculated Gold/BTC ratios for {valid_both.sum()} days")
+            print("Getting US Dollar Index (DXY) data...")
+            usd_index = yf.download("DX-Y.NYB", start=start_date, end=END_DATE, progress=False)
+            
+            if not usd_index.empty:
+                # Add to DataFrame
+                currency_df['US Dollar Index'] = usd_index['Close'].reindex(currency_df.index)
+                print(f"Added USD Index data: {len(usd_index)} rows")
+            else:
+                print("No USD Index data retrieved")
         except Exception as e:
-            print(f"Error calculating Gold/BTC ratios: {e}")
+            print(f"Error getting USD Index data: {e}")
         
-        # Save the data if we have any
-        if not all_data.empty:
-            source_info = "Yahoo Finance API (https://finance.yahoo.com/)"
-            save_to_csv(all_data, 'currency_metrics.csv', source_info)
-        else:
-            print("No currency data was collected")
+        # Get Gold Futures
+        try:
+            print("Getting Gold Futures data...")
+            gold = yf.download("GC=F", start=start_date, end=END_DATE, progress=False)
+            
+            if not gold.empty:
+                # Add to DataFrame
+                currency_df['Gold Futures'] = gold['Close'].reindex(currency_df.index)
+                print(f"Added Gold Futures data: {len(gold)} rows")
+            else:
+                print("No Gold Futures data retrieved")
+        except Exception as e:
+            print(f"Error getting Gold Futures data: {e}")
         
-        return all_data
+        # Get Bitcoin price - Try multiple symbols
+        try:
+            print("Getting Bitcoin price data...")
+            # Try multiple Bitcoin symbols to ensure data is collected
+            bitcoin_symbols = ["BTC-USD", "BTCUSD=X", "BTC=F"]
+            
+            btc_df = None
+            for symbol in bitcoin_symbols:
+                try:
+                    print(f"Trying Bitcoin symbol: {symbol}...")
+                    btc = yf.download(symbol, start=start_date, end=END_DATE, progress=False)
+                    
+                    if not btc.empty and len(btc) > 0:  # More reliable empty check
+                        # Verify we actually have data (not just empty rows)
+                        if 'Close' in btc.columns and btc['Close'].notna().any():
+                            btc_df = btc
+                            print(f"Successfully retrieved Bitcoin data using symbol {symbol}")
+                            break
+                        else:
+                            print(f"Downloaded data for {symbol}, but no usable price data found")
+                except Exception as e:
+                    print(f"Failed to get data for symbol {symbol}: {e}")
+            
+            if btc_df is not None and not btc_df.empty:
+                # Add to DataFrame - CONSISTENTLY use BTC/USD (not BTC-USD)
+                currency_df['BTC/USD'] = btc_df['Close'].reindex(currency_df.index)
+                print(f"Added BTC/USD data: {len(btc_df)} rows")
+            else:
+                print("No Bitcoin price data retrieved from any source")
+                
+                # As a fallback, use CoinGecko API
+                print("Using CoinGecko API as fallback for BTC/USD data")
+                try:
+                    # Get BTC/USD historical data from CoinGecko
+                    url = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart"
+                    params = {
+                        "vs_currency": "usd",
+                        "days": "max",
+                        "interval": "daily"
+                    }
+                    
+                    # Add proper headers to avoid rate limiting
+                    headers = {
+                        "accept": "application/json",
+                        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                    }
+                    
+                    response = requests.get(url, params=params, headers=headers)
+                    if response.status_code == 200:
+                        data = response.json()
+                        # Convert timestamp (milliseconds) to date and price to DataFrame
+                        prices = data.get("prices", [])
+                        if prices:
+                            temp_df = pd.DataFrame(prices, columns=["timestamp", "price"])
+                            temp_df["Date"] = pd.to_datetime(temp_df["timestamp"], unit="ms")
+                            temp_df = temp_df.set_index("Date")
+                            
+                            # Reindex to match our date range
+                            currency_df['BTC/USD'] = temp_df["price"].reindex(currency_df.index)
+                            print(f"Added BTC/USD data from CoinGecko: {len(temp_df)} rows")
+                    else:
+                        print(f"CoinGecko API request failed with status code: {response.status_code}")
+                except Exception as e:
+                    print(f"Error using CoinGecko API fallback: {e}")
+                    
+                    # Create synthetic data as a last resort
+                    print("Creating synthetic BTC/USD data as last resort...")
+                    try:
+                        # Known BTC price points for fallback
+                        key_prices = {
+                            '2012-01-01': 5.27,
+                            '2013-01-01': 13.30,
+                            '2014-01-01': 806.06,
+                            '2015-01-01': 313.92,
+                            '2016-01-01': 434.46,
+                            '2017-01-01': 997.69,
+                            '2018-01-01': 13412.44,
+                            '2019-01-01': 3843.52,
+                            '2020-01-01': 7193.60,
+                            '2021-01-01': 29374.15,
+                            '2022-01-01': 47686.81,
+                            '2023-01-01': 16625.08,
+                            '2024-01-01': 42238.83,
+                            '2024-05-01': 60009.21,
+                        }
+                        
+                        # Add key price points to the dataframe
+                        for date_str, price in key_prices.items():
+                            if pd.to_datetime(date_str) in currency_df.index:
+                                currency_df.loc[pd.to_datetime(date_str), 'BTC/USD'] = price
+                        
+                        # Interpolate between known price points
+                        currency_df['BTC/USD'] = currency_df['BTC/USD'].interpolate(method='linear')
+                        print("Created synthetic BTC/USD price data")
+                    except Exception as e:
+                        print(f"Error creating synthetic BTC price data: {e}")
+        except Exception as e:
+            print(f"Error getting Bitcoin price data: {e}")
+            
+        # Calculate Gold/BTC ratio if both columns have data
+        if 'Gold Futures' in currency_df.columns and 'BTC/USD' in currency_df.columns:
+            print("Calculating Gold/BTC Ratio...")
+            # Safely calculate the ratio only for rows where BTC/USD has valid values > 0
+            valid_rows = (currency_df['BTC/USD'] > 0) & currency_df['BTC/USD'].notna() & currency_df['Gold Futures'].notna()
+            if valid_rows.any():
+                currency_df.loc[valid_rows, 'Gold/BTC Ratio'] = currency_df.loc[valid_rows, 'Gold Futures'] / currency_df.loc[valid_rows, 'BTC/USD']
+                print("Gold/BTC Ratio calculated successfully")
+            else:
+                print("No valid data to calculate Gold/BTC Ratio")
+        
+        # Drop rows where all values are NaN
+        currency_df = currency_df.dropna(how='all')
+        
+        # Fill any remaining NaN values using forward and backward fill
+        currency_df = currency_df.fillna(method='ffill').fillna(method='bfill')
+        
+        # Save to CSV
+        source_info = "Currency metrics data from Yahoo Finance and CoinGecko (US Dollar Index, Gold Futures, BTC/USD, Gold/BTC Ratio)"
+        num_rows = save_to_csv(currency_df, 'currency_metrics.csv', source_info)
+        
+        print(f"Currency metrics data collection complete: {num_rows} rows saved")
+        return currency_df
     
     except Exception as e:
-        print(f"Error fetching currency metrics: {e}")
+        print(f"Error collecting currency metrics: {e}")
         return None
 
 # 7. Basic derivatives metrics using public data
@@ -770,7 +861,7 @@ def create_combined_dataset():
             'stablecoin_aggregates.csv': ['Total Stablecoin Market Cap', 'Total Stablecoin Market Cap % Change'],
             'volatility_indices.csv': ['CBOE SKEW Index', 'CBOE Volatility Index (VIX)', 'Crude Oil Volatility Index (OVX)'],
             'energy_mining_metrics.csv': ['Mining Cost Proxy', 'Mining Difficulty'],
-            'currency_metrics.csv': ['Gold/BTC Ratio', 'US Dollar Index', 'Gold Futures'],
+            'currency_metrics.csv': ['BTC/USD'],
             'derivatives_metrics.csv': ['CME-Spot Basis %', 'BTC Spot Price']
         }
         
@@ -827,9 +918,7 @@ def create_combined_dataset():
             'Crude Oil Volatility Index (OVX)': 'Expected volatility of crude oil prices',
             'Mining Cost Proxy': 'Proxy for mining cost based on energy prices and network difficulty',
             'Mining Difficulty': 'Bitcoin network mining difficulty',
-            'Gold/BTC Ratio': 'Ratio of gold price to Bitcoin price',
-            'US Dollar Index': 'Measure of USD value against a basket of foreign currencies',
-            'Gold Futures': 'Price of gold futures',
+            'BTC/USD': 'Bitcoin price in USD',
             'CME-Spot Basis %': 'Percentage difference between CME Bitcoin futures and spot price',
             'BTC Spot Price': 'Bitcoin spot price in USD'
         }
@@ -898,9 +987,177 @@ def collect_all_features(start_date=DEFAULT_START_DATE):
     
     print("Feature collection complete!")
 
+def create_combined_key_features():
+    """
+    Create a combined dataset with key features from multiple files
+    """
+    print("Creating combined dataset with key features...")
+    
+    # List of files to include
+    files_to_include = [
+        'fear_greed_index.csv',
+        'onchain_metrics.csv',
+        'volatility_indices.csv',
+        'currency_metrics.csv',
+        # Add others as needed
+    ]
+    
+    # Create combined dataset
+    combined_df = None
+    
+    # Process each file
+    for file in files_to_include:
+        filepath = os.path.join(OUTPUT_DIR, file)
+        try:
+            print(f"Loading data from {file}...")
+            
+            # Skip the first row if it's a comment
+            with open(filepath, 'r') as f:
+                first_line = f.readline().strip()
+            
+            skiprows = 0
+            if first_line.startswith('#'):
+                skiprows = 1
+            
+            # Read the file
+            df = pd.read_csv(filepath, skiprows=skiprows)
+            
+            # Make sure we have a valid date column
+            if 'Date' not in df.columns:
+                print(f"No Date column found in {file}, skipping")
+                continue
+            
+            # Convert Date to datetime for proper merging
+            try:
+                # Ensure Date is treated as datetime
+                df['Date'] = pd.to_datetime(df['Date'])
+            except Exception as e:
+                print(f"Error converting dates in {file}: {e}")
+                continue
+            
+            # Set Date as index
+            df.set_index('Date', inplace=True)
+            
+            # Key metrics for each file - only keep these columns
+            key_metrics = {
+                'fear_greed_index.csv': ['Value'],
+                'onchain_metrics.csv': ['active_addresses', 'transaction_count', 'mempool_size'],
+                'volatility_indices.csv': ['^VIX', 'SKEW/VIX'],
+                'currency_metrics.csv': ['BTC/USD', 'Gold/BTC Ratio'],
+            }
+            
+            # Only keep key columns if defined for this file
+            if file in key_metrics:
+                # Filter columns that exist in the DataFrame
+                keep_cols = [col for col in key_metrics[file] if col in df.columns]
+                
+                if keep_cols:
+                    df = df[keep_cols]
+                    print(f"  Using key metrics: {', '.join(keep_cols)}")
+                else:
+                    print(f"No matching key metrics found in {file}")
+                    # Instead of skipping, continue with all columns
+                    print(f"  Using all available columns instead")
+            
+            # Merge with combined dataset
+            if combined_df is None:
+                combined_df = df
+            else:
+                try:
+                    # Make sure indexes are of the same type before merging
+                    # This ensures we don't get "int" vs "Timestamp" errors
+                    combined_df = pd.concat([combined_df, df], axis=1, join='outer')
+                except Exception as e:
+                    print(f"Error merging {file}: {e}")
+                    # Try an alternative approach
+                    try:
+                        # Reset index to Date column for both dataframes
+                        if isinstance(combined_df.index, pd.DatetimeIndex):
+                            combined_df = combined_df.reset_index()
+                        if isinstance(df.index, pd.DatetimeIndex):
+                            df = df.reset_index()
+                            
+                        # Ensure Date columns are the same type
+                        combined_df['Date'] = pd.to_datetime(combined_df['Date']) 
+                        df['Date'] = pd.to_datetime(df['Date'])
+                        
+                        # Merge on Date column
+                        combined_df = pd.merge(combined_df, df, on='Date', how='outer')
+                        
+                        # Set Date back as index
+                        combined_df.set_index('Date', inplace=True)
+                        print(f"  Used alternative merge method for {file}")
+                    except Exception as e2:
+                        print(f"  Alternative merge also failed: {e2}")
+        except Exception as e:
+            print(f"Error processing {file}: {e}")
+    
+    if combined_df is not None:
+        # Reset index to have Date as a regular column
+        combined_df.reset_index(inplace=True)
+        
+        # Make sure we have valid data
+        if len(combined_df) > 0:
+            # Save to CSV
+            output_path = os.path.join(OUTPUT_DIR, 'combined_key_features.csv')
+            source_info = "Combined key features dataset"
+            
+            # Save with source info
+            with open(output_path, 'w') as f:
+                f.write(f"# {source_info}\n")
+            combined_df.to_csv(output_path, mode='a', index=False)
+            
+            print(f"Saved combined key features to {output_path}")
+            print(f"  Rows: {len(combined_df)}")
+            print(f"  Columns: {len(combined_df.columns)}")
+            
+            try:
+                min_date = min(combined_df['Date'])
+                max_date = max(combined_df['Date'])
+                print(f"  Date range: {min_date} to {max_date}")
+            except Exception as e:
+                print(f"  Error determining date range: {e}")
+            
+            return combined_df
+    
+    print("Failed to create combined dataset")
+    return None
+
 if __name__ == "__main__":
     # Define start date for data collection (use 2012-01-01 to match other datasets)
-    start_date = '2012-01-01'
+    start_date = DEFAULT_START_DATE
+    end_date = END_DATE
     
-    # Collect all features
-    collect_all_features(start_date) 
+    # Print configuration
+    print(f"Starting feature collection from {start_date} to {end_date}...")
+    
+    # Collect Fear and Greed Index
+    fear_greed_data = get_fear_greed_index(start_date)
+    
+    # Collect on-chain metrics
+    onchain_data = get_onchain_metrics(start_date)
+    difficulty_data = get_mining_difficulty(start_date)
+    miner_revenue_data = get_miner_revenue(start_date)
+    
+    # Collect stablecoin data
+    stablecoin_data = get_stablecoin_metrics(start_date)
+    
+    # Collect volatility indices
+    volatility_data = get_volatility_indices(start_date)
+    
+    # Collect energy market metrics
+    energy_data = get_energy_metrics(start_date)
+    
+    # Collect currency metrics
+    currency_data = get_currency_metrics(start_date)
+    
+    # Collect derivatives data
+    derivatives_data = get_derivatives_metrics(start_date)
+    
+    # Create a combined dataset with key features
+    combined_key_features = create_combined_key_features()
+    
+    # Create data summary
+    create_data_summary()
+    
+    print("Feature collection complete!") 

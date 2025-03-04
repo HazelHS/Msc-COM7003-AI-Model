@@ -52,7 +52,11 @@ COLLECTION_SCRIPTS = {
         os.path.join(SCRIPT_DIR, 'get_exchange_data_simple.py')
     ],
     'features': [
-        os.path.join(SCRIPT_DIR, 'collect_individual_features.py')
+        os.path.join(SCRIPT_DIR, 'crypto_features_collector.py'),
+        os.path.join(SCRIPT_DIR, 'update_currency_metrics.py')
+    ],
+    'validation': [
+        os.path.join(SCRIPT_DIR, 'validation.py')
     ]
 }
 

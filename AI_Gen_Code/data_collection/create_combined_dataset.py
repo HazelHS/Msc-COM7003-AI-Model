@@ -21,24 +21,36 @@ import re
 def main():
     print("Starting creation of combined dataset for AI training...")
     
-    # Base path for datasets
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    datasets_path = os.path.join(base_dir, "datasets")
+    # Base path for datasets - use environment variables if available
+    if 'DATASETS_DIR' in os.environ and 'COMBINED_DATASET_DIR' in os.environ:
+        base_dir = os.environ.get('DATASETS_DIR')
+        combined_dir = os.environ.get('COMBINED_DATASET_DIR')
+        print(f"Using environment variables for paths:")
+        print(f"  DATASETS_DIR: {base_dir}")
+        print(f"  COMBINED_DATASET_DIR: {combined_dir}")
+    else:
+        # Fall back to default paths
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        datasets_path = os.path.join(base_dir, "datasets")
+        base_dir = datasets_path
+        combined_dir = os.path.join(datasets_path, "combined_dataset")
+        print(f"Using default paths:")
+        print(f"  Base directory: {base_dir}")
+        print(f"  Combined directory: {combined_dir}")
     
     # Create combined dataset directory if it doesn't exist
-    combined_dir = os.path.join(datasets_path, "combined_dataset")
     os.makedirs(combined_dir, exist_ok=True)
-    print(f"Created output directory: {combined_dir}")
+    print(f"Ensured output directory exists: {combined_dir}")
     
     # Create the output DataFrame with Date column
     final_df = pd.DataFrame()
     
     # Process exchange data files
     exchange_files = []
-    exchange_dir = os.path.join(datasets_path, "processed_exchanges")
+    exchange_dir = os.path.join(base_dir, "processed_exchanges")
     if os.path.exists(exchange_dir):
         exchange_files = [f for f in glob.glob(os.path.join(exchange_dir, "*.csv")) 
-                        if "validated" in f and not "all_indices" in f]  # Exclude all_indices files
+                        if ("processed" in f or "validated" in f) and not "all_indices" in f]  # Include processed files, exclude all_indices
     print(f"Found {len(exchange_files)} exchange files to process")
     
     print("\nProcessing exchange data files...")
@@ -74,6 +86,11 @@ def main():
                     # Add column with exchange prefix
                     column_name = f"{exchange_symbol} {col}"
                     exchange_df[column_name] = df[col]
+                elif col == 'Adj Close' and 'Close' in df.columns:
+                    # If Adj Close is missing but Close exists, use Close value as Adj Close
+                    column_name = f"{exchange_symbol} {col}"
+                    exchange_df[column_name] = df['Close']
+                    print(f"  Using Close as {column_name} (Adj Close not in source data)")
                 else:
                     # Add empty column with exchange prefix
                     column_name = f"{exchange_symbol} {col}"
@@ -99,7 +116,7 @@ def main():
     
     # Process additional features
     additional_features_files = []
-    features_dir = os.path.join(datasets_path, "additional_features")
+    features_dir = os.path.join(base_dir, "additional_features")
     if os.path.exists(features_dir):
         # Use non-validated files for additional features since they contain the Date column
         additional_features_files = [f for f in glob.glob(os.path.join(features_dir, "*.csv")) 
@@ -130,6 +147,15 @@ def main():
                 # Read the file
                 df = pd.read_csv(file_path, skiprows=skiprows)
                 
+                # Commented out: We want to keep the Gold/BTC Ratio column
+                # For currency_metrics.csv specifically, remove Gold/BTC Ratio and BTC/Gold Ratio columns
+                # if 'currency_metrics.csv' in file_path.lower():
+                #     columns_to_remove = ['Gold/BTC Ratio', 'BTC/Gold Ratio']
+                #     for col in columns_to_remove:
+                #         if col in df.columns:
+                #             df = df.drop(columns=[col])
+                #             print(f"  Removed {col} column from {file_name}")
+                
                 # Check if there is a Date column
                 if 'Date' in df.columns:
                     # Create a new DataFrame with date column for this feature
@@ -139,8 +165,19 @@ def main():
                     # Add each column with feature prefix
                     for col in df.columns:
                         if col != 'Date':  # Skip Date as it's already added
-                            # Add column with feature prefix
-                            column_name = f"{feature_type} {col}"
+                            # Skip "Miner Revenue (USD)" column
+                            if col == "Miner Revenue (USD)":
+                                print(f"  Skipping {col} column as requested")
+                                continue
+                                
+                            # Special case for BTC/USD and Gold/BTC Ratio columns to not modify their names
+                            if 'currency_metrics.csv' in file_path.lower() and (col == 'BTC/USD' or col == 'Gold/BTC Ratio'):
+                                # Use original column name without feature prefix
+                                column_name = col
+                                print(f"  Adding special column {col} without prefix")
+                            else:
+                                # Add column with feature prefix
+                                column_name = f"{feature_type} {col}"
                             feature_df[column_name] = df[col]
                     
                     # Merge with the current output
@@ -178,6 +215,14 @@ def main():
     # Save the output
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     output_path = os.path.join(combined_dir, f"combined_dataset_{timestamp}.csv")
+    
+    # Remove columns containing "Currency" before saving
+    print("\nRemoving Currency columns...")
+    currency_columns = [col for col in final_df.columns if 'Currency' in col]
+    if currency_columns:
+        print(f"  Removing {len(currency_columns)} Currency columns: {', '.join(currency_columns)}")
+        final_df = final_df.drop(columns=currency_columns)
+    
     final_df.to_csv(output_path, index=False)
     
     # Also save a static version

@@ -22,6 +22,7 @@ import calendar
 import argparse
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+import re  # Add import for regex
 
 # Set the seaborn style for better visualizations
 sns.set(style="whitegrid")
@@ -578,199 +579,251 @@ def visualize_time_series(df, output_dir):
     
     print(f"Time series visualization saved to {output_path}")
 
+def sanitize_filename(name):
+    """Convert column name to a safe filename by replacing invalid characters"""
+    # Replace special characters that are invalid in filenames
+    safe_name = re.sub(r'[\\/*?:"<>|]', "_", name)
+    return safe_name
+
 def visualize_seasonal_decomposition(df, output_dir):
-    """Visualize seasonal decomposition of time series data"""
-    print("Generating seasonal decomposition visualization...")
+    """Visualize the seasonal decomposition of time series"""
+    print("Generating seasonal decomposition visualizations...")
     
-    # Ensure output directory exists
+    # Make sure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
     
-    # Only plot numeric columns
-    numeric_df = df.select_dtypes(include=[np.number])
-    
-    if numeric_df.empty:
-        print("No numeric columns found for seasonal decomposition")
+    # Check if the dataframe has a date column
+    if 'Date' not in df.columns:
+        print("Warning: No 'Date' column found. Skipping seasonal decomposition.")
         return
     
-    # For each numeric column (limit to first 3)
-    for i, col in enumerate(numeric_df.columns[:3]):
+    # Set Date as index if it's not already
+    if not isinstance(df.index, pd.DatetimeIndex):
+        df = df.copy()
+        df['Date'] = pd.to_datetime(df['Date'])
+        df.set_index('Date', inplace=True)
+    
+    # Filter for numeric columns only
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    
+    for col in numeric_cols:
         try:
-            # Check for sufficient data
-            if len(numeric_df) < 10:
-                print(f"Not enough data for seasonal decomposition of {col}")
+            # Get a complete time series without missing values
+            series = df[col].dropna()
+            
+            # Skip if too few data points
+            if len(series) < 14:
+                print(f"  Skipping {col}: insufficient data points")
                 continue
                 
-            # Try to perform seasonal decomposition
-            series = numeric_df[col].dropna()
+            # Check if the series has a uniform frequency
+            if not pd.infer_freq(series.index):
+                print(f"  Skipping {col}: no clear frequency detected")
+                continue
+                
+            # Ensure the index is uniform by resampling if needed
+            uniform_series = series.asfreq('D')
+                
+            # Perform seasonal decomposition
+            from statsmodels.tsa.seasonal import seasonal_decompose
             
-            # Determine period (default to 30 for monthly data if we have enough points)
-            if len(series) >= 60:
-                period = 30  # Monthly
-            else:
-                period = 7   # Weekly
-            
-            # Perform decomposition
-            decomposition = seasonal_decompose(series, model='additive', period=period)
-            
-            # Plot
-            fig, axes = plt.subplots(4, 1, figsize=(14, 16), sharex=True)
-            
-            # Original
-            axes[0].plot(series.index, series.values)
-            axes[0].set_title(f'Original Series: {col}', fontsize=16)
-            axes[0].grid(True)
-            
-            # Trend
-            axes[1].plot(decomposition.trend.index, decomposition.trend.values, color='tab:orange')
-            axes[1].set_title('Trend Component', fontsize=16)
-            axes[1].grid(True)
-            
-            # Seasonal
-            axes[2].plot(decomposition.seasonal.index, decomposition.seasonal.values, color='tab:green')
-            axes[2].set_title('Seasonal Component', fontsize=16)
-            axes[2].grid(True)
-            
-            # Residual
-            axes[3].plot(decomposition.resid.index, decomposition.resid.values, color='tab:red')
-            axes[3].set_title('Residual Component', fontsize=16)
-            axes[3].grid(True)
-            
-            plt.tight_layout()
-            
-            # Save the figure
-            output_path = os.path.join(output_dir, f'seasonal_decomposition_{col}.png')
-            plt.savefig(output_path, dpi=300, bbox_inches='tight')
-            plt.close()
-            
-            print(f"Seasonal decomposition for {col} saved to {output_path}")
-            
+            # Try to decompose with sensible frequency values
+            try:
+                # Default to 7 days for daily data (weekly seasonality)
+                result = seasonal_decompose(uniform_series, model='additive', period=7)
+                
+                # Create the plot
+                fig, axes = plt.subplots(4, 1, figsize=(14, 16))
+                
+                # Original data
+                axes[0].plot(result.observed)
+                axes[0].set_title(f'Original Time Series: {col}', fontsize=14)
+                axes[0].grid(True)
+                
+                # Trend component
+                axes[1].plot(result.trend)
+                axes[1].set_title('Trend Component', fontsize=14)
+                axes[1].grid(True)
+                
+                # Seasonal component
+                axes[2].plot(result.seasonal)
+                axes[2].set_title('Seasonal Component', fontsize=14)
+                axes[2].grid(True)
+                
+                # Residual component
+                axes[3].plot(result.resid)
+                axes[3].set_title('Residual Component', fontsize=14)
+                axes[3].grid(True)
+                
+                plt.tight_layout()
+                
+                # Sanitize column name for filename
+                safe_col_name = sanitize_filename(col)
+                
+                # Save the figure
+                output_path = os.path.join(output_dir, f'seasonal_decomposition_{safe_col_name}.png')
+                plt.savefig(output_path, dpi=300, bbox_inches='tight')
+                plt.close()
+                
+            except Exception as e:
+                print(f"  Error analyzing {col}: {str(e)}")
+                
         except Exception as e:
-            print(f"Error in seasonal decomposition for {col}: {e}")
+            print(f"  Error processing {col}: {str(e)}")
+    
+    print(f"Seasonal decomposition visualizations saved to {output_dir}")
 
 def visualize_autocorrelation(df, output_dir):
-    """Visualize autocorrelation and partial autocorrelation"""
-    print("Generating autocorrelation visualization...")
+    """Visualize autocorrelation and partial autocorrelation of time series"""
+    print("Generating autocorrelation visualizations...")
     
-    # Ensure output directory exists
+    # Make sure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
     
-    # Only plot numeric columns
-    numeric_df = df.select_dtypes(include=[np.number])
-    
-    if numeric_df.empty:
-        print("No numeric columns found for autocorrelation analysis")
+    # Check if the dataframe has a date column
+    if 'Date' not in df.columns:
+        print("Warning: No 'Date' column found. Skipping autocorrelation.")
         return
     
-    # For each numeric column (limit to first 3)
-    for i, col in enumerate(numeric_df.columns[:3]):
+    # Set Date as index if it's not already
+    if not isinstance(df.index, pd.DatetimeIndex):
+        df = df.copy()
+        df['Date'] = pd.to_datetime(df['Date'])
+        df.set_index('Date', inplace=True)
+    
+    # Filter for numeric columns only
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    
+    from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+    
+    for col in numeric_cols:
         try:
-            # Check for sufficient data
-            if len(numeric_df) < 10:
-                print(f"Not enough data for autocorrelation of {col}")
+            # Get a complete time series without missing values
+            series = df[col].dropna()
+            
+            # Skip if too few data points
+            if len(series) < 30:
+                print(f"  Skipping {col}: insufficient data points")
                 continue
-                
-            # Get the series
-            series = numeric_df[col].dropna()
             
-            # Create figure
-            fig, axes = plt.subplots(2, 1, figsize=(12, 10))
+            # Create the plot
+            fig, axes = plt.subplots(2, 1, figsize=(14, 10))
             
-            # ACF plot
-            plot_acf(series, ax=axes[0], lags=30)
-            axes[0].set_title(f'Autocorrelation Function: {col}', fontsize=16)
+            # Plot ACF
+            plot_acf(series, ax=axes[0], lags=40, alpha=0.05)
+            axes[0].set_title(f'Autocorrelation Function (ACF): {col}', fontsize=14)
             axes[0].grid(True)
             
-            # PACF plot
-            plot_pacf(series, ax=axes[1], lags=30)
-            axes[1].set_title(f'Partial Autocorrelation Function: {col}', fontsize=16)
+            # Plot PACF
+            plot_pacf(series, ax=axes[1], lags=40, alpha=0.05)
+            axes[1].set_title(f'Partial Autocorrelation Function (PACF): {col}', fontsize=14)
             axes[1].grid(True)
             
             plt.tight_layout()
             
+            # Sanitize column name for filename
+            safe_col_name = sanitize_filename(col)
+            
             # Save the figure
-            output_path = os.path.join(output_dir, f'autocorrelation_{col}.png')
+            output_path = os.path.join(output_dir, f'autocorrelation_{safe_col_name}.png')
             plt.savefig(output_path, dpi=300, bbox_inches='tight')
             plt.close()
             
-            print(f"Autocorrelation for {col} saved to {output_path}")
-            
         except Exception as e:
-            print(f"Error in autocorrelation analysis for {col}: {e}")
+            print(f"  Error analyzing {col}: {str(e)}")
+    
+    print(f"Autocorrelation visualizations saved to {output_dir}")
 
 def visualize_seasonal_patterns(df, output_dir):
-    """Visualize seasonal patterns in time series data"""
-    print("Generating seasonal patterns visualization...")
+    """Visualize seasonal patterns in time series by different time periods"""
+    print("Generating seasonal pattern visualizations...")
     
-    # Ensure output directory exists
+    # Make sure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
     
-    # Only plot numeric columns
-    numeric_df = df.select_dtypes(include=[np.number])
-    
-    if numeric_df.empty:
-        print("No numeric columns found for seasonal patterns analysis")
+    # Check if the dataframe has a date column
+    if 'Date' not in df.columns:
+        print("Warning: No 'Date' column found. Skipping seasonal patterns.")
         return
     
-    # Check if index is datetime
+    # Set Date as index if it's not already
     if not isinstance(df.index, pd.DatetimeIndex):
-        print("Index is not datetime type, converting to datetime...")
-        try:
-            df.index = pd.to_datetime(df.index)
-        except:
-            print("Failed to convert index to datetime. Skipping seasonal patterns visualization.")
-            return
+        df = df.copy()
+        df['Date'] = pd.to_datetime(df['Date'])
+        df.set_index('Date', inplace=True)
     
-    # For each numeric column (limit to first 3)
-    for i, col in enumerate(numeric_df.columns[:3]):
+    # Filter for numeric columns only
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    
+    for col in numeric_cols:
         try:
-            # Create a copy with datetime components
-            temp_df = numeric_df[[col]].copy()
-            temp_df['year'] = temp_df.index.year
-            temp_df['month'] = temp_df.index.month
-            temp_df['day'] = temp_df.index.day
-            temp_df['dayofweek'] = temp_df.index.dayofweek
-            temp_df['quarter'] = temp_df.index.quarter
+            # Get a complete time series without missing values
+            ts_df = df[[col]].dropna()
             
-            # Create figure with 2 subplots
-            fig, axes = plt.subplots(2, 1, figsize=(14, 12))
+            # Skip if too few data points
+            if len(ts_df) < 365:  # Need at least a year of data
+                print(f"  Skipping {col}: insufficient data points")
+                continue
             
-            # Monthly patterns
-            monthly_data = temp_df.groupby('month')[col].agg(['mean', 'std']).reset_index()
-            monthly_data['month_name'] = monthly_data['month'].apply(lambda x: calendar.month_abbr[x])
+            # Create a copy of the data for analysis
+            ts_df = ts_df.copy()
             
-            # Sort by month order
-            monthly_data = monthly_data.sort_values('month')
+            # Extract features from the date
+            ts_df['Year'] = ts_df.index.year
+            ts_df['Month'] = ts_df.index.month
+            ts_df['Day'] = ts_df.index.day
+            ts_df['DayOfWeek'] = ts_df.index.dayofweek
+            ts_df['Quarter'] = ts_df.index.quarter
             
-            sns.barplot(x='month_name', y='mean', data=monthly_data, ax=axes[0])
-            axes[0].set_title(f'Monthly Patterns: {col}', fontsize=16)
-            axes[0].set_xlabel('Month', fontsize=14)
-            axes[0].set_ylabel('Mean Value', fontsize=14)
-            axes[0].grid(True)
+            # Create the plot
+            fig, axes = plt.subplots(2, 2, figsize=(16, 12))
             
-            # Day of week patterns
-            dow_data = temp_df.groupby('dayofweek')[col].agg(['mean', 'std']).reset_index()
-            dow_data['day_name'] = dow_data['dayofweek'].apply(lambda x: calendar.day_abbr[x])
+            # Plot by month
+            monthly_avg = ts_df.groupby('Month')[col].mean()
+            axes[0, 0].plot(monthly_avg.index, monthly_avg.values, marker='o')
+            axes[0, 0].set_title(f'Monthly Pattern: {col}', fontsize=14)
+            axes[0, 0].set_xticks(range(1, 13))
+            axes[0, 0].set_xticklabels(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+            axes[0, 0].grid(True)
             
-            # Sort by day of week order
-            dow_data = dow_data.sort_values('dayofweek')
+            # Plot by day of week
+            dow_avg = ts_df.groupby('DayOfWeek')[col].mean()
+            axes[0, 1].plot(dow_avg.index, dow_avg.values, marker='o')
+            axes[0, 1].set_title(f'Day of Week Pattern: {col}', fontsize=14)
+            axes[0, 1].set_xticks(range(0, 7))
+            axes[0, 1].set_xticklabels(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
+            axes[0, 1].grid(True)
             
-            sns.barplot(x='day_name', y='mean', data=dow_data, ax=axes[1])
-            axes[1].set_title(f'Day of Week Patterns: {col}', fontsize=16)
-            axes[1].set_xlabel('Day of Week', fontsize=14)
-            axes[1].set_ylabel('Mean Value', fontsize=14)
-            axes[1].grid(True)
+            # Plot by quarter
+            quarter_avg = ts_df.groupby('Quarter')[col].mean()
+            axes[1, 0].plot(quarter_avg.index, quarter_avg.values, marker='o')
+            axes[1, 0].set_title(f'Quarterly Pattern: {col}', fontsize=14)
+            axes[1, 0].set_xticks(range(1, 5))
+            axes[1, 0].set_xticklabels(['Q1', 'Q2', 'Q3', 'Q4'])
+            axes[1, 0].grid(True)
+            
+            # Plot yearly trend
+            yearly_avg = ts_df.groupby('Year')[col].mean()
+            axes[1, 1].plot(yearly_avg.index, yearly_avg.values, marker='o')
+            axes[1, 1].set_title(f'Yearly Trend: {col}', fontsize=14)
+            axes[1, 1].set_xticks(yearly_avg.index)
+            axes[1, 1].grid(True)
             
             plt.tight_layout()
             
+            # Sanitize column name for filename
+            safe_col_name = sanitize_filename(col)
+            
             # Save the figure
-            output_path = os.path.join(output_dir, f'seasonal_patterns_{col}.png')
+            output_path = os.path.join(output_dir, f'seasonal_patterns_{safe_col_name}.png')
             plt.savefig(output_path, dpi=300, bbox_inches='tight')
             plt.close()
             
-            print(f"Seasonal patterns for {col} saved to {output_path}")
-            
         except Exception as e:
-            print(f"Error in seasonal patterns analysis for {col}: {e}")
+            print(f"  Error analyzing {col}: {str(e)}")
+    
+    print(f"Seasonal pattern visualizations saved to {output_dir}")
 
 def main():
     """Main function to parse arguments and run visualizations"""

@@ -1,8 +1,56 @@
-import yfinance as yf
-import pandas as pd
+"""
+Stock Exchange Data Collector
+
+This script downloads historical data for 7 major stock market indices:
+GDAXI (Germany DAX), IXIC (NASDAQ), DJI (Dow Jones), N225 (Nikkei), 
+STOXX50E (Euro STOXX 50), HSI (Hang Seng), and FTSE (FTSE 100).
+
+All data is saved in a standardized CSV format for later processing.
+
+Usage:
+    python get_exchange_data_simple.py
+    
+Author: AI Assistant
+Date: March 2025
+"""
+
 import os
-import time
+import pandas as pd
+import numpy as np
+import yfinance as yf
 from datetime import datetime
+import time
+import requests
+import urllib.parse
+import sys
+import csv
+
+# Define paths - use environment variables if available
+if 'DATASETS_DIR' in os.environ and 'PROCESSED_EXCHANGES_DIR' in os.environ:
+    OUTPUT_DIR = os.environ.get('PROCESSED_EXCHANGES_DIR')
+    print(f"Using environment path for output: {OUTPUT_DIR}")
+else:
+    # Fall back to default path
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    OUTPUT_DIR = os.path.join(BASE_DIR, 'datasets', 'processed_exchanges')
+    print(f"Using default path for output: {OUTPUT_DIR}")
+
+# Create output directory if it doesn't exist
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR)
+    print(f"Created output directory: {OUTPUT_DIR}")
+
+# Currency conversion configuration
+FOREX_INDICES = {
+    "GDAXI": "EUR", # German DAX - Euro
+    "IXIC": "USD",  # NASDAQ - US Dollar
+    "DJI": "USD",   # Dow Jones - US Dollar
+    "N225": "JPY",  # Nikkei - Japanese Yen
+    "STOXX50E": "EUR", # Euro STOXX 50 - Euro
+    "HSI": "HKD",   # Hang Seng - Hong Kong Dollar
+    "FTSE": "GBP",  # FTSE 100 - British Pound
+}
 
 # Define the correct Yahoo Finance ticker symbols for major indices
 INDEX_SYMBOLS = {
@@ -277,12 +325,6 @@ def process_all_exchanges():
     """
     start_time = time.time()
     
-    # Create output directory if it doesn't exist
-    output_dir = '../datasets/processed_exchanges'
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-        print(f"Created output directory: {output_dir}")
-    
     # Read indexInfo.csv
     try:
         # First try in the current directory
@@ -339,7 +381,7 @@ def process_all_exchanges():
                 clean_symbol = index_symbol.replace('^', '').replace('.', '_')
                 
                 # Save individual CSV file
-                output_file = f"{output_dir}/{clean_symbol}_processed.csv"
+                output_file = f"{OUTPUT_DIR}/{clean_symbol}_processed.csv"
                 processed_data.to_csv(output_file, index=False)
                 print(f"Data saved to {output_file} ({len(processed_data)} rows)")
                 
@@ -367,7 +409,7 @@ def process_all_exchanges():
             combined_data = combined_data.drop_duplicates(subset=['Date', 'Index'], keep='first')
         
         # Save the combined file
-        combined_file = f"{output_dir}/all_indices_processed.csv"
+        combined_file = f"{OUTPUT_DIR}/all_indices_processed.csv"
         combined_data.to_csv(combined_file, index=False)
         print(f"\nCombined data saved to {combined_file} ({len(combined_data)} rows, {combined_data.shape[1]} columns)")
         
@@ -388,7 +430,7 @@ def process_all_exchanges():
             )
             
             # Save the pivot table
-            pivot_file = f"{output_dir}/all_indices_pivot.csv"
+            pivot_file = f"{OUTPUT_DIR}/all_indices_pivot.csv"
             date_pivot.to_csv(pivot_file)
             print(f"Pivot table saved to {pivot_file} ({date_pivot.shape[0]} rows, {date_pivot.shape[1]} columns)")
     
