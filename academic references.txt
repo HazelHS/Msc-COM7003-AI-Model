@@ -1,0 +1,18 @@
+https://api.blockchain.info - on chain BTC metrics.
+yfinance [yahoo finance] API - for stock exchange info for: Germany DAX, NASDAQ (already in USD), Dow Jones (already in USD), Nikkei, Euro STOXX 50, Hang Seng, DXY, Gold futures, BTC/USD, BTC Volume and BTC/Gold Ratio.
+https://arxiv.org/html/2408.12408v1#S3.SS3 - An Evaluation of Deep Learning Models for Stock Market Trend Prediction
+https://doi.org/10.1002/for.3071 - Stock movement prediction: A multi-input LSTM approach [Tangs]
+https://www.mdpi.com/2078-2489/12/10/388 - [Peng. 2021] Predicting Stock Movements: Using Multiresolution Wavelet Reconstruction and Deep Learning in Neural Networks (minorly improved denoising methods)
+
+yet to read:
+https://www.mdpi.com/1911-8074/14/7/302 - Machine Learning in Finance: A Metadata-Based Systematic Review of the Literature 
+https://link.springer.com/article/10.1186/s40537-022-00676-2 - Forex market forecasting using machine learning: Systematic Literature Review and meta-analysis
+https://dl.acm.org/doi/10.1145/3699966 - Deep Learning Algorithms for Cryptocurrency Price Prediction: A Comparative Analysis.
+https://arxiv.org/html/2405.11431v1 - Review of deep learning models for crypto price prediction: implementation and evaluation
+https://doi.org/10.3390/app15031554 - Enhancing Bitcoin Price Prediction with Deep Learning: Integrating Social Media Sentiment and Historical Data
+https://arxiv.org/abs/1905.10437 - N-BEATS: Neural basis expansion analysis for interpretable time series forecasting
+https://arxiv.org/abs/2201.12893 - Cryptocurrency Valuation: An Explainable AI Approach
+https://arxiv.org/abs/2002.05786 - Deep Learning for Financial Applications : A Survey
+https://arxiv.org/pdf/2303.02223v2 - Feature Selection for Forecasting
+https://www.mdpi.com/1999-4893/10/4/114 - Variable Selection in Time Series Forecasting Using Random Forests.
+https://www.nature.com/articles/s41599-024-02807-x - Applying machine learning algorithms to predict the stock price trend in the stock market – The case of Vietnam.

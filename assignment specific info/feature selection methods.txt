@@ -1,0 +1,126 @@
+Performance Metrics from Chen et al.:
+- Single Random Forest: Baseline
+- López Gil's method: +8% improvement
+- Tang's method: +11% improvement
+- Chen's method: +15% improvement
+
+López Gil: 3-fold CV with combined RF/MI scores
+Tang: Fixed threshold with RF importance
+Chen: Adaptive weighting based on market volatility
+
+
+Would you like me to:
+Implement Chen's full methodology with adaptive weighting?
+Add their market regime detection code?
+Include their specific performance metrics for comparison?
+The main tradeoff is complexity vs. performance. Chen's method is more complex to implement but offers better performance, especially in volatile markets. For cryptocurrency prediction, this could be particularly valuable given the market's inherent volatility.
+
+
+
+
+"We use 5-fold time series cross-validation (López Gil used 3-fold)" and "We select features above mean score (Tang used a fixed threshold)" Thank you for providing this information it is extremely helpful.
+
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.feature_selection import mutual_info_regression
+from sklearn.model_selection import TimeSeriesSplit
+from scipy import stats
+
+def analyze_features(df, target='BTC/USD', importance_threshold=0.1):
+    """
+    Analyze features using López Gil's 3-fold CV and Tang's fixed threshold
+    """
+    X = df.drop(target, axis=1)
+    y = df[target]
+    
+    def random_forest_importance():
+        # López Gil's 3-fold cross-validation
+        tscv = TimeSeriesSplit(n_splits=3)
+        importances = []
+        
+        for train_idx, _ in tscv.split(X):
+            X_train = X.iloc[train_idx]
+            y_train = y.iloc[train_idx]
+            
+            rf = RandomForestRegressor(n_estimators=100, random_state=42)
+            rf.fit(X_train, y_train)
+            importances.append(rf.feature_importances_)
+        
+        mean_importance = np.mean(importances, axis=0)
+        std_importance = np.std(importances, axis=0)
+        
+        return pd.DataFrame({
+            'Feature': X.columns,
+            'RF_Importance': mean_importance,
+            'RF_Std': std_importance
+        }).sort_values('RF_Importance', ascending=False)
+
+    # ... existing mutual_information_analysis and correlation_analysis functions ...
+
+    # Get results from each method
+    rf_results = random_forest_importance()
+    mi_results = mutual_information_analysis()
+    corr_results = correlation_analysis()
+    
+    # Combine scores
+    combined_scores = pd.DataFrame({
+        'Feature': rf_results['Feature'],
+        'Combined_Score': (
+            rf_results['RF_Importance'] / rf_results['RF_Importance'].max() +
+            mi_results['MI_Score'] / mi_results['MI_Score'].max() +
+            corr_results['Correlation'].abs() / corr_results['Correlation'].abs().max()
+        ) / 3
+    }).sort_values('Combined_Score', ascending=False)
+    
+    # Apply Tang's fixed threshold approach
+    selected_features = combined_scores[
+        combined_scores['Combined_Score'] > importance_threshold
+    ]
+    
+    return selected_features
+
+def main():
+    # Load your denoised dataset
+    df = pd.read_csv(output_dir / "2015-2025_dataset_denoised.csv", 
+                     index_col=0, parse_dates=True)
+    
+    # Run analysis with Tang's threshold
+    selected_features = analyze_features(df, importance_threshold=0.1)
+    
+    print("\nSelected Features (Above Tang's threshold):")
+    print(selected_features)
+    
+    # Save selected features
+    final_features = selected_features['Feature'].tolist() + ['BTC/USD']
+    df_selected = df[final_features]
+    df_selected.to_csv(output_dir / "2015-2025_dataset_selected_features.csv")
+    print(f"\nSelected features dataset saved with shape: {df_selected.shape}")
+    print("\nSelected features:")
+    print('\n'.join(final_features))
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,177 @@
+main catagories of core machine learning algo's
+
+1. Linear Regression
+2. Classification
+3. Clustering
+4. Hidden Markov Model
+
+ - note: gradient decents \\ you are allowed to call an API for handling gradient decent, not expected to build one from scratch. BUT you are expected to show/prove you understand it!
+
+(one hot encoding (bitvector respresentation)
+
+----------------------------------------------
+Production Cycle!!:
+----------------------------------------------
+1. have complete and processed dataset.
+1.2: to reduce dimentionality, "sigluar value decomposition"  princeiple component analysis &/or univarate analysis
+2. features selection
+3. apply model
+4. train model
+5. evaluation
+6. redo feature selection with hyperparameter tuning. (grid search, random search, bayesian search[recomended])
+
+
+
+----------------------------------------------------
+features desired:
+---------------------------------------------------
+
+
+global Stock Exchange Data - daily price
+btc/usd                    - daily price
+stock to flow              - overlayed on the daily price
+AAII % Bearish (RHS) - (NASDAQ 100) [bearish sentiment index?]
+
+on chain lequidity:
+
+- Illiquid Supply Change (coins moving to cold storage)
+- Exchange Net Position Change (inflows/outflows)
+- Miner Reserve Balance (miner selling pressure)
+- Realized HODL Ratio (long-term vs short-term holder behavior)
+
+Stablecoin Liquidity (Tether/USDC metrics):
+
+# Strong correlation (r ≈ 0.85) between:
+- Aggregate Stablecoin Supply Growth
+- BTC Market Cap Growth (30-60 day lag observed)
+# Data source: CoinMetrics' "Aggregate Stablecoins" chart
+
+Macro Volatility Spillover (measurable via):
+
+# CBOE SKEW Index (black swan pricing)
+# Crude Oil Volatility (OVX) → shows stronger correlation than VIX
+# 2-Year Treasury Yield volatility (MOVE Index)
+
+Energy Market Dynamics (miner cost basis):
+
+# Hashprice (USD/TH/day) vs Electricity Costs
+# Miner Profit Margin Compression → leads to forced selling
+# Data source: Hashrate Index
+
+Currency Debasement Signals (beyond simple M2):
+
+# Track:
+- Emerging Market FX Reserves (inverse correlation)
+- USD Liquidity Conditions (Fed Reverse Repo + TGA)
+- Gold/BTC Ratio (asset rotation signals)
+
+Derivatives Market Structure (CME/Crypto exchanges):
+
+# Key metrics:
+- Futures Basis Spread (CME vs Binance)
+- Options Put/Call Skew
+- Perpetual Funding Rate Divergence
+
+---------------------------------------------------
+features aquired:
+------------------------------------------------
+
+
+1. Market Volume Metrics:
+   - Global averaged stocks (volume)
+   - Global averaged stocks(USD)
+
+2. Currency and Precious Metals:
+   - US Dollar Index (DXY)
+   - Gold Futures
+   - BTC/USD (Bitcoin price)
+   - Gold/BTC Ratio
+
+3. On-chain Metrics:
+   - Active Addresses
+   - Transaction Count
+   - Mempool Size
+   - Hash Rate (GH/s)
+   - Mining Difficulty
+   - Transaction Fees (BTC)
+   - Median Confirmation Time (min)
+
+4. Volatility Indices:
+   - CBOE SKEW Index
+   - CBOE Volatility Index (VIX)
+   - Crude Oil Volatility Index (OVX)
+
+
+-----------------------------------------------
+abs
+intro
+problem statement
+objective and aims
+AI approach
+library?
+data cle??
+data vis
+data preprep
+model select
+model eval?
+conclusion
+recommendatsions
+future
+ref
+appendix
+----------------------------------------------------
+
+
+
+
+
+How These Visualizations Inform Your Process:
+
+1. Data Preprocessing Decisions
+- Missing values: If visualizations show significant gaps, you'll need imputation strategies
+- Outliers: Unusual spikes might need capping, removal, or special handling
+- Distributions: Skewed features might benefit from transformations (log, Box-Cox)
+- Frequency: Irregular timestamps might require resampling to a consistent frequency
+
+2. Feature Engineering Insights
+- Trends: Strong trends suggest adding trend-based features (rolling averages, slope indicators)
+- Seasonality: Cyclical patterns indicate adding seasonal features (day of week, month)
+- Volatility clusters: Periods of high volatility suggest volatility-based features
+- Non-linear relationships: Transform features to better capture non-linear relationships
+
+3. Algorithm Selection Guidance
+- Linear vs. non-linear patterns: Helps decide between linear models vs. neural networks
+- Stationarity: Non-stationary data might need ARIMA-type models or differencing
+- Long-term dependencies: Long autocorrelation suggests LSTM or GRU architectures
+- Feature interactions: Complex interactions point toward more sophisticated models
+
+Practical Implementation Approach
+- Start with basic quality visualizations to understand data completeness and distributions
+- Explore time-based patterns to understand trends, seasonality, and volatility
+- Examine feature relationships to identify potential predictors and correlations
+- Test different transformations to see how they affect the data structure
+- Document insights from each visualization to inform your processing pipeline
+
+This exploratory data analysis phase is critical for cryptocurrency price prediction specifically because:
+- Crypto markets exhibit unique behaviors (high volatility, bubbles, sentiment-driven moves)
+- Relationships between features and price can be highly non-linear
+- The relative importance of indicators changes across different market regimes
+- Technical indicators often have predictive power in these markets
+- By visualizing first, you'll develop a more effective processing strategy and ultimately build a more accurate TensorFlow model.
+
+
+MVRV Z-Score data:
+
+Calculation Method
+The script calculates MVRV Z-Score using:
+Market Value (current price × circulating supply)
+Realized Value (average price when coins last moved × circulating supply)
+Z-score (standard deviation measurement between market and realized values)
+Conclusion
+While TradingView offers this indicator as a visualization tool, it's not designed to be an API data source. If you need MVRV Z-Score data for your project, you would still need to:
+Find a specialized crypto data provider with MVRV Z-Score (paid options like Glassnode)
+Calculate it yourself using raw blockchain data (market value and realized value data)
+Implement the formula using the Pine Script logic shown on TradingView (requires cryptocurrency price history and on-chain data)
+The TradingView script is valuable as a reference for understanding how MVRV Z-Score is calculated, but doesn't solve the fundamental issue of needing a free data source for this metric.
+
+

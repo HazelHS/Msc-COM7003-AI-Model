@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+- This is an AI project for a AI and data science Msc at leeds trinity in the UK (2025-2026), specifically for my AI module where I am writting, and running all the code in [dataset.ipynb](mdc:dataset.ipynb) and generating the dataset there too. This is all in hopes of creating an AI model for predicting future BTC/USD price trends to some level of accuracy for the coursework requirements. I will also have to write a technical report on it, and use peer reviewed research as case studies as well, specifically this paper "https://arxiv.org/html/2408.12408v1#S3.SS3" as my starting point.
+
+- all the financial data I collect is coming from yfinance, and is expected to be daily trading data over a 10 year period, from 2015 - 2025.
+
+- all the reasoning behind the code must be referenced as to why it was implemented with peer reviewed materials.
