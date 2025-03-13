@@ -16,3 +16,4 @@ https://arxiv.org/abs/2002.05786 - Deep Learning for Financial Applications : A 
 https://arxiv.org/pdf/2303.02223v2 - Feature Selection for Forecasting
 https://www.mdpi.com/1999-4893/10/4/114 - Variable Selection in Time Series Forecasting Using Random Forests.
 https://www.nature.com/articles/s41599-024-02807-x - Applying machine learning algorithms to predict the stock price trend in the stock market – The case of Vietnam.
+https://www.sciencedirect.com/science/article/abs/pii/S0957417415003334?via%3Dihub - ballings - 2015 - Evaluating multiple classifiers for stock price direction prediction

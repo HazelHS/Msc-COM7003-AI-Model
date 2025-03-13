@@ -1,0 +1,1665 @@
+Expert Systems with Applications 42 (2015) 7046–7056
+
+Contents lists available at ScienceDirect
+
+Expert Systems with Applications
+journal homepage: www.elsevier.com/locate/eswa
+
+Evaluating multiple classiﬁers for stock price direction prediction
+Michel Ballings a,⇑, Dirk Van den Poel b, Nathalie Hespeels b, Ruben Gryp b
+a
+b
+
+The University of Tennessee, Department of Business Analytics and Statistics, 249 Stokely Management Center, 37996 Knoxville, TN, USA
+Ghent University, Department of Marketing, Tweekerkenstraat 2, 9000 Ghent, Belgium
+
+a r t i c l e
+
+i n f o
+
+Article history:
+Available online 14 May 2015
+Keywords:
+Ensemble methods
+Single classiﬁers
+Benchmark
+Stock price direction prediction
+
+a b s t r a c t
+Stock price direction prediction is an important issue in the ﬁnancial world. Even small improvements in
+predictive performance can be very proﬁtable. The purpose of this paper is to benchmark ensemble methods (Random Forest, AdaBoost and Kernel Factory) against single classiﬁer models (Neural Networks,
+Logistic Regression, Support Vector Machines and K-Nearest Neighbor). We gathered data from 5767
+publicly listed European companies and used the area under the receiver operating characteristic curve
+(AUC) as a performance measure. Our predictions are one year ahead. The results indicate that Random
+Forest is the top algorithm followed by Support Vector Machines, Kernel Factory, AdaBoost, Neural
+Networks, K-Nearest Neighbors and Logistic Regression. This study contributes to literature in that it
+is, to the best of our knowledge, the ﬁrst to make such an extensive benchmark. The results clearly suggest that novel studies in the domain of stock price direction prediction should include ensembles in their
+sets of algorithms. Our extensive literature review evidently indicates that this is currently not the case.
+Ó 2015 Elsevier Ltd. All rights reserved.
+
+1. Introduction
+Predicting stock prices is an important objective in the ﬁnancial
+world (Al-Hmouz, Pedrycz, & Balamash, 2015; Barak & Modarres,
+2015; Booth, Gerding, McGroarty, 2014), since a reasonably accurate prediction has the possibility to yield high ﬁnancial beneﬁts
+and hedge against market risks (Kumar & Thenmozhi, 2006). A
+great point of discussion in literature is whether stock price behavior is predictable or not. For a long time investors accepted the
+Efﬁcient Market Hypothesis (EMH) (Malkiel & Fama, 1970). This
+hypothesis states that no abnormal returns can be obtained by
+studying the evolution of stock prices’ past behavior
+(Tsinaslanidis & Kugiumtzis, 2014; Yeh & Hsu, 2014). In the beginning of the 21st century however, some economists indicated that
+future stock prices are at least partially predictable (Malkiel, 2003).
+Therefore a lot of prediction algorithms have been explored and
+showed that stock price behavior can indeed be predicted
+(Huang, Yang, & Chuang, 2008; Ou & Wang, 2009). However predictable, it remains hard to forecast the stock price movement
+mainly because the ﬁnancial market is a complex, evolutionary,
+and non-linear dynamical system which interacts with political
+events, general economic conditions and traders’ expectations
+(Huang, Nakamori, & Wang, 2005).
+⇑ Corresponding author.
+E-mail addresses: Michel.Ballings@utk.edu (M. Ballings), Dirk.VandenPoel@
+UGent.be (D. Van den Poel), Nathalie.Hespeels@UGent.be (N. Hespeels), Ruben.
+Gryp@UGent.be (R. Gryp).
+http://dx.doi.org/10.1016/j.eswa.2015.05.013
+0957-4174/Ó 2015 Elsevier Ltd. All rights reserved.
+
+Different techniques have already been explored for stock price
+direction prediction. One of the best performing algorithms in the
+ﬁnancial world appears to be Support Vector Machines (SVM)
+(Huang et al., 2005; Kim, 2003; Lee, 2009). Other well-known techniques are Neural Networks (Kim & Chun, 1998), Decision Trees
+(Wu, Lin, & Lin, 2006), Logistic Regression (Brownstone, 1996),
+Discriminant Analysis (Ou & Wang, 2009) and K-Nearest
+Neighbors (Subha & Nambi, 2012). However, most studies ignore
+ensemble methods in their benchmarks. To the best of our knowledge Kumar and Thenmozhi (2006), Rodriguez and Rodriguez
+(2004), Lunga and Marwala (2006) and Patel, Shah, Thakkar, and
+Kotecha (2015) are the only four studies in the domain of stock
+price direction prediction that use an ensemble method. This is
+an important gap in literature because ensemble methods have
+been proven to be top performers in many other areas such as customer churn behavior (Ballings & Van den Poel, 2012), social media
+analytics (Ballings & Van den Poel, 2015) and unsupervised word
+sense disambiguation (WSD) (Brody, Navigli & Lampata, 2006).
+In our study we will therefore include several ensemble methods such as Random Forest (RF) (Breiman, 2001), AdaBoost (AB)
+(Freund & Shapire, 1995) and Kernel Factory (KF) (Balings & Van
+den Poel, 2013) in our benchmark. While others conduct discrete
+analyses to predict exact stock prices, we focus on classiﬁcation
+models (Leung, Daouk & Chan, 2000). Literature shows that forecasting the direction is enough to execute proﬁtable trading strategies (Cheung, Chinn, & Pascual, 2005; Pesaran & Timmerman,
+1995). Hence, we predict the direction of stock prices instead of
+absolute stock prices. The main contribution of this study is an
+
+
+7047
+
+M. Ballings et al. / Expert Systems with Applications 42 (2015) 7046–7056
+
+extensive benchmark comparing the performance of ensemble
+methods (RF, AB and KF) and single classiﬁer models (Neural
+Networks (NN), Logistic Regression (LR), SVM, K-Nearest
+Neighbors (KNN)) in predicting the stock price direction. We
+hypothesize that, given their superiority in other domains, ensemble methods will outperform the single classiﬁer methods.
+The remainder of this paper is structured as follows. In Section 2
+we will review the literature on which algorithms have been used
+for stock price direction prediction. Section 3 details our methodology for benchmarking the ensemble methods against other algorithms. Section 4 discusses the results. Section 5 concludes this
+study and Section 6 describes limitations and avenues for future
+research.
+
+2. Literature review
+The use of prediction algorithms is in contradiction with one of
+the basic rules in ﬁnance, the Efﬁcient Market Hypothesis (EMH)
+(Malkiel & Fama, 1970). This hypothesis states that if one can get
+an advantage from analyzing past returns, the entire ﬁnancial market will notice this advantage and as a consequence the price of the
+share will be corrected. This means that no abnormal returns can
+be obtained by examining past prices and returns of stocks.
+Although the EMH is generally accepted, it was initially based on
+traditional linear statistical algorithms (Malkiel & Fama, 1970).
+Many researchers have already rejected the hypothesis by using
+algorithms that can model more complex dynamics of the ﬁnancial
+system (Lo, Mamaysky, & Wang, 2000; Malkiel, 2003). Since methods handling the complex and non-linear ﬁnancial market are
+yielding positive results, researchers still try to invent better
+techniques.
+There are three major methodologies to predict the stock price
+behavior: (1) technical analysis, (2) time series forecasting and (3)
+machine learning and data mining (Hellström & Holmströmm,
+1998). The ﬁrst category uses charts and plots as a principal tool.
+Analysts use these plots to make a buy or sell decision. The second
+category aims at predicting future stock prices by analyzing past
+returns on stock prices. Common methods are the autoregressive
+method (AR), the moving average model (MA), the
+autoregressive-moving average model (ARMA) and the threshold
+autoregressive model (TAR). The third category, data mining, is
+‘‘the science of extracting useful information from large data sets
+or databases’’ (Hand, Manilla & Smyth, 2001). The popularity of
+data mining in the ﬁnancial world has been growing since the main
+problem with predicting stock price direction is the huge amount
+of data. The data sets are too big to handle with non data mining
+methods such that they obscure the underlying meaning and one
+cannot obtain useful information from it (Fayyad, Shapiro &
+Smyth, 1996; Widom 1995).
+Several algorithms have been used in stock price direction prediction literature. Simpler techniques such as the single decision
+tree, discriminant analysis, and Naïve Bayes have been replaced
+by better performing algorithms such as Random Forest, Logistic
+Regression and Neural Networks. General-purpose solvers such
+as Genetic Algorithms (Kuo, Chen, & Hwang 2001) have also been
+used but generally perform worse and are computationally more
+expensive. The majority of stock price direction prediction literature has focused on Logistic Regression, Neural Networks,
+K-Nearest Neighbors and Support Vector Machines. Ensemble
+methods such as Radom Forest, (Stochastic) AdaBoost and Kernel
+Factory are still very unexplored in the domain of stock price direction prediction.
+In Table 1 we provide an overview of those algorithms used for
+predicting stock price direction in literature (we excluded single
+Decision Trees, Naïve Bayes, Discriminant Analysis and Genetic
+
+Algorithms because they have been superseded by newer and better methods discussed above). LR stands for Logistic Regression,
+NN stands for Neural Networks, KN stands for K-nearest neighbors,
+SVM stands for Support Vector Machines, RF stands for Random
+Forest, AB stands for AdaBoost and KF stands for Kernel Factory.
+It is clear from Table 1 that our study is the ﬁrst to include all seven
+algorithms in one benchmark. This is important if we want to ﬁnd,
+globally, the best algorithm. Using suboptimal algorithms may hinder scientiﬁc progress in that important patterns in the data might
+be missed.
+In our study we will benchmark ensemble methods against single classiﬁer models. The ensemble methods mentioned above all
+use a set of individually trained classiﬁers as base classiﬁers. We
+believe that the ensemble methods will outperform the individual
+classiﬁcation models because they have proven to be very successful in several other domains such as face recognition (Tan, Chen,
+Zhou, & Zhang, 2005), gene selection (Diaz-Uriarte & de Andres,
+2006), protein structural class prediction (Ballings & Van den
+Poel, 2015) and credit scoring (Paleologo, Elisseeff, & Antonini,
+2010). In stock price direction prediction literature both Support
+Vector Machines (SVM) and Random Forest (RF) have proven to
+be top performers (Kumar & Thenmozhi, 2006; Patel et al., 2015).
+However, there is no consensus on which algorithm is best with
+SVM outperforming RF in Kumar and Thenmozhi (2006) and vice
+versa in Patel et al. (2015). AdaBoost has also been shown to perform well, albeit not as well as Random Forest (Rodriguez &
+Rodriguez 2004). In an effort to help provide clarity in which algorithm is best, this study will benchmark SVM, AB, RF and four other
+algorithms.
+
+Table 1
+Algorithms for stock price direction prediction used in literature.
+Prediction method
+LR
+Schöneburg (1990)
+Bessembinder and Chan (1995)
+Brownstone (1996)
+Saad, Prokhorov, and Wunsch (1996)
+Kim and Chun (1998)
+Saad, Prokhorov, and Wunsch (1998)
+Kim and Han (2000)
+Kuo et al. (2001)
+Kim (2003)
+Kim and Lee (2004)
+Rodriguez and Rodriguez (2004)
+Huang et al. (2005)
+Kumar and Thenmozhi (2006)
+Lunga and Marwala (2006)
+Wu et al. (2006)
+Wang and Chan (2007)
+Huang et al. (2008)
+Senol and Ozturan (2008)
+Lai, Fan, and Chang (2009)
+Lee (2009)
+Ou and Wang (2009)
+Kara, Boyaciogly and Baykan (2011)
+Wei and Cheng (2011)
+Subha and Nambi (2012)
+Lin, Guo, and Hu (2013)
+De Oliveira, Nobre, and Zárate (2013)
+Chen, Chen, Fan, and Huang (2013)
+Rechenthin et al. (2013)
+Ji, Che, and Zong (2014)
+Bisoi and Dash (2014)
+Zikowski (2015)
+Hafezi, Shahrabi, and Hadavandi
+(2015)
+Patel et al. (2015)
+This study
+
+NN
+
+KN
+
+SVM
+
+AB
+
+RF
+
+x
+
+x
+
+KF
+
+x
+x
+x
+
+x
+x
+
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+
+x
+
+x
+x
+
+x
+x
+
+x
+x
+x
+
+x
+
+x
+x
+x
+x
+x
+x
+
+x
+
+x
+
+x
+
+x
+
+x
+x
+x
+
+x
+x
+x
+x
+x
+
+x
+
+x
+
+x
+x
+x
+x
+
+x
+
+x
+x
+
+x
+
+x
+x
+
+x
+
+x
+x
+
+x
+
+
+7048
+
+M. Ballings et al. / Expert Systems with Applications 42 (2015) 7046–7056
+
+3. Methodology
+3.1. Data and variables
+For this study we gathered yearly data from 5767 publicly listed
+European companies. The data cover a wide range of industries
+(see Table 2). Data were selected from the Amadeus Database from
+‘‘bureau van Dijk’’. Amadeus is a database of companies’ ﬁnancial
+information across Europe.
+To make our results generalizable we computed the most
+important predictors in extant literature. Kumar and Thenmozhi
+(2006) stated that earnings yield, cash ﬂow yield, book-to-market
+ratio, and size are the major predictors of stock returns. Kim and
+Chun (1998) on the other hand use the stock price index and turnover by volume and price/earnings ratio. Wu et al. (2006) make use
+of money supply and inﬂation rate.
+Besides the above stated variables in literature, we also introduced other important ﬁnancial indicators that improve the predictive value of our model. These include liquidity indicators
+(current ratio, collection period of receivables), solvency indicators
+(solvency ratio, gearing ratio) and proﬁtability indicators (ROE,
+ROCE, ROA). In addition information of the balance sheet (total
+assets, debtors, capital, long term debt) and the proﬁt and loss
+statement (sales, depreciation, taxation, interest paid) is added.
+General economy features (public debt, GDP, unemployment, trade
+balance) are also included. The table in Appendix A provides a full
+list of all the variables in this study along with descriptions and
+formulas.
+The goal of this study is to predict one year ahead whether the
+stock price will go up by a predetermined amount. In total, for year
+2009 we collected 81 variables (including the market price of
+2009). For year 2010 we only extracted the market price of 2010
+from the database. If the stock price of 2010 went up by 25% relative to the 2009 price we coded the stock price direction as going
+up, otherwise we coded the direction as down. In Appendix B we
+provide the results of the sensitivity analysis for two other thresholds: 15% and 35%. The results largely coincide.
+Using a threshold of 15%, 25% and 35% resulted in respectively
+40.6%, 32.4% and 25.6% of cases being classiﬁed as a positive.
+Because some analytical techniques are more sensitive to class
+imbalance than others we over-sampled the positive class to
+
+Table 2
+Number of companies per industry.
+Industry
+
+Companies
+
+Agriculture, forestry & ﬁshing
+Mining and quarrying
+Manufacturing
+Electricity, gas, steam and air conditioning supply
+Water supply, sewerage, waste management & remediation
+activities
+Construction
+Wholesale & resale trade, repair of motor vehicles and motor
+cycles
+Transportation and storage
+Accommodation & food service activities
+Information & communication
+Financial & insurance activities
+Real estate activities
+Professional, scientiﬁc and technical activities
+Administrative & support service activities
+Public administration and defense, compulsory social security
+Education
+Human health and social work activities
+Arts, entertainment & recreation
+Other service activities
+TOTAL
+
+3.3%
+3.0%
+26.4%
+2.3%
+0.9%
+6.2%
+9.3%
+3.7%
+2.8%
+6.5%
+13.1%
+4.3%
+13.6%
+2.6%
+0.1%
+0.2%
+0.5%
+0.7%
+0.6%
+5767
+
+obtain a perfectly balanced sample. We chose over-sampling of
+the positive class instead of under-sampling of the negative class
+because the former ensures that no valuable information is discarded. Other more complicated sampling methods have been
+shown not to outperform over-sampling (Burez & Van den Poel
+2009). Benchmarking algorithms on a balanced sample promotes
+fairness.
+3.2. Analytical techniques
+In this section we will describe the seven techniques used in
+this study: Logistic Regression (LR), Neural Networks (NN),
+K-nearest neighbors (KN), Support Vector Machines (SVM),
+Random Forest (RF), AdaBoost (AB) and Kernel Factory (KF). The
+ﬁrst four are single classiﬁers and the last three are ensemble
+methods. All analyses are performed using R (R Core Team, 2013)
+version 3.1.3.
+3.2.1. Single classiﬁers
+3.2.1.1. Logistic Regression. We use a regularized, also called penalized, approach to Logistic Regression in order to avoid overﬁtting.
+The technique sacriﬁces a little bias to reduce the variance of the
+predicted values and hence improves overall prediction performance (Tibshirani, 1996). The lasso technique stands for least
+absolute shrinkage and selection operator (Tibshirani, 1996) and
+imposes a bound on the sum of the absolute values of the coefﬁcients shrinking coefﬁcients towards zero (Guisan, Edwards, &
+Hastie, 2002). This is done by adding a penalty term to the negative
+binomial log-likelihood in the objective function (Friedman et al.,
+2010):
+
+"
+argmin #
+ðb0 ;bÞ2Rpþ1
+
+#
+p
+N
+#
+#
+X
+#
+#
+1X
+T
+yi : b0 þ xTi b # log 1 þ eðb0 þxi bÞ þ k jbj j
+N i¼1
+j¼1
+
+with N the number of instances and p the number of predictors. The
+equation clearly shows that in order to minimize the objective function coefﬁcients are required to shrink. The parameter k determines
+the amount of shrinkage. Higher values of k will result in smaller
+coefﬁcients. We cross-validated the shrinkage parameter by optimizing the AUC on a holdout set of 50% of the training set. Once
+we determined the optimal value of k we re-estimated the
+Logistic Regression model on the full training set to ensure a fair
+comparison with the other algorithms. We used the glmnet
+R-package by Friedman et al. (2010, 2013). We set the a parameter
+to 1 to obtain the lasso method and we let the function compute the
+sequence of k by setting nlambda to 100 (the default).
+3.2.1.2. Neural Networks. We used a feed-forward artiﬁcial neural
+network optimized by BFGS. This method is more efﬁcient, reliable
+and convenient than backpropagation. We use one layer of hidden
+neurons. This is generally sufﬁcient for classifying most data sets
+(Dreiseitl & Ohno-Machado, 2002). We use the logistic activation
+function and re-scale the numerical predictors to [#1, 1] by subtracting the midrange, deﬁned as (max + min)/2, from each column
+and dividing by the range/2 of each column. The binary variables
+are coded as {#1, 1}. Scaling of the data is necessary to avoid local
+optima. The underlying reason of why scaling avoids local optima
+can be traced back to the initialization phase. The classiﬁcation
+boundary (i.e., hyperplane) is deﬁned by the points where the
+input is zero (Sarle, 1997). Similar to the coefﬁcient and intercept
+in linear regression, the weights in a Neural Network determine
+the orientation of the hyperplane, and the bias determines the distance of the hyperplane from the origin. If the bias terms are small,
+then the initial classiﬁcation boundaries will pass fairly through
+the origin. If the data are not centered at the origin, many of the
+hyperplanes will not cut the data and hence separate the two
+
+
+M. Ballings et al. / Expert Systems with Applications 42 (2015) 7046–7056
+
+classes (Sarle, 1997). Those that do pass through the data will only
+provide a limited range of directions. This will increase the likelihood of obtaining local optima. Hence it is important to scale the
+inputs to include the origin such as [#1, 1].
+Scaling is also required to overcome numerical problems and
+obtain training efﬁciency. Scaling avoids the limits of
+ﬂoating-point representations. When we have a very large input,
+weights will be very small and small changes cannot be represented. In addition the logistic activation function saturates for
+large inputs making the algorithm adjust its weight slowly during
+training. Scaling therefore often accelerates training. To avoid saturation the weights are desired to be small in the random initialization. The magnitude of the weights depends on the scale of
+the inputs. Therefore scaling also removes the scale dependence
+of the initial weights.
+We used the nnet R- package (Ripley, 2013; Venables & Ripley,
+2002). The network weights at the start of the iterative procedure
+are chosen at random (Ripley, 1996, pg. 154). As recommended by
+Spackman (1991) and Ripley (1996, pg. 149) the entropy parameter
+is set to use the maximum conditional likelihood. The rang parameter, controlling the range of the initial random weights parameter
+was left at the default of 0.5. To avoid overﬁtting we used weight
+decay (Dreiseitl & Ohno-Machado, 2002) and therefore the maximum number of weights (MaxNWts) and the number of iterations
+(maxit) were set to very large values (5000) in order not to run into
+a situation of early stopping. Finally, we determined the weight
+decay factor and the number of nodes in the hidden layer by performing a grid search (Dreiseitl & Ohno-Machado, 2002). We tried
+all combinations of decay = {0.001, 0.01, 0.1} (Ripley, 1996, pg.
+163), and size = [1, 2,...,20] (Ripley, 1996, pg. 170) and selected
+the optimal combination.
+3.2.1.3. K-Nearest Neighbor. We used the k-d tree (Bentley, 1975)
+implementation of the K-Nearest Neighbors algorithm. An important parameter to determine is the K. This represents the number
+of closest neighbors that will be taken into account when scoring
+the unknown sample. The unknown sample will receive a score
+that corresponds to the proportion of positives of the K samples.
+We cross-validated the K-parameter by trying all values of
+K = {1,2,3,. . .,150}. We used the FNN R-package (Beygelzimer et al.
+2013).
+3.2.1.4. Support Vector Machines. We used the most commonly used
+kernels: the linear, polynomial, radial basis (RBF), and sigmoid kernel (Ballings & Van den Poel, 2013a). The RBF kernel requires a
+width parameter k of the Gaussian function (Ben-Hur & Weston,
+2010). The penalty parameter C, also called the cost or soft margin
+constant, speciﬁes the trade-off between the size of the margin and
+hyperplane violations. The higher the C, the more it costs to have
+examples in the soft margin and hence the smaller the margin.
+The polynomial kernel requires a choice of degree d. The linear kernel function only requires setting C. To determine the optimal
+parameter values we follow Hsu et al. (2010) by performing a grid
+search on C = [2#5, 2#4, . . ., 215], k = [2#15, 2#13,. . ., 23] and d = {2, 3}
+to identify the best combination. Support Vector Machines are
+implemented through Meyer et al.’s (2012) e1071 R-package using
+the svm function.
+3.2.2. Ensemble methods
+Ensembles methods solve problems that are (1) statistical, (2)
+computational, and (3) representational in nature (Dietterich,
+2000) by averaging models. Many different classiﬁers can be
+learned from speciﬁc combinations of data, representations, objective functions and optimization methods. The set of all possible
+classiﬁers that might be learned is called the hypothesis space H.
+An algorithm searches H to identify the best possible hypothesis
+
+7049
+
+h#H. Because in reality one only has limited data it is well possible
+that the algorithm ﬁnds different hypotheses of equal overall accuracy. If however, in some region of the input domain, some
+hypotheses outperform the others, averaging reduces the risk of
+selecting the wrong hypothesis in a speciﬁc region. This is what
+Dietterich (2000) calls the statistical problem.
+The second problem that ensembles can alleviate is what
+Dietterich (2000) calls the computational problem. Algorithms
+employ optimization methods to perform local searches. These
+searches may get stuck in local optima. By averaging different
+hypotheses, obtained by different search initializations, the true
+hypothesis f may be better approximated than the individual
+hypotheses.
+Finally if f R H, averaging can expand the space of representable
+functions. For example, a linear algorithm cannot learn a nonlinear
+boundary, but a combination of linear algorithms can. This is why
+ensemble methods are said to use a divide and conquer approach;
+each individual learns a simpler and smaller part of the problem.
+This is what Dietterich (2000) calls a representational problem.
+An algorithm that suffers from the statistical or computational
+problem has problems of high variance, while an algorithm that
+suffers from the representational problem has high bias. Hence,
+ensembles are attractive because they may reduce both bias and
+variance (Zhou, 2012, p67).
+3.2.2.1. Random Forest. Random Forest builds an ensemble of trees
+to improve upon the limited robustness and suboptimal performance of decision trees (Dudoit et al.,2002). Individual trees are
+built on a bootstrap sample using a version of Binary Recursive
+Partitioning (BRP) (Breiman, Friedman, Stone, & Olshen 1984).
+The BRP algorithm initializes by making a random subset of candidate variables and evaluating all possible splits of all candidate
+variables (Breiman, 2001). The best split is subsequently used to
+create a binary partitioning. This process of selecting a subset of
+variables, evaluating all splits and creating a binary partitioning
+is repeated recursively within each subsequent partition and stops
+when the partition size equals 1. There are only two parameters in
+Random Forest: the number of trees in the ensemble and the number of variables to try at each split. As recommended by Breiman
+(2001) we use a large number of trees (500) and set the number
+of variables to the square root of the total number of predictors.
+We employed the randomForest R- package by Liaw and Wiener
+(2002).
+3.2.2.2. AdaBoost. Deterministic AdaBoost works by sequentially
+applying a learning algorithm to reweighted versions of the training data (Freund & Schapire, 1996). In each iteration the instances
+that were misclassiﬁed in the previous iteration are assigned more
+weight. The ﬁnal model is a linear combination of the models
+obtained in the different iterations (Friedman, Hastie, &
+Tibshirani, 2000). We use one of the most recent boosting variants:
+stochastic boosting (Friedman, 2002). It improves on the original
+algorithms by incorporating randomness as an integral part of
+the procedure (Friedman, 2001). Speciﬁcally, stochastic AdaBoost
+draws bootstrap samples from the training sample, with the probability of an instance being selected proportional to the current
+weight (Friedman, 2002). Two important parameters are the number of iterations and the number of terminal nodes in the team
+members. As recommended by Friedman (2001) we set the maximum number of nodes to 8 by setting the maximum depth of the
+trees to 3. In addition we set the number of iterations to 500. We
+used the ada R- package by Culp, Johnson, and Michailidis (2012).
+3.2.2.3. Kernel Factory. Kernel Factory randomly divides the training data into a number of mutually exclusive partitions deﬁned
+
+
+7050
+
+M. Ballings et al. / Expert Systems with Applications 42 (2015) 7046–7056
+
+by a row and column parameter. Each partition forms a separate
+input space and is subsequently transformed by a kernel into a kernel matrix K. Next each K is employed to train a Random Forest.
+These Random Forest models are then deployed on a validation
+set. The scores are then used by a Genetic Algorithm to optimize
+the weights for subsequent combination through a weighted average. Ballings and Van den Poel (2013a) recommend the burn
+method for Kernel Factory. This method automatically tries the
+polynomial, linear and radial basis kernel function on the ﬁrst partition and selects the best kernel function for use on all other partitions. Furthermore, we use the recommended values of 1 and
+int(log10(N)), with N the number of instances, for respectively
+the number of column partitions and row partitions (Ballings &
+Van den Poel, 2013b). Kernel Factory is implemented through the
+kernelFactory R- package (Ballings & Van den Poel, 2013b).
+
+Demšar’s (2006) recommendation and use ﬁve times twofold
+cross-validation (5x2f cv). This method of cross-validation splits
+the data randomly into two equal parts. One part is used to train
+the algorithm and the other part to evaluate the algorithm, and
+vice versa. This process is then repeated ﬁve times. This results
+in 10 performance values.
+To determine whether the differences between the algorithms
+in terms of AUCs are signiﬁcant we use the Friedman test
+(Friedman, 1937; Friedman, 1940). The Friedman test is a
+non-parametric equivalent of the repeated-measures ANOVA
+(Demšar, 2006). It ranks the algorithms for each cross-validation
+fold separately, with the top algorithm receiving the rank of 1,
+the second best receiving the rank of 2,. . ., and the worst performing algorithm receiving rank equal to the number of algorithms (in
+our case 7). Average ranks are assigned in case of ties. The
+Friedman statistic is deﬁned as:
+
+3.3. Model evaluation criteria
+The area under the receiver operating characteristic curve
+(AUC) is seen as an adequate and accurate classiﬁer performance
+measure (Provost, Fawcett, & Kohavi, 1997). AUC can take a value
+from 0.5 to 1. A value of 0.5 means that the predictions are not better than random, while a value of 1 means that the predictions are
+perfect. The advantage of AUC over other performance measures
+(such as Percent Correctly Classiﬁed (PCC)) is that AUC includes
+all cut-off values (Ballings & Van den Poel, 2013). AUC is deﬁned
+as follows:
+
+AUC ¼
+
+Z 1
+0
+
+TP
+FP
+¼
+d
+ðTP þ FNÞ ðFP þ TNÞ
+
+Z 1
+0
+
+TP FP
+d
+P N
+
+with TP: True Positives, TN: True Negatives, P: Positives (event), N:
+Negatives (non-event). All AUCs reported in this study are medians
+of ﬁve times twofold cross validation.
+In order to determine whether there are any important differences across the output domain we also report the ﬁve times twofold cross- validated receiver operating characteristic (ROC) curves
+(see Section 3.4. for more information about cross- validation). We
+use threshold averaging. This method of averaging chooses a uniformly distributed set of thresholds among the sorted set of all
+thresholds of the ROC curves in the sample. For each of these
+thresholds it generates the ROC points for each of the ROC curves
+and takes the mean true positive and false positive rates for subsequent plotting.
+
+v2F ¼
+
+"
+#
+X 2 kðk þ 1Þ2
+12N
+Rj #
+kðk þ 1Þ j
+4
+
+where N is the number of folds (10 in our case), k is the number of
+algorithms (7 in our case), and Rj is the average rank of the jth of k
+P
+algorithms. The average rank is deﬁned as Rj ¼ N1 Ni rij where r ij is
+the rank of the jth of k algorithms on the ith of N folds.
+When the null hypothesis (all algorithms are equivalent) of the
+Friedman test is rejected we perform the Nemenyi post hoc test to
+determine which algorithms are signiﬁcantly different (Nemenyi,
+1963). Two classiﬁers are signiﬁcantly different if the corresponding average ranks differ by as least the critical difference
+
+rﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+rﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+kðk þ 1Þ
+7ð7 þ 1Þ
+¼ 2:949
+CD ¼ q/
+¼ 2:849005
+6N
+6:10
+
+ð1Þ
+
+where the critical values q/ are based on the Studentized range
+pﬃﬃﬃ
+2, N is the number of folds and k is the number
+
+statistic divided by
+
+3.4. Cross-validation
+Cross-validation is widely used for model selection because of
+its simplicity and universality (Arlot & Celisse, 2010). We follow
+Fig. 2. 5x2fcv averaged ROC curve per algorithm.
+
+Table 3
+Mean ranking of the folds for AUC.
+Prediction method
+LR
+
+NN
+
+KN
+
+SVM
+
+RF
+
+AB
+
+KF
+
+6.8
+
+5.4
+
+5.8
+
+2.0
+
+1.0
+
+4.0
+
+3.0
+
+Table 4
+The interquartile range of the ten folds for AUC.
+Prediction method
+
+Fig. 1. 5x2fcv median AUC per algorithm.
+
+LR
+
+NN
+
+KN
+
+SVM
+
+RF
+
+AB
+
+KF
+
+0.0082
+
+0.0187
+
+0.0489
+
+0.0116
+
+0.0061
+
+0.0134
+
+0.0076
+
+
+7051
+
+M. Ballings et al. / Expert Systems with Applications 42 (2015) 7046–7056
+Table 5
+Proﬁt implications.
+
+Price Barco stock
+Proﬁts
+Prediction rate
+70%
+71%
+Discounted proﬁts
+Discount rate
+5%
+
+2009
+
+2010
+
+2011
+
+2012
+
+2013
+
+2014
+
+15.17
+
+28.49
+
+48.27
+
+38.76
+
+55.48
+
+56.53
+
+2009
+
+2010
+9.324
+9.457
+0.133
+
+2011
+13.846
+14.044
+0.198
+
+2012
+#2.853
+#2.758
+0.095
+
+2013
+11.704
+11.871
+0.167
+
+2014
+0.735
+0.746
+0.0111
+
+0.604
+
+2010
+0.133
+
+2011
+0.188
+
+2012
+0.086
+
+2013
+0.144
+
+2014
+0.009
+
+0.561
+
+2009
+
+of algorithms to be compared (Demšar, 2006). If the difference
+between the mean rankings of 2 algorithms is bigger than the critical difference (CD) of 2.849005 (this is the critical difference for a
+p-value of 0.05, 7 classiﬁers and 10 folds) then the performance of
+these algorithms differs signiﬁcantly.
+4. Results and discussion
+Fig. 1 presents the median AUC of the ﬁve times twofold
+cross-validation. LR stands for Logistic Regression, NN stands for
+Neural Networks, KN stands for K-nearest neighbors, SVM stands
+for Support Vector Machines, RF stands for Random Forest, AB
+stands for AdaBoost and KF stands for Kernel Factory. AUC values
+are all above 0.5 stating that the evaluated prediction methods
+are better than random. From Fig. 1 it is clear that Random
+Forest is the top predictor followed at a distance by SVM, KF, AB,
+NN, KN and LR. Our results are in accordance with Patel et al.
+(2015), who also found that RF outperforms SVM. In contrast
+Kumar and Thenmozhi (2006) found that SVM outperforms RF.
+However the difference in Kumar and Thenmozhi (2006) was very
+small (1.04%-points in terms of Hit ratio) whereas in this study the
+difference is very large (0.0642 in terms of AUC). Fig. 2 conﬁrms the
+generalizability of the results. Across the entire output domain, RF
+is the best algorithm.
+The Friedman test indicates that the differences in AUC are signiﬁcant with v2 ð6Þ ¼ 57:9429; p < 0:001. Because the null hypothesis of the Friedman rank sum test is rejected, we perform the
+Nemenyi post hoc test to compare all algorithms to each other.
+To determine which speciﬁc algorithms are signiﬁcantly different
+we ﬁrst calculate the average rankings of the AUCs in Table 3
+and then compare which differences are greater than the critical
+difference of 2.849005. First of all RF signiﬁcantly outperforms all
+the other classiﬁers except SVM. Furthermore AB is not signiﬁcantly better than any other classiﬁer. Finally KF only signiﬁcantly
+outperforms LR (See Table 4).
+Finally, to determine the stability of the results we calculate the
+interquartile range (IQR) in Table 3 by taking the difference of the
+75th and 25th percentile. The bigger this difference, the bigger the
+deviation is and the lower the stability. The dominance of RF is
+again conﬁrmed because it has the smallest IQR of all the
+algorithms.
+5. Conclusions
+This study set out to benchmark the performance of ensemble
+methods (Random Forest, Adaboost and Kernel Factory) against
+single classiﬁer models (Neural Networks, Logistic Regression,
+Support Vector Machines and K-Nearest Neighbors) in predicting
+stock price direction. To the best of our knowledge this is the ﬁrst
+study to include this set of algorithms in a stock price direction
+prediction application. Being able to predict the stock price direction more accurately is beneﬁcial to companies specialized in
+
+predicting ﬁnancial quotes, investment banks and all people dealing with stocks. While ensembles have proven to be top performers
+in various other domains, only a small number of benchmarks in
+the domain of this study include ensembles. We found that
+Random Forest is the top performer, followed by Support Vector
+Machines, Kernel Factory and AdaBoost. In other words, the three
+ensembles that we included in our benchmark are ranked as the
+top four algorithms. The results clearly suggest that novel studies
+in the domain of stock price direction prediction should include
+ensembles in their sets of algorithms, which, as Table 1 indicates,
+is evidently not the case.
+Hence we recommend Random Forest to predict stock price
+direction. It has the highest median AUC and its performance is signiﬁcantly better than all but one other classiﬁers. Furthermore,
+other ensemble methods appear to be good alternatives for single
+classiﬁer models because they are ranked very high. In Table 5, we
+underscore the importance of improving stock price direction
+prediction.
+As illustration we used the stock quotes of Barco over the last
+5 years and took a discount rate of 5% into account. Consider an
+investor making a hold or sell decision each year. The decision is
+valid for one year. When the investor uses a model with an accuracy of 70% to predict the stock price direction he has 70% chance
+to estimate the correct direction and thus only 70% chance on the
+proﬁts incurred on the stock. When the investor is able to increase
+the prediction rate with only 1%-point, there are already ﬁnancial
+beneﬁts attached. On the stock of Barco over 5 years the investor
+retains €0.561 per stock. This equals a 1,429% increase in proﬁt.
+
+6. Limitations and future research
+As we based our research on data from the Amadeus database,
+our data are limited to information from European companies.
+Further research might incorporate worldwide data. According to
+Kumar and Thenmozhi (2006), it might be useful to benchmark
+algorithms per continent. This because some techniques tend to
+perform better in some parts of the world then others, for example
+in BRIC countries.
+Our focus was on predicting the direction of the stock price.
+Another focus might be to try to predict the exact stock prices
+(Kaboudan, 2000; Pai & Lin, 2005) using ensemble methods. In
+addition Wang (2002) attempts to predict the stock price immediately at any given time, while Oh and Kim (2002) and Qian and
+Rasheed (2007) focus on predicting stock market indices. Finally
+Gençay and Qi (2001) used Neural Networks to predict the pricing
+of derivative securities.
+In this study we predict one-year ahead stock price directions.
+Future research might also investigate intra-daily (Rechenthin &
+Street, 2013), daily (Rechenthin, Street, & Srinivasan, 2013), weekly
+or monthly predictions. We focus on long-term investment decisions since we only predict one year ahead. That is why our results
+are not generalizable to High Frequency Trading (HFT). This way of
+
+
+7052
+
+M. Ballings et al. / Expert Systems with Applications 42 (2015) 7046–7056
+
+trading uses computer-aided algorithms that analyze the market
+and/or an asset. Because trading volumes are huge and positions
+are held only for a very short period of time (only 1 minute in
+the paper of Manahov et al. (2014)) high frequency traders are able
+to make proﬁt with only a small change in stock prices. Long-term
+
+investors, however, apply a buy and hold strategy. For this strategy
+small changes in quotes are less important since their volumes are
+much smaller and trades are repeated less often. The difference
+between these two strategies can be subject to future research.
+
+Appendix A.
+Predictors used in this study
+Variable
+type
+
+Variable name
+
+Description/deﬁnition
+
+General
+info
+
+Number of employees
+Added value
+
+Indication of the ﬁrm size
+Amount added to the value of a
+product or service
+Indicator of the ﬁrm’s efﬁciency and
+short-term ﬁnancial health
+The closing stock price of 2009
+
+Working capital
+Stock price 2009
+Assets
+
+Fixed assets
+Other ﬁxed assets
+Current assets
+Net current assets
+Other current assets
+Creditors
+Cash
+Total assets
+
+Liabilities
+
+Shareholders funds
+Other shareholders funds
+Total shareholders funds
+Capital
+Market capitalization
+Stock
+Current liabilities
+Other current liabilities
+Provision
+Debtors
+Non-current liabilities
+Other non-current liabilities
+Long-Term debt
+Loans
+
+Long-term tangible piece of property
+a ﬁrm owns.
+Sum of ﬁxed assets not detailed by
+individual class on balance sheet
+Assets that are expected to be
+converted within one year
+How much capital being generated or
+used by day-to day activities
+Current assets not including cash,
+securities, receivables, inventory,..
+Claims against customers (settled
+within 1 year)
+Fair value of cash and cash
+equivalents
+Resources a ﬁrm owns to create future
+economic beneﬁts
+
+Formula
+
+Current assets-current liabilities
+
+Current assets – current liabilities
+
+Balance of share capital, all proﬁts
+retained and reserves
+Balance sheet value of the
+shareholders’ interest
+Financial resources available for use
+Market value the outstanding shares
+Equity stake of the owners
+Trade payables and revenues to be
+earned in next years
+Claims against the company held by
+others than suppliers
+Present liability of an entity to
+another entity
+Suppliers’ claims against the company
+Long-term ﬁnancial obligations that
+are not due within present year
+Debt that does not need to be repaid
+in one year
+Debt provided by one entity to
+another entity at an interest rate
+
+Income
+
+Depreciation & amortization
+
+Non-cash expense of a
+tangible/intangible investment over
+time
+
+Statement
+
+Operating revenue
+
+Revenue generated from operating
+activities
+
+Total assets – total liabilities
+
+
+7053
+
+M. Ballings et al. / Expert Systems with Applications 42 (2015) 7046–7056
+Appendix A. (continued)
+
+Predictors used in this study
+Variable
+type
+
+Variable name
+
+Description/deﬁnition
+
+Sales
+
+Revenues generated through the use
+of operating assets
+Earnings Before Interests and Taxes,
+operating proﬁt and loss
+Amount paid for all employee wages
+and beneﬁts
+Average amount paid for all employee
+wages and beneﬁts
+Earnings Before Interests, Taxes,
+Depreciation and Amortization
+Revenue from ﬁnancial activities
+Expenses from ﬁnancial activities
+Interest accrued on ﬁnancial liabilities
+Proﬁt or loss resulting from ﬁnancing
+activities
+Shows the amount of cash generated
+and used in a given period
+Proﬁtability measure looking at proﬁt
+before corporate income tax
+Amount a company expects to pay for
+taxes
+Proﬁtability of a company after
+accounting for all costs
+Proﬁt and loss for the period
+
+EBIT
+Costs of employees
+Average costs of employees
+EBITDA
+Financial revenue
+Financial expenses
+Interest paid
+Financial proﬁt and loss
+Cash ﬂow
+Proﬁt and loss before tax
+Taxation
+Proﬁt and loss after tax
+Net income
+Ratio’s
+
+Proﬁt margin
+Net assets turnover
+EBIT margin
+EBITDA margin
+Mrkt cap/shareholders
+funds
+Inventory turnover
+Current ratio
+Solvency ratio
+Liquidity ratio
+Shareholders liquidity ratio
+Collection period
+Cash ﬂow yield
+ROE (using PL before tax)
+ROCE(using PL before tax)
+ROA (using PL before tax)
+ROE (using net income)
+ROCE (using net income)
+ROA (using net income)
+ROI
+Costs of empl./operating rev.
+Price-earnings ratio
+Price cashﬂow ratio
+
+Percentage of selling price that turned
+into proﬁt
+Efﬁciency with which net assets are
+used
+Indication of operating performance
+Measurement of a company’s
+operating proﬁtability
+Cf. infra
+Indication of how well a company
+converts stock into revenues
+Ability to pay short-term obligations
+Ability to meet debt and other
+obligations
+Ability to repay short-term creditors
+out of total cash
+Amount of time it takes to receive
+payments owed
+Return evaluation ratio
+Return On Equity: Indicator of a ﬁrm’s
+performance
+Return On Capital Employed:
+measures the ﬁrm’s proﬁtability
+Return On Assets: proﬁt for each euro
+of assets invested
+Cf. Infra
+Cf. infra
+Cf. infra
+Return On Investment: Measures the
+efﬁciency
+Cf. infra
+Valuation ratio
+Valuation ratio
+
+Formula
+
+Financial revenue-ﬁnancial expenses
+
+Proﬁt/sales
+Sales/net assets
+EBIT/sales
+EBITDA/sales
+Market cap/shareholders funds
+Cost of goods sold/ average inventory
+Current assets/current liabilities
+Total debt/total assets
+Liquid assets/short-term liabilities
+Shareholders funds/non current liabilities
+(days⁄accounts receivable)/credit sales
+Cash ﬂow per share/Stock price 2009
+PL before tax/shareholders’ equity
+PL before tax/ capital employed
+PL before tax/total assets
+Net income/shareholders’ equity
+Net income/capital employed
+Net income/total assets
+PL for the period/shareholders funds
+Costs of employees/operating revenue
+Stock price per share/Earnings per share
+Stock price per share/Operating cash ﬂow per
+share
+(continued on next page)
+
+
+7054
+
+M. Ballings et al. / Expert Systems with Applications 42 (2015) 7046–7056
+
+Appendix A. (continued)
+
+Predictors used in this study
+Variable
+type
+
+Variable name
+
+Description/deﬁnition
+
+Formula
+
+Price book value ratio
+
+Valuation ratio
+
+Credit period
+
+The period of time a ﬁrm grants credit
+to its customers
+Indication of how easily a company
+can pay interest on outstanding debt
+Level of debt related to equity capital
+(in %); measure of ﬁnancial leverage
+Indicator of proﬁtability
+
+Stock price/(total assets-intangible assets and
+liabilities)
+(accounts payable⁄number of working
+days)/credit purchases
+(Net proﬁt + interest and tax expense)/interest
+expense
+(Long term debt + short term debt)/ shareholders’
+equity
+(Net income – dividends on preferred
+stock)/average outstanding shares
+EPS for the most recent 12 month period/ current
+stock price
+
+Interest coverage
+Gearing
+Earnings per share
+Earnings yield
+
+Book value per share
+Cash ﬂow per share
+Economic
+info
+
+International reserves
+Public debt
+Budget balance
+Trade balance
+Unemployment
+GDP real growth rate
+
+Inﬂation
+
+Percentage of each dollar invested in
+the stock that was earned by the
+company
+Level of safety of each individual stock
+after all debts are paid
+Indicator of ﬁnancial strength
+Reserve funds that can be passed
+between the central banks.
+Debt owed by a central government
+Overall difference between
+government revenues and spending
+Difference between the monetary
+value of exports and imports
+Number of people without work and
+actively seeking work
+Indicator of economic health; rate of
+change that a nation’s gross domestic
+product (GDP) experiences from one
+year to another.
+General increase in prices and fall in
+purchasing value of money
+
+Appendix B.
+The results for the two alternative thresholds largely coincide.
+For a threshold of 15 percent the 5x2fcv median AUCs are (from
+high to low): RF = 0.8667, SV = 0.8006, KF = 0.7688, AB = 0.7404,
+NN = 0.7088, LR = 0.6576, KN = 0.6494. The top ﬁve algorithms
+receive the same ranking as for the 25 percent threshold. LR
+switches from the last position to the one but last position.
+For a threshold of 35 percent the 5x2fcv median AUCs are (from
+high to low): RF = 0.9287, SV = 0.8958, KF = 0.8203, KN = 0.7608,
+AB = 0.7578, NN = 0.7394, LR = 0.6468. The top three algorithms
+receive the same ranking as in the 25 percent case. In the tail of
+the ranking KN gains two positions, and AB and NN lose one position. LR keeps its original position.
+In conclusion, the sensitivity analysis clearly indicates that the
+results are not sensitive to the chosen threshold. The results and
+conclusions are very similar across thresholds. For all test thresholds the top three performers are RF, SVM and KF. There are only
+minor changes in rakings in the bottom performers.
+References
+Al-Hmouz, R., Pedrycz, W., & Balamash, A. (2015). Description and prediction of
+time series: A general framework of granular computing. Expert Systems with
+Applications, 42, 4830–4839. http://dx.doi.org/10.1016/j.eswa.2015.01.060.
+
+(Total shareholder equity-preferred equity)/total
+shares outstanding
+(Operating cash ﬂow-preferred
+dividends)/Common shares outstanding
+
+Govern. revenues – govern. spending
+Exports - imports
+Number of unemployed people/all people in the
+labor force
+(Real GDP year X – real GDP year (X-1))/ Real GDP
+year (X-1)
+
+((Consumer price index value year X – consumer
+price index value year (X-1)) / Consumer price
+index value year (X-1)) ⁄ 100
+
+Arlot, S., & Celisse, A. (2010). A survey of cross-validation procedures for model
+selection. Statistics Surveys, 4, 40–79. http://dx.doi.org/10.1214/09-SS054.
+Ballings, M., & Van den Poel, D. (2012). Customer event history for churn prediction:
+How long is long enough? Expert Systems with Applications, 39, 13517–13522.
+Ballings, M., & Van den Poel, D. (2013b). R package kernelFactory: An ensemble of
+kernel machines. Available at: http://cran.r-project.org/web/packages/
+kernelFactory/index.html.
+Ballings, M., & Van den Poel, D. (2013a). Kernel factory: An ensemble of kernel
+machines. Expert Systems with Applications, 40(8), 2904–2913.
+Ballings, M., & Van den Poel, D. (2015). CRM in social media: Predicting increases in
+facebook usage frequency. European Journal of Operational Research, 244,
+248–260. http://dx.doi.org/10.1016/j.ejor.2015.01.001.
+Barak, S., & Modarres, M. (2015). Developing an approach to evaluate stocks by
+forecasting effective features with data mining methods. Expert Systems with
+Applications., 42, 1325–1339. http://dx.doi.org/10.1016/j.eswa.2014.09.026.
+Ben-Hur, A., & Weston, J. (2010). A user’s guide to support vector machines. Methods in
+Molecular Biology. Department of Computer Science Colorado State University
+(pp. 223–239). Department of Computer Science Colorado State University.
+Bentley, J. L. (1975). Multidimensional binary search trees used for associative
+searching. Communications of the ACM, 18(9), 509–517.
+Bessembinder, H., & Chan, K. (1995). The proﬁtability of technical trading rules in
+the asian stock markets. Paciﬁc-Basin Finance Journal, 3(2–3), 257–284. http://
+dx.doi.org/10.1016/0927-538X(95)00002-3.
+Beygelzimer, A., Kakadet, S., Langford, J., Arya, S., Mount, D., & Shengqiao, L. (2013).
+R package: FNN, fast nearest neighbor search algorithms and applications.
+Available at: http://cran.r-project.org/web/packages/FNN/index.html.
+Bisoi, R., & Dash, P. K. (2014). A hybrid evolutionary dynamic neural network for
+stock market trend analysis and prediction using unscented Kalman ﬁlter.
+Applied Soft Computing, 19, 41–56. http://dx.doi.org/10.1016/j.asoc.2014.01.039.
+Booth, A., Gerding, E., & McGroarty, F. (2014). Automated trading with performance
+weighted random forests and seasonality. Expert Systems with Applications, 41,
+3651–3661. http://dx.doi.org/10.1016/j.eswa.2013.12.009.
+
+
+M. Ballings et al. / Expert Systems with Applications 42 (2015) 7046–7056
+Breiman, Leo. (2001). Random Forests. Machine Learning, 45(1), 5–32. http://
+dx.doi.org/10.1023/A:1010933404324.
+Breiman, L., Friedman, J., Stone, C. J., & Olshen, R. A. (1984). Classiﬁcation and
+regression trees. Wadsworth Statistics/Probability (1st ed., ). New York, N.Y:
+Chapman and Hall/CRC.
+Brody, S., Navigli, R., & Lapata, M. (2006). Ensemble methods for unsupervised WSD.
+In Proceedings of the 21st international conference on computational linguistics and
+the 44th annual meeting of the association for computational linguistics
+(pp. 97–104). Berlin: Springer. http://dx.doi.org/10.3115/1220175.1220188.
+Brownstone, D. (1996). Using percentage accuracy to measure neural network
+predictions in stock market movements. Neurocomputing, 10(3), 237–250.
+http://dx.doi.org/10.1016/0925-2312(95)00052-6.
+Burez, J., & Van den Poel, D. (2009). Handling class imbalance in customer churn
+prediction. Expert Systems with Applications, 36, 4626–4636. http://dx.doi.org/
+10.1016/j.eswa.2008.05.027.
+Chen, M.-Y., Chen, D.-R., Fan, M.-H., & Huang, T.-Y. (2013). International
+transmission of stock market movements: An adaptive neuro-fuzzy inference
+system for analysis of TAIEX forecasting. Neural Computing and Applications, 23,
+S369–S378. http://dx.doi.org/10.1007/s00521-013-1461-4.
+Cheung, Y.-W., Chinn, M. D., & Pascual, A. G. (2005). Empirical exchange rate models
+of the nineties: Are any ﬁt to survive? Journal of International Money and Finance,
+24(7), 1150–1175. http://dx.doi.org/10.1016/j.jimonﬁn.2005.08.002.
+Culp, M., Johnson, K., & Michailidis, G. (2012). R package ada: An R package for
+stochastic boosting. Available at: http://cran.r-project.org/web/packages/ada/
+index.html.
+De Oliveira, F. A., Nobre, C. N., & Zárate, L. E. (2013). Applying artiﬁcial neural
+networks to prediction of stock price and improvement of the directional
+prediction index – Case study of PETR4, Petrobras, Brazil. Expert Systems with
+Applications, 40, 7596–7606. http://dx.doi.org/10.1016/j.eswa.2013.06.071.
+Demšar, Janez. (2006). Statistical comparisons of classiﬁers over multiple data sets.
+Journal of Machine Learning Research, 7, 1–30.
+Diaz-Uriarte, R., & de Andres, S. A. (2006). Gene selection and classiﬁcation of
+microarray data using random forest. BMC Bioinformatics 2006, 7, 3.
+Dietterich, T.G. (2000). Ensemble methods in machine learning. In: Kittler, J., Roli, F.
+(Eds.), Multiple classiﬁer systems (pp. 1–15).
+Dreiseitl, S., & Ohno-Machado, L. (2002). Logistic regression and artiﬁcial neural
+network classiﬁcation models: A methodology review. Journal of Biomedical
+Informatics, 35(5–6), 352–359.
+Dudoit, S., Fridlyand, J., & Speed, T. P. (2002). Comparison of discrimination methods
+for the classiﬁcation of tumors using gene expression data. Journal of the
+American Statistical Association, 97, 77–87.
+Fayyad, U., Piatetsky-Shapiro, G., & Smyth, P. (1996). The KDD process for extracting
+useful knowledge from volumes of data. Communications ACM, 39(11), 27–34.
+http://dx.doi.org/10.1145/240455.240464.
+Freund, Y., & Schapire, R. (1996). Experiments with a new boosting algorithm. In
+machine learning. proceedings of the thirteenth international conference (ICML ’96)
+(pp. 148–156). Bari, Italy.
+Freund, Y., & Schapire, Robert E. (1995). A Desicion-theoretic generalization of online learning and an application to boosting. In P. Vitányi (Ed.), Computational
+Learning Theory. Lecture Notes in Computer Science (Vol. 904, pp. 23–37). Berlin
+Heidelberg: Springer.
+Friedman, M. (1937). The use of ranks to avoid the assumption of normality implicit
+in the analysis of variance. Journal of the American Statistical Association, 32,
+675–701. http://dx.doi.org/10.2307/2279372.
+Friedman, M. (1940). A comparison of alternative tests of signiﬁcance for the
+problem of m rankings. The Annals of Mathematical Statistics, 11, 86–92. http://
+dx.doi.org/10.2307/2235971.
+Friedman, J. H. (2001). Greedy function approximation: A gradient boosting
+machine. Annals of Statistics, 29(5), 1189–1232.
+Friedman, J. H. (2002a). Stochastic gradient boosting. Computational Statistics & Data
+Analysis, 38, 367–378.
+Friedman, Jerome H. (2002b). Stochastic gradient boosting. Computational Statistics
+&
+Data
+Analysis,
+38(4),
+367–378.
+http://dx.doi.org/10.1016/S01679473(01)00065-2.
+Friedman, J., Hastie, T., & Tibshirani, R. (2013). R package glmnet: Lasso and elasticnet regularized generalized linear models. Available at: http://cran.r-project.
+org/web/packages/glmnet/index.html.
+Friedman, J., Hastie, T., & Tibshirani, R. (2000). Additive logistic regression: A
+statistical view of boosting. Annals of Statistics, 28, 337–374. http://dx.doi.org/
+10.1214/aos/1016218223.
+Friedman, J., Hastie, T., & Tibshirani, R. (2010a). Regularization paths for generalized
+linear models via coordinate descent. Journal of Statistical Software, 33, 1–22.
+Friedman, J., Hastie, T., & Tibshirani, R. (2010b). Regularization paths for
+generalized linear models via coordinate descent. Journal of Statistical
+Software, 33(1), 1–22.
+Gençay, R., & Qi, Min. (2001). Pricing and hedging derivative securities with neural
+networks: Bayesian regularization, early stopping, and bagging. IEEE
+Transactions on Neural Networks, 12(4), 726–734. http://dx.doi.org/10.1109/
+72.935086.
+Guisan, A., Edwards, T. C., & Hastie, T. (2002). Generalized linear and generalized
+additive models in studies of species distributions: Setting the scene. Ecological
+Modelling, 157(2–3), 89–100.
+Hafezi, R., Shahrabi, J., & Hadavandi, E. (2015). A bat-neural network multi-agent
+system (BNNMAS) for stock price prediction: Case study of DAX stock price.
+Applied
+Soft
+Computing,
+29,
+196–210.
+http://dx.doi.org/10.1016/
+j.asoc.2014.12.028.
+
+7055
+
+Hand, D. J., Mannila, Heikki, & Smyth, Padhraic (2001). Principles of data mining. MIT
+Press.
+Hellström, T., Holmströmm, K. (1998). Predictable Patterns in Stock Returns.
+Technical Report Series IMa-TOM-1997-09 (August 9, 1998).
+Hsu, C.-W., Chang, C.-C., & Lin, C.-J. (2010). A practical guide to support vector
+classiﬁcation (Technical Report). Department of Computer Science and
+Information Engineering, National Taiwan University, Taipei 106, Taiwan.
+Huang, W., Nakamori, Y., & Wang, S.-Y. (2005). Forecasting stock market movement
+direction with support vector machine. Computers & Operations Research,
+32(10), 2513–2522. http://dx.doi.org/10.1016/j.cor.2004.03.016.
+Huang, C.-J., Yang, D.-X., & Chuang, Y.-T. (2008). Application of wrapper approach
+and composite classiﬁer to the stock trend prediction. Expert Systems with
+Applications, 34(4), 2870–2878. http://dx.doi.org/10.1016/j.eswa.2007.05.035.
+Ji, T., Che, W., & Zong, N. (2014). Stock market forecast based on RBF neural network.
+In Z. Wen & T. Li (Eds.), Practical Applications of Intelligent Systems, Iske 2013
+(pp. 955–962). Berlin, Berlin: Springer-Verlag.
+Kaboudan, M. A. (2000). Genetic programming prediction of stock prices.
+Computational
+Economics,
+16(3),
+207–236.
+http://dx.doi.org/10.1023/
+A:1008768404046.
+Kara, Y., Boyacioglu, M. A., & Baykan, Ö. K. (2011). Predicting direction of stock price
+index movement using artiﬁcial neural networks and support vector machines:
+The sample of the Istanbul stock exchange. Expert Systems with Applications,
+38(5), 5311–5319. http://dx.doi.org/10.1016/j.eswa.2010.10.027.
+Kim, K.-j. (2003). Financial time series forecasting using support vector machines.
+Neurocomputing,
+55(1–2),
+307–319.
+http://dx.doi.org/10.1016/S09252312(03)00372-2.
+Kim, S. H., & Chun, S. H. (1998). Graded forecasting using an array of bipolar
+predictions: Application of probabilistic neural networks to a stock market
+index. International Journal of Forecasting, 14(3), 323–337. http://dx.doi.org/
+10.1016/S0169-2070(98)00003-X.
+Kim, K.-j., & Han, I. (2000). Genetic algorithms approach to feature discretization in
+artiﬁcial neural networks for the prediction of stock price index. Expert Systems
+with
+Applications,
+19(2),
+125–132.
+http://dx.doi.org/10.1016/S09574174(00)00027-0 (August 2000).
+Kim, K.-j., & Lee, W. B. (2004). Stock market prediction using artiﬁcial neural
+networks with optimal feature transformation. Neural Computing & Applications,
+13(3), 255–260. http://dx.doi.org/10.1007/s00521-004-0428-x.
+Kumar, M., & Thenmozhi, M. (2006). Forecasting Stock index movement: A comparison
+of support vector machines and random forest. SSRN Scholarly Paper. Rochester,
+NY: Social Science Research Network, January 24, 2006. <http://papers.
+ssrn.com/abstract=876544>.
+Kuo, R. J., Chen, C. H., & Hwang, Y. C. (2001). An Intelligent stock trading decision
+support system through integration of genetic algorithm based fuzzy neural
+network and artiﬁcial neural network. Fuzzy Sets and Systems, 118(1), 21–45.
+http://dx.doi.org/10.1016/S0165-0114(98)00399-6.
+Lai, R. K., Fan, W.-H. H., & Chang, P.-C. (2009). Evolving and clustering fuzzy decision
+tree for ﬁnancial time series data forecasting. Expert Systems with Applications
+Part, 36(2), 3761–3773. http://dx.doi.org/10.1016/j.eswa.2008.02.025.
+Lee, M.-C. (2009). Using support vector machine with a hybrid feature selection
+method to the stock trend prediction. Expert Systems with Applications, 36(8),
+10896–10904. http://dx.doi.org/10.1016/j.eswa.2009.02.038.
+Leung, Mark. T., Daouk, Hazem., & Chen, An.-Sing. (2000). Forecasting stock indices:
+A comparison of classiﬁcation and level estimation models. International Journal
+of
+Forecasting,
+16(2),
+173–190.
+http://dx.doi.org/10.1016/S01692070(99)00048-5.
+Liaw, A., & Wiener, M. (2002). Classiﬁcation and regression by random Forest. R
+News, 2(3), 18–22.
+Lin, Y., Guo, H., & Hu, J., (2013). An SVM-based Approach for Stock Market Trend
+Prediction. Neural Networks (IJCNN), The 2013 international joint conference
+(August 2013).
+Lo, Andrew W., Mamaysky, H., & Wang, J. (2000). Foundations of technical analysis:
+Computational algorithms, statistical inference, and empirical implementation.
+The Journal of Finance, 55(4), 1705–1770. http://dx.doi.org/10.1111/00221082.00265.
+Lunga, D., & Marwala, T. (2006). Online forecasting of stock market movement
+direction using the improved incremental algorithm. In I. King, J. Wang, L.-W.
+Chan, & D. Wang (Eds.), Neural Information Processing. Lecture Notes in Computer
+Science (Vol. 4234, pp. 440–449). Berlin Heidelberg: Springer. http://link.
+springer.com/chapter/10.1007/11893295_49.
+Malkiel, Burton G. (2003). The efﬁcient market hypothesis and its critics. The Journal
+of Economic Perspectives, 17(1), 59–82. http://dx.doi.org/10.2307/3216840.
+Malkiel, B. G., & Fama, E. F. (1970). Efﬁcient capital markets: A review of theory and
+empirical work⁄. The Journal of Finance, 25(2), 383–417. http://dx.doi.org/
+10.1111/j.1540-6261.1970.tb00518.x.
+Manahov, V., Hudson, R., & Gebka, B. (2014). Does high frequency trading affect
+technical analysis and market efﬁciency? and if so, How? Journal of International
+Financial Markets, Institutions and Money, 28, 131–157. http://dx.doi.org/
+10.1016/j.intﬁn.2013.11.002.
+Meyer, D., Dimitriadou, E., Hornik, K., Weingessel, A., & Leisch, F. (2012). R package
+e1071: Misc functions of the department of statistics (e1071). Available at:
+http://cran.r-project.org/web/packages/e1071/index.html.
+Nemenyi. P. B. (1963). Distribution-free multiple comparisons (PhD thesis), Princeton
+University.
+Oh, K. J., & Kim, K.-j. (2002). Analyzing stock market tick data using piecewise
+nonlinear model. Expert Systems with Applications, 22(3), 249–255. http://
+dx.doi.org/10.1016/S0957-4174(01)00058-6.
+
+
+7056
+
+M. Ballings et al. / Expert Systems with Applications 42 (2015) 7046–7056
+
+Ou, P., & Wang, H. (2009). Prediction of stock market index movement by ten data
+mining techniques. Modern Applied Science, 3(12), P28. http://dx.doi.org/
+10.5539/mas.v3n12P28.
+Pai, P.-F., & Lin, C.-S. (2005). A hybrid ARIMA and support vector machines model in
+stock price forecasting. Omega, 33(6), 497–505. http://dx.doi.org/10.1016/
+j.omega.2004.07.024.
+Paleologo, G., Elisseeff, A., & Antonini, G. (2010). Subagging for credit scoring
+models. European Journal of Operational Research, 201(2), 490–499.
+Patel, J., Shah, S., Thakkar, P., & Kotecha, K. (2015). Predicting stock and stock price
+index movement using Trend Deterministic Data Preparation and machine
+learning techniques. Expert Systems with Applications, 42, 259–268. http://
+dx.doi.org/10.1016/j.eswa.2014.07.040.
+Pesaran, M. Hashem, & Timmermann, Allan (1995). Predictability of stock returns:
+Robustness and economic signiﬁcance. The Journal of Finance, 50(4), 1201–1228.
+http://dx.doi.org/10.1111/j.1540-6261.1995.tb04055.x.
+Provost, F., Fawcett, T., & Kohavi, R. (1997). The case against accuracy estimation for
+comparing induction algorithms. In Proceedings of the ﬁfteenth international
+conference on machine learning (pp. 45–453). Morgan Kaufmann.
+Qian, B., & Rasheed, K. (2007). Stock market prediction with multiple classiﬁers.
+Applied Intelligence, 26(1), 25–33. http://dx.doi.org/10.1007/s10489-006-00017.
+Rechenthin, M., Street, W. N., & Srinivasan, P. (2013). Stock chatter: using stock
+sentiment to predict price direction (SSRN Scholarly Paper No. ID 2380419).
+Social Science Research Network, Rochester, NY.
+Rechenthin, M., & Street, W. N. (2013). Using conditional probability to identify
+trends in intra-day high-frequency equity pricing. Physica A, 392, 6169–6188.
+http://dx.doi.org/10.1016/j.physa.2013.08.003.
+Ripley, B. (1996). Pattern recognition and neural networks. Cambridge University
+Press.
+Ripley, B. (2013). R package nnet: Feed-forward neural networks and multinomial
+log-linear models. Available at: http://cran.r-project.org/web/packages/nnet/
+index.html.
+Rodriguez, Pedro N., & Rodriguez, A. (2004). Predicting stock market indices
+movements. In C. Brebia (Ed.), Computational Finance and its Applications.
+Southampton: Marco Constantino, Wessex Institute of Technology. Available at
+SSRN: http://ssrn.com/abstract=613042.
+Saad, E. W., Prokhorov, D. V., & Wunsch, D. C. (1996). Advanced neural network
+training methods for low false alarm stock trend prediction. IEEE International
+Conference on Neural Networks, 4, 2021–2026. http://dx.doi.org/10.1109/
+ICNN.1996.549212.
+Saad, E. W., Prokhorov, D. V., & Wunsch, D. C. (1998). Comparative study of stock
+trend prediction using time delay, recurrent and probabilistic neural networks.
+IEEE Transactions on Neural Networks, 9(6), 1456–1470. http://dx.doi.org/
+10.1109/72.728395.
+Sarle, W. S. (1997). Should I standardize the input variables (column vectors)?,
+periodic posting to the Usenet newsgroup comp.ai.neural-nets, Neural Network
+FAQ, part 2 of 7. URL <ftp://ftp.sas.com/pub/neural/FAQ2.html#A_std_in>.
+
+Schöneburg, E. (1990). Stock price prediction using neural networks: A project
+report.
+Neurocomputing, 2(1), 17–27. http://dx.doi.org/10.1016/09252312(90)90013-H.
+Senol, D., & Ozturan, M. (2008). Stock price direction prediction using artiﬁcial
+neural network approach: The case of turkey. Journal of Artiﬁcial Intelligence,
+1(2), 70–77.
+Spackman, K. A, (1991). Maximum likelihood training of connectionist models:
+Comparison with least squares back-propagation and logistic regression. In
+Proceedings of the annual symposium on computer application in medical care (pp.
+285–289).
+Subha, M. V., & Nambi, S. T. (2012). Classiﬁcation of Stock Index movement using Knearest neighbours (k-NN) algorithm. WSEAS Transactions on Information
+Science & Applications, 9(9), 261–270. P259.
+Tan, X., Chen, S., Zhou, Z.-H., & Zhang, F. (2005). Recognizing partially occluded,
+expression variant faces from single training image per person with SOM and
+Soft k-NN ensemble. IEEE Transactions on Neural Networks, 16(4), 875–886.
+Tibshirani, R. (1996). Regression shrinkage and selection via the Lasso. Journal of the
+Royal Statistical Society: Series B Methodology, 58, 267–288.
+Tsinaslanidis, P. E., & Kugiumtzis, D. (2014). A prediction scheme using perceptually
+important points and dynamic time warping. Expert Systems with Applications,
+41, 6848–6860. http://dx.doi.org/10.1016/j.eswa.2014.04.028.
+Venables, W. N., & Ripley, B. D. (2002). Modern Applied Statistics with S (4th ed.). New
+York: Springer.
+Wang, Y.-F. (2002). Predicting stock price using fuzzy grey prediction system. Expert
+Systems with Applications, 22(1), 33–38. http://dx.doi.org/10.1016/S09574174(01)00047-1.
+Wang, J.-L., & Chan, S.-H. (2007). Stock market trading rule discovery using pattern
+recognition and technical analysis. Expert Systems with Applications, 33(2),
+304–315. http://dx.doi.org/10.1016/j.eswa.2006.05.002.
+Wei, L.-Y., & Cheng, C.-H. (2011). A hybrid recurrent neural networks model based
+on synthesis features to forecast the Taiwan stock market. International Journal
+of Innovative Computing, Information and Control, 8(8), 5559–5571.
+Widom, J. (1995). Research problems in data warehousing. In Proceedings of the
+fourth international conference on information and knowledge management, CIKM
+’95 (pp. 25–30). New York, NY, USA: ACM. 10.1145/221270.221319.
+Wu, M.-C., Lin, S.-Y., & Lin, C.-H. (2006). An effective application of decision tree to
+stock trading. Expert Systems with Applications, 31(2), 270–274. http://
+dx.doi.org/10.1016/j.eswa.2005.09.026.
+Yeh, I.-C., & Hsu, T.-K. (2014). Exploring the dynamic model of the returns from
+value stocks and growth stocks using time series mining. Expert Systems with
+Applications, 41, 7730–7743. http://dx.doi.org/10.1016/j.eswa.2014.06.036.
+Zhou, Z.-H. (2012). Ensemble methods: Foundations and algorithms, machine learning
+& pattern recognition series. Boca Raton FL: Chapman & Hall/CRC.
+Zikowski, K. (2015). Using volume weighted support vector machines with walk
+forward testing and feature selection for the purpose of creating stock trading
+strategy. Expert Systems with Applications, 42, 1797–1805. http://dx.doi.org/
+10.1016/j.eswa.2014.10.001.
+
+
+
