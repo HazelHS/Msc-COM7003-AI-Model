@@ -15,7 +15,7 @@ Production Cycle!!:
 1. have complete and processed dataset.
 1.2: to reduce dimentionality, "sigluar value decomposition"  princeiple component analysis &/or univarate analysis
 2. features selection
-3. apply model
+3. choose model
 4. train model
 5. evaluation
 6. redo feature selection with hyperparameter tuning. (grid search, random search, bayesian search[recomended])
@@ -173,5 +173,21 @@ Find a specialized crypto data provider with MVRV Z-Score (paid options like Gla
 Calculate it yourself using raw blockchain data (market value and realized value data)
 Implement the formula using the Pine Script logic shown on TradingView (requires cryptocurrency price history and on-chain data)
 The TradingView script is valuable as a reference for understanding how MVRV Z-Score is calculated, but doesn't solve the fundamental issue of needing a free data source for this metric.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+I would like for you to analyise both the papers methods, and the code implementation of each. Compare them purely on they're mathematical parity with they're respective papers and give me a text output that I can copy and paste that updates the first text block describing the implementations. I need to know how accurate it is to the papers and how both work and relate to eachother. And I need to check if the original text in that block is indeed accurate or if it needs changing. Thank you.
+
 
 

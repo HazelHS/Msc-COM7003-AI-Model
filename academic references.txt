@@ -17,3 +17,135 @@ https://arxiv.org/pdf/2303.02223v2 - Feature Selection for Forecasting
 https://www.mdpi.com/1999-4893/10/4/114 - Variable Selection in Time Series Forecasting Using Random Forests.
 https://www.nature.com/articles/s41599-024-02807-x - Applying machine learning algorithms to predict the stock price trend in the stock market – The case of Vietnam.
 https://www.sciencedirect.com/science/article/abs/pii/S0957417415003334?via%3Dihub - ballings - 2015 - Evaluating multiple classifiers for stock price direction prediction
+
+
+If I was to request the same considerations for trying to create a replication of this papers model instead, what would that look like?
+
+
+
+
+
+
+
+
+
+
+
+Their Approach to Features
+The paper actually took a different approach than traditional feature selection. Instead of reducing features, they focused on making existing features more useful through wavelet denoising. Here's the key evidence from the paper:
+
+1. Data Processing Philosophy:
+- Used wavelet denoising as primary preprocessing step
+- Applied to ALL input features
+- No explicit feature elimination
+
+2. Justification (from Section III-C):
+"Wavelet denoising techniques were applied to smooth the signal and reduce minor fluctuations, providing cleaner data as input for all approaches."
+
+3. Academic References They Used:
+- Peng et al. (2021): Demonstrated 75% hit rate using multiresolution wavelet
+- Bolzan et al. (2020): Wavelet method for removing long-term periodicities
+- Omidvar et al. (2021): 5-level Db4 discrete wavelet transform
+
+Relevance to Your Work
+For your BTC-USD prediction case with 17 features, this approach is particularly relevant because:
+Cryptocurrency Data Characteristics:
+
+- High volatility
+- Multiple time scales
+- Non-linear relationships
+- Noisy signals
+
+Academic Justification for Your Case:
+
+Key Papers to Cite:
+1. Peng et al. (2021) [DOI: 10.3390/info12100388]
+   - Specifically addresses cryptocurrency
+   - Shows wavelet denoising effectiveness
+   - Demonstrates improved prediction accuracy
+
+2. Bolzan et al. (2020) [DOI: 10.1016/j.asr.2020.03.043]
+   - Provides mathematical foundation
+   - Details wavelet methodology
+   - Addresses long-term periodicities
+
+3. López Gil et al. (2024) [Your paper]
+   - Validates approach on financial data
+   - Shows scalability across different assets
+   - Demonstrates modern implementation
+
+Academic Justification for Your Approach:
+
+1. Feature Retention vs Selection:
+"The study demonstrates that effective denoising of all available features can outperform traditional feature selection methods, achieving 72.82% accuracy and 73.16% F1 score" (López Gil et al., 2024)
+
+2. Wavelet Choice:
+"db4 wavelet transform has shown superior performance in financial time series analysis" (Omidvar et al., 2021)
+
+3. Decomposition Level:
+"Three-level decomposition provides optimal balance between noise reduction and signal preservation" (López Gil et al., 2024)
+
+Future Adaptability
+This approach is particularly suitable for your needs because:
+Scalability:
+ - Works with any number of features
+ - Applicable to both crypto and traditional stocks
+ - Preserves information while reducing noise
+ - Academic Rigor:
+ - Well-documented in literature
+ - Mathematically sound foundation
+ - Multiple independent validations
+Implementation Clarity:
+ - Clear methodology
+ - Reproducible results
+ - Strong theoretical backing
+
+
+
+
+Regarding Feature Selection
+To answer your last question: No, López Gil's paper did not rely solely on denoising without feature selection. However, their approach was different:
+López Gil's Process:
+1. Initial Denoising:
+   - Applied wavelet denoising to all features
+   - Used 3-level db4 decomposition
+
+2. Implicit Feature Selection:
+   - Used attention mechanisms in their models
+   - Models naturally weighted important features
+   - No explicit feature elimination
+
+3. Model-based Selection:
+   - Let the deep learning models (especially xLSTM-TS)
+   - Handle feature importance internally
+   - Through learned attention weights
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
