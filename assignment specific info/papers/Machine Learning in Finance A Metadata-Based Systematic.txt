@@ -1,0 +1,2778 @@
+Journal of
+
+Risk and Financial
+Management
+Article
+
+Machine Learning in Finance: A Metadata-Based Systematic
+Review of the Literature
+Thierry Warin 1
+
+and Aleksandar Stojkov 2, *
+1
+2
+
+*
+
+HEC Montreal, Montréal, QC H3T 2A7, Canada; thierry.warin@hec.ca
+Iustinianus Primus Law Faculty, Ss. Cyril and Methodius University in Skopje, Skopje 1000, North Macedonia
+Correspondence: a.stojkov@pf.ukim.edu.mk
+
+Abstract: Machine learning in finance has been on the rise in the past decade. The applications of
+machine learning have become a promising methodological advancement. The paper’s central goal is
+to use a metadata-based systematic literature review to map the current state of neural networks and
+machine learning in the finance field. After collecting a large dataset comprised of 5053 documents,
+we conducted a computational systematic review of the academic finance literature intersected with
+neural network methodologies, with a limited focus on the documents’ metadata. The output is a
+meta-analysis of the two-decade evolution and the current state of academic inquiries into financial
+concepts. Researchers will benefit from a mapping resulting from computational-based methods
+such as graph theory and natural language processing.
+Keywords: efficient market hypothesis; machine learning; network analysis; sentiment analysis
+##########
+#######
+Citation: Warin, Thierry, and
+Aleksandar Stojkov. 2021. Machine
+Learning in Finance: A
+Metadata-Based Systematic Review
+of the Literature. Journal of Risk and
+Financial Management 14: 302.
+https://doi.org/10.3390/
+jrfm14070302
+Academic Editor: Reza Tajaddini
+Received: 25 April 2021
+Accepted: 21 June 2021
+Published: 2 July 2021
+
+Publisher’s Note: MDPI stays neutral
+with regard to jurisdictional claims in
+published maps and institutional affiliations.
+
+Copyright: © 2021 by the authors.
+Licensee MDPI, Basel, Switzerland.
+This article is an open access article
+distributed under the terms and
+conditions of the Creative Commons
+Attribution (CC BY) license (https://
+creativecommons.org/licenses/by/
+4.0/).
+
+1. Introduction
+The theory and practice of finance have undergone a remarkable evolution in the past
+five decades. The emergence and acceptance of the Efficient Market Hypothesis (EMH),
+its subsequent mixed empirical record, the rise of pragmatically driven ‘Chartism’, and
+the present co-evolution of quantitative and behavioral finance represent some exciting
+significant developments in the financial domain.
+The vibrancy of finance can also be observed by two methodological revolutions
+bringing sophisticated technical analysis of financial phenomena. Machine Learning Algorithms (MLAs) application in explaining and forecasting financial market trends has
+been a significant methodological advancement in the past three decades. Another critical
+research direction has been the rise of sentiment analysis of unstructured data relating to
+relevant news for financial markets.
+In this article, we propose to take a comprehensive look at machine learning in finance.
+For that, we will use neural network as a keyword in our data collection. Using neural
+network as a keyword does not limit us to just neural networks approaches, because the
+source data will also contain other terms such as machine learning, deep learning, etc. The
+rationale behind using neural network as a core keyword is that the most influential papers
+introducing machine learning in finance used neural networks as a methodology of choice
+(i.e., Gencay and Stengos 1998).
+Conventional systematic literature reviews (SLR) are a process that enables the collection
+of relevant evidence on a given topic that meets predefined eligibility criteria and provides
+an answer to the research questions formulated. A meta-analysis necessitates descriptive
+and/or inferential statistical methods to synthesize data from multiple studies on a particular
+subject. The techniques facilitate the generation of knowledge from a variety of studies,
+both qualitative and quantitative. The conventional method consists of four fundamental
+steps: search (define the search string and database types), appraisal (pre-defined literature
+inclusion and exclusion criteria, and quality assessment criteria), synthesis (extract and categorize the data), and analysis (narrate the results and finally reach a conclusion) (SALSA)
+
+J. Risk Financial Manag. 2021, 14, 302. https://doi.org/10.3390/jrfm14070302
+
+https://www.mdpi.com/journal/jrfm
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+2 of 31
+
+(Mengist et al. 2020). SLR is defined as a “systematic, explicit, and reproducible method
+for identifying, evaluating, and synthesizing the existing body of completed and recorded
+work” (del Amo et al. 2018). According to Grant and Booth (2009), the SALSA framework
+is a methodology for determining the search protocols that the SLR should follow. This
+ensures methodological precision, standardization, comprehensiveness, and reproducibility. The majority of scientific work employed this methodological approach to mitigate
+the risk of publication bias and increase the work’s acceptability (del Amo et al. 2018;
+Grant and Booth 2009; Malinauskaite et al. 2019; Perevochtchikova et al. 2019). Thus, most
+review articles followed the Preferred Reporting Items for Systematic Reviews and MetaAnalyses Protocol and the Search, Appraisal, Synthesis, and Analysis (SALSA) framework
+(Grant and Booth 2009).
+From SALSA, this article adds a pre-processing step to reduce potential human biases
+and highlights new results based on text-based analyses of the data collected.
+Indeed, our main contribution is a computational systematic literature review of
+machine learning (and neural networks in particular) in finance between 1990 and 2021.
+We believe it is crucial to map the evolution of these new technologies and methodologies
+in our field. When scholars in the computer science field essentially develop the Artificial
+Intelligence (AI) sub-domain and machine learning techniques, including deep learning and
+reinforcement learning, it is interesting to look at the bridges between these developments
+and the ones in finance.
+A second contribution is methodological. We indeed perform a metadata-based
+systematic review of the relevant literature. In the methodology section, we will provide a
+precise definition of the approach. We believe it is an essential methodological complement
+to conventional qualitative reviews and econometric-based meta-analyses. A metadata
+analysis means we will collect more articles than in a traditional systematic literature review
+and use algorithms to filter and sort the initial dataset. The methodological approach will
+be twofold: (1) we will use Natural Language Processing (NLP) techniques to extract textas-data information, and (2) we will use graph theory to visualize potential collaboration
+networks. These two methodological approaches combined will provide us a different
+analysis than a formal systematic review. It is not to be seen as a substitute, but instead as
+a complement to the more conventional approach.
+As an aside, and although we will not spend time on this aspect, a third contribution
+could be an epistemological one in nature and leverages our first contribution on the
+mapping of machine learning in finance to reflect on the implications of its significance
+on the old debate between theorists and chartists in finance. Markowitz (1952); Sharpe
+(1963, 1964), EMH emerged as a dominant paradigm providing a formal explanation
+of financial markets’ behavior. Empirical approaches emerged under the umbrella of
+“Chartism” (e.g., Berardi 2011). Chartists-or empirically minded technical analysts-have
+used extrapolative rules to discover statistical regularities in the time series for prices
+(e.g., Hsieh 1989; Frankel and Froot 1990; Taylor and Allen 1992; Menkhoff 1997, 2010;
+Lo 2004; Neely et al. 2009; Kaucic 2010; Gradojevic and Gencay 2013; Neely et al. 2014;
+Gerritsen et al. 2020). Additionally, a burgeoning literature on agent-based financial market
+models emerged, allowing various interactions between chartists and fundamentalists (e.g.,
+Day and Huang 1990). Thanks to ML techniques, induction generates causal relationships
+based on information at the moment of estimation (Popper 1962; Warin 2005). These causal
+relationships are at the root of the predictive power of ML models. In the ML context,
+causality and prediction seem to get theorists and technical analyses closer.
+The structure of the paper is as follows. In the next section, we provide a metadatabased systematic review of the academic literature on finance, published between January
+1990 and May 2021. The third section elaborates the conceptual structures behind the
+relevant literature by exploring the keywords, keywords co-occurrences, and the topics’
+evolution based on a topic modeling technique. In the next section, we examine the
+intellectual structures behind the evolution of analytical thinking on finance by focusing on
+what vehicles and which organizations are the main engines in this topic dynamics. The
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+3 of 31
+
+fifth section critically examines the social structures of our sample, encompassing different
+measures to capture the social connections of authors, co-citations, and collaborations across
+institutions. The concluding remarks summarize the potential of machine learning, neural
+networks, and in general, the augmented technical analysis in analyzing financial markets.
+2. Materials and Methods
+A standard introduction to financial theory would often distinguish several valuation
+models that might be useful for analyzing securities and managing portfolios (see Lee and
+Lee 2010). Since the 1970s, the evolution of financial theory has been greatly influenced and
+informed by the emergence and acceptance of the EMH and the Modern Portfolio Theory
+(MPT) (Prasch and Warin 2016). Given the vast literature on financial analytics models, we
+confine our critical review only to the main strands of the relevant academic literature.
+To illustrate the development of neural networks in finance, we conduct a scientometric study of the academic literature on finance, published between January 1990 and
+May 2021.
+2.1. Methodology
+The methodology used here is a systematic literature review with a different approach
+to more conventional reviews. In usual literature reviews, the author selects the relevant
+literature based on her domain or methodological expertise. Then, the analysis is based
+on the content found in the sample that has been created in the initial stage. The primary
+characteristics of SLR and its associated procedure, meta-analysis, are the following: (1) a
+clearly stated research question that the study will address; (2) explicit and reproducible
+objectives; (3) search strings that include all related studies that meet the eligibility criteria;
+and (4) an assessment of the quality/validity of the selected studies.
+To have a comprehensive look, conventional systematic literature might not be the
+best choice. Considering the pace of the new developments in the artificial intelligence
+field, we propose here to map the extent of the usage of these new technologies and
+methodologies in finance. Systematic literature is a mapping exercise of a knowledge
+area, and it is also really focused, with between 50 to 200 papers being analyzed. Here,
+we also want to map the machine learning knowledge area while collecting a significant
+number of documents. The large dataset size will allow us to build an analysis based on the
+documents’ metadata, such as authors’ affiliations, universities, etc. This research protocol
+built around a metadata-based systematic literature review could be considered the first
+phase in a systematic literature review.
+In contrast to more conventional methods, we have two phases: First, similar to a
+traditional systematic review, the selection of the relevant articles is performed via a search
+engine, except the expert does not select the relevant articles from the results presented to
+her. Here, the expert chooses the keywords and creates a comprehensive dataset of all the
+documents matching the keywords in the title, abstract, keyword, and keyword + section.
+The first phase, being automated, allows the utilization of quantitative criteria to filter
+down the dataset. Then, in the second phase, a dataset reduction to 50–200 documents is
+made by an expert.
+To summarize, one of the critical contributions of a metadata-based systematic literature review is to reduce—though not wholly—potential human biases. Another significant
+contribution of this new methodology based on these two phases is that it allows us to
+consider the documents’ metadata in a text format. By adding a computational treatment
+based on Natural Language Processing (NLP) techniques to transform the text into data,
+we can then provide analyses that would not be possible otherwise, leveraging analytical
+approaches such as graph theory. It is particularly relevant to discover research patterns,
+research history, the actual research vehicles, or to be able to associate discoveries with
+institutions, to name a few examples. These sophisticated techniques allow us to perform a
+literature mapping thanks to this computational approach.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+4 of 31
+
+Another critical point is the large size of the dataset, which has a lot of favorable
+statistical properties. We will also use algorithms to help us analyze quantities of papers
+that we would not be able to do otherwise due to the sheer quantity of information analyzed
+by a human.
+Finally, another important dimension is using each document’s reference section to
+perform metrics that allow researchers to understand the knowledge transmission patterns.
+Beyond the computational treatment and to leverage the results obtained from these
+computations, we use the following theoretical framework. Aria et al. (2017) propose to
+look at three different structures: the conceptual, intellectual, and social structures. The
+conceptual structures are about leveraging the metadata to help us understand which
+concepts and topics are used in the academic conversation and how they have evolved
+through time. The intellectual structure will help us understand who produced these
+concepts, which journals played a pivot role in this nascent literature, and which articles
+were among the most referenced that fueled this literature. Lastly, the social structure will
+allow us to look at authors’ collaborations and the knowledge support from universities
+and countries through their collaborations.
+The data collection will be conducted using a “human-in-the-loop” (HIL) approach. It
+consists of proceeding to a purely automated data collection with an ex-post validation
+based on the field expertise.
+First, we use an automated process in two phases as described earlier. The search
+was performed on the publisher-independent citation database “Web of Science” (WoS),
+Clarivate Analytics, by using combinations of keywords (and simultaneously removing the
+duplicates): “neural network*” AND “finance*”.
+These keywords allow us to build our sample. This sample does not aim at being
+representative of the domain. Instead, it intends to analyze the dynamics of the conversation about neural networks in finance. By building a sample about a modeling technique,
+we risk overfitting the true representativity of neural networks in finance if someone is
+interested in generalizing; this is not our intent.
+We then use human-based field expertise to review the references anyway while
+adding some potential missing references based on the domain expertise (see Appendix A
+for a list of the added references). HIL allows us to have a combined qualitative assessment
+with pure automatic data collection. This second step is marginal in terms of added articles,
+but it is crucial for quality control.
+Our approach differs at these two levels: in the sample creation, we try to be as
+comprehensive as possible on a particular topic, here “neural network*” AND “financ*”.
+The stars mean that we collect any occurrence with a declination of the word’s root. We
+use neural networks as a proxy for machine learning techniques as authors who use
+neural networks also reference machine learning in their keywords (among 10,160 used
+keywords and 3606 keywords Plus, see Table 1). So, the sample includes papers on
+machine learning as well. The sample is likely not comprehensive, as in any systematic
+literature review, but it is larger than conventional methods. The sample is collected by
+finding matches in the text title, the abstract, the keywords, and the keywords + in Web
+of Science. It helps us create a 5053 rich sample, a larger sample than regular, systematic
+reviews. We can deal with a larger sample thanks to the second differentiation point of
+our methodology: leveraging the sample metadata through computational techniques.
+The dataset can be found on the following webpage, including a search engine: https:
+//warin.ca/posts/article-machine-learning-finance/ (accessed date: 29 June 2021).
+In this second level of differentiation, we create and use the metadata from the title,
+the abstract, the keywords, and the keywords +. The creation of metadata is conducted
+via Natural Language Processing (NLP) techniques. We prepare the dataset by selecting
+tokens, n-grams, etc. (Aria and Cuccurullo 2017).
+These metadata are helpful to provide quantitative analysis to the sample. Using these
+machine learning tools allows us to have a research synthesis that can be leveraged with
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+5 of 31
+
+other techniques such as social network analysis. We can also look at the dynamics of the
+research contributions, the collaborations, the idea generation, and propagation.
+Table 1. Preliminary information about data, overall period, and per year.
+Description
+
+Overall Time Period (1990–2021)
+
+2017
+
+2018
+
+2019
+
+2020
+
+2021
+
+2533
+5053
+7.74
+14.66
+1.699
+105,684
+
+265
+355
+4
+10.9
+2.18
+10,844
+
+329
+436
+3
+8.278
+2.069
+13,281
+
+374
+578
+2
+5.005
+1.668
+18,239
+
+333
+592
+1
+2.255
+1.128
+22,817
+
+107
+157
+0
+0.465
+0.465
+7313
+
+Sources (Journals, Books, etc.)
+Documents
+Average years from publication
+Average citations per documents
+Average citations per year per document
+References
+
+Let us first look at the descriptive statistics before studying the dynamics of the
+research in this sample. We present the main descriptive statistics and empirical findings
+from the systematic literature review in the next step.
+2.2. Descriptive Statistics
+The relevant ‘universe’ of the literature consists of references identified in the HILWeb of Science citation database (see Table 1) totaling 5053 documents, most of which
+are published in refereed journals (see Table 2). The literature review covers the period
+between 1 January 1990, and 10 May 2021 (see Figure 1).
+Table 2. Document type, overall period, and per year.
+Description
+Article
+Article; easy access
+Article; proceedings paper
+Article; retracted publication
+Bibliography
+Biographical item
+Book review
+Correction
+Editorial material
+Letter
+Meeting abstract
+Proceedings paper
+Review
+Review; early access
+
+Overall Time Period (1990–2021)
+
+2017
+
+2018
+
+2019
+
+2020
+
+2021
+
+2719
+67
+143
+1
+1
+1
+6
+3
+9
+3
+3
+1974
+120
+3
+
+196
+0
+1
+0
+0
+0
+0
+0
+0
+0
+0
+150
+8
+0
+
+222
+0
+4
+1
+0
+0
+0
+0
+2
+0
+0
+194
+13
+0
+
+339
+0
+2
+0
+0
+0
+0
+1
+1
+0
+0
+216
+19
+0
+
+484
+0
+0
+0
+0
+0
+0
+0
+0
+0
+1
+79
+28
+0
+
+143
+0
+1
+0
+0
+0
+0
+1
+1
+0
+0
+0
+11
+0
+
+The overall number of documents in our sample is 5053 (see Table 1). This number
+is the cumulative result of each year, and we can observe a significant rise in the number
+of documents per year. The average citations per document are 14.66 but have evolved
+through time to numbers ranging between 1 and 2. As a reference point, the total citations
+per paper in economics and business for the highly cited papers were 3.04 for the 2011–2015
+period and 3.91 for the 2017–2021 period. In Social Sciences in general, the total citations
+per paper for the highly cited papers were 2.89 for the 2011–2015 period and 3.30 for the
+2017–2021 period. These results show the normalization of machine learning in financerelated documents.
+The number of articles dominates the sample for the overall period (see Table 2) with
+2719 occurrences, followed by 1974 proceedings papers. So, short contributions (articles
+and proceedings papers) represent the actual output in this sample. Authors indeed
+tend to produce the knowledge body about machine learning in finance through short
+contributions (e.g., Gu et al. 2020).
+
+
+2.2. Descriptive Statistics
+
+J. Risk Financial Manag. 2021, 14, 302
+
+The relevant ‘universe’ of the literature consists of references identified in the HILWeb of Science citation database (see Table 1) totaling 5053 documents, most of which are
+6 of 31
+published in refereed journals (see Table 2). The literature review covers the period
+between 1 January 1990, and 10 May 2021 (see Figure 1).
+
+Figure
+Figure1.1.Article
+Articlecount
+countthrough
+throughtime.
+time.
+
+Our database of references covers 308 keywords and 946 author appearances (see
+Table 3). Most of the publications are multi-authored documents, indicating the increasingly
+collaborative nature of research in the finance domain.
+Table 3. Document content and authors, overall period, and per year.
+Description
+Keyword Plus (ID)
+Author’s Keywords (DE)
+Authors
+Author Appearances
+Authors of single-authored documents
+Authors of multi-authored documents
+
+Overall Time Period
+
+2017
+
+2018
+
+2019
+
+2020
+
+2021
+
+3607
+10164
+9648
+14628
+520
+9128
+
+604
+1251
+939
+1056
+44
+895
+
+693
+1429
+1210
+1350
+40
+1170
+
+849
+1804
+1655
+1972
+37
+1618
+
+950
+2044
+1651
+1985
+47
+1604
+
+234
+688
+492
+519
+8
+484
+
+The descriptive statistical analysis also reveals that, on average, there are 2.32 authors
+per publication and 2.72 co-authors per publication (see Table 4). Most of the documents
+are collectively written. Only 661 documents have a single author.
+Table 4. Authors’ collaboration, overall period, and per year. Note: The Collaboration Index (CI) is calculated as total
+authors of multi-authored articles/total multi-authored articles.
+Description
+Single-authored documents
+Documents per Author
+Authors per Document
+Co-Authors per Documents
+Collaboration Index
+
+Overall Time Period
+
+2017
+
+2018
+
+2019
+
+2020
+
+2021
+
+661
+0.524
+1.91
+2.89
+2.08
+
+46
+0.378
+2.65
+2.97
+2.90
+
+42
+0.360
+2.78
+3.10
+2.97
+
+37
+0.349
+2.86
+3.41
+2.99
+
+49
+0.359
+2.79
+3.35
+2.95
+
+9
+0.319
+3.13
+3.31
+3.27
+
+To conclude this descriptive statistics section, we observed a similar trend in the
+academic production about machine learning in finance based on short documents and
+co-authorship. Let us now analyze the three different structures: conceptual, intellectual,
+and social.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+7 of 31
+
+3. Conceptual Structures of Our Sample
+The application of AI in the domain of finance is not a recent phenomenon in the
+academic literature (e.g., Hutchinson et al. 1994; Lo et al. 2000; Gavrishchaka and Banerjee
+2006; De Spiegeleer et al. 2018; Huang et al. 2020). However, the last decade witnessed
+empirical studies using Machine Learning Algorithms (MLAs) to examine credit risk
+analysis and forecasting stock returns. As Dixon et al. (2020, p. vii) highlight, “ML in
+finance sits at the intersection of several emergent disciplines, including pattern recognition,
+financial econometrics, statistical computing, probabilistic programming, and dynamic
+programming”. One of the main competitive advantages of ML is that computers have an
+outstanding ability to process large amounts of financial information.
+From a methodological perspective, the empirical studies rely not only on conventional
+MLAs such as support vector machine (SVM) and k-nearest neighbors (kNN) but also on
+Deep Learning (DL) (e.g., Krauss et al. 2017; Fischer and Krauss 2018; Huang et al. 2020), an
+advanced technique based on artificial neural network algorithms (e.g., Chung-Ming and
+White 1994; Donaldson and Kamstra 1997; Hans and Griensven 1998; Gencay and Stengos
+1998; Blake and Kapetanios 2000; Garcia and Gencay 2000; Fernandez-Rodrıguez et al.
+2000; Bekiros and Georgoutsos 2008; Kristjanpoller and Minutolo 2018; Atsalakis et al. 2019).
+Some DL models were also used to predict stock prices (e.g., Kraus and Feuerriegel 2017;
+Minh et al. 2017; Jiang et al. 2018; Matsubara et al. 2018). For instance, Schumaker and
+Chen (2010) make a stock market forecasting based on financial news articles using a text
+classification approach. Glasserman et al. (2020) study using the supervised Latent Dirichlet
+Allocation (sLDA) framework to select news articles topics to explain stock returns.
+The network analysis has been used more in the context of financial stability analysis
+and financial linkages. Another strand of the literature examines the impact of views and
+opinions of investors-also known as investor sentiment-on stock price movements. The
+sentiment analysis aims to capture news by traditional and/or social media and assess the
+investors’ views and market mood (e.g., Mitra and Mitra 2011; Mitra and Yu 2016). The
+assessment of market sentiment-often captured by market indices-can be strengthened by
+sentiment analysis of the market mood or investors’ emotions. A popular approach is to
+extract relevant news articles, preprocess the text, and assign a sentiment score to each
+article. The sentiment score is then commonly calculated as the difference between the
+number of positive and negative words in the article divided by the total number of words.
+The studies use a reputable lexicon of financial terms-such as Loughran and McDonald
+(2011) lexicon-to determine positive and negative words.
+In the following sub-sections, we will consider the conceptual structures of our sample
+by looking at the keywords, the keywords co-occurrences, and the evolution of the topics
+based on a topic modeling technique.
+3.1. Keywords Analyses
+We consider here the entire words that we find in the keyword section of every document. Remember that the sample was created using “neural network*” AND “finance*”
+(see Figure 2). It is thus expected that authors would again put neural networks as keywords in the keyword section. They will also associate other keywords such as prediction,
+forecasting, or machine learning, including deep learning. This is evidence that our sample
+goes beyond just neural networks but also covers other related topics.
+It is interesting to see that deep learning is a very recent addition to the fintech field,
+as approximated by our sample. It is also interesting to notice that it is recently that the
+reasons why we would use the new techniques in finance have appeared, for instance, the
+role of these new methodologies in prediction. Machine learning techniques are indeed a
+paradigm shift when it comes to their predictive power.
+
+
+We consider here the entire words that we find in the keyword section of every
+document. Remember that the sample was created using “neural network*” AND
+“finance*” (see Figure 2). It is thus expected that authors would again put neural networks
+as keywords in the keyword section. They will also associate other keywords such as
+J. Risk Financial Manag. 2021, 14, 302prediction, forecasting, or machine learning, including deep learning. This is evidence that
+8 of 31
+our sample goes beyond just neural networks but also covers other related topics.
+
+Figure 2. Keywords count through time.
+Figure 2. Keywords count through time.
+
+Table 5 represents the top keywords in the overall sample and the top keywords per
+It is
+to see
+thatkeywords
+deep learning
+is a through
+very recent
+addition
+to the
+field,
+year.
+It interesting
+is interesting
+to see
+ranking
+time
+and how
+the fintech
+literature
+has
+asevolved
+approximated
+by our
+sample.
+It is alsoand
+interesting
+notice
+thatlearning
+it is recently
+the
+in machine
+learning
+ownership
+maturity,towith
+deep
+papersthat
+moving
+reasons
+we would use the new techniques in finance have appeared, for instance, the
+up the why
+ladder.
+role ofTo
+these
+new
+methodologies
+in prediction.
+Machine
+techniques
+indeed
+go beyond
+a single-dimensional
+perspective
+oflearning
+the keywords,
+let usare
+look
+now aat
+paradigm
+shift whenmatrix.
+it comes to their predictive power.
+the co-occurrences
+Table 5 represents the top keywords in the overall sample and the top keywords per
+3.2. Keywords
+Co-Occurrences
+Network Analyses
+year.
+It is interesting
+to see keywords
+ranking through time and how the literature has
+evolved
+in machine
+learning ownership
+maturity,
+with
+deep learningWhen
+papersa moving
+Now,
+we are interested
+in looking and
+at the
+keywords
+co-occurrences.
+keyword
+up
+ladder.
+is the
+used,
+it is possible to build a count matrix and compute its relationships with other
+keywords. From there, we can compute some relevant network indicators (centrality,
+density, etc.). Several figures will plot the relevance degree (centrality, or notions of
+‘importance’) against the development degree (density). Degree centrality counts the
+number of links held by each node and points at themes that can easily connect with the
+broader network. The density of a network is the frequency of realized edges relative to
+potential edges.
+In Figure 3, we represent the graphs based on the network indicators. The first figure
+is the network of keywords for the entire sample, while each other graph represents a
+network for 2021, 2020, 2019, 2018, and 2017, respectively.
+When we consider the co-occurrences networks, particularly the years 2021 and 2017,
+we observe that most of the conversations are organized around two groups, representing
+both computer techniques and mathematical approaches. Only recently, applications in
+finance are starting to appear, such as the prediction of bankruptcies.
+In Table 6, we compute the mathematical features of the networks. We observe that
+the size of the networks has been on the rise in the past years, showing an increase in the
+spread of the concepts. It is accompanied by a decrease in density through time with a
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+9 of 31
+
+slight increase in the average path length, confirming potentially that the literature opens
+up to applications.
+Table 5. Top keywords, overall period, and per year.
+Author Keywords (DE)
+
+Articles
+
+Overall Time Period
+Neural Network
+Artificial Neural Network
+Forecasting
+Machine Learning
+Deep Learning
+2021
+Neural Network
+Artificial Neural Network
+Forecasting
+Machine Learning
+Deep Learning
+2020
+Deep Learning
+Neural Network
+Machine Learning
+Artificial Neural Network
+Forecasting
+2019
+Neural Network
+Deep Learning
+Machine Learning
+Artificial Neural Network
+Forecasting
+2018
+Neural Network
+Deep Learning
+Artificial Neural Network
+Machine Learning
+Forecasting
+2017
+Neural Network
+Artificial Neural Network
+Forecasting
+Prediction
+Machine Learning
+
+Keywords-Plus (ID)
+
+Articles
+
+867
+423
+277
+274
+257
+
+Neural Networks
+Prediction
+Model
+Neural Network
+Classification
+
+800
+482
+402
+340
+305
+
+26
+22
+21
+15
+10
+
+Neural Networks
+Model
+Prediction
+Market
+Classification
+
+13
+12
+10
+8
+7
+
+87
+85
+79
+49
+42
+
+Neural Networks
+Prediction
+Model
+Neural Network
+Models
+
+81
+66
+63
+50
+40
+
+80
+72
+58
+43
+35
+
+Neural Networks
+Prediction
+Model
+Neural Network
+Classification
+
+96
+51
+49
+38
+36
+
+51
+48
+45
+35
+25
+
+Neural Networks
+Prediction
+Model
+Classification
+Neural Network
+
+83
+44
+42
+26
+25
+
+51
+39
+21
+20
+18
+
+Neural Networks
+Prediction
+Model
+Neural Network
+Classification
+
+68
+38
+34
+31
+30
+
+3.3. Topic Modeling-Based Analyses
+In the following analysis, we will add a new dimension based on structural topic
+modeling. The goal here is to complement the information we obtained from the keywords co-occurrences. A structural topic modeling first means that we will leverage
+words including the keywords section and beyond: the title section, the abstract, and the
+keyword + section.
+We tokenize all the words, and we compute the latent variables to identify potential topics.
+In the following figures, we represent this analysis. The top-left figure covers the
+whole period, while the other figures represent each year, 2021, 2020, 2019, 2018, and
+2017, respectively.
+Table 6. Graph indicators, overall period, and per year.
+Statistics
+Size
+Density
+Transitivity
+Diameter
+Degree Centralization
+Average path length
+
+Overall Time Period
+
+2021
+
+2020
+
+2019
+
+2018
+
+2017
+
+3607.000
+0.005
+0.128
+6.000
+0.298
+2.752
+
+234.000
+0.036
+0.538
+6.000
+0.188
+3.067
+
+950.000
+0.014
+0.238
+6.000
+0.229
+2.792
+
+849.000
+0.016
+0.232
+6.000
+0.303
+2.716
+
+693.000
+0.018
+0.266
+6.000
+0.317
+2.732
+
+604.000
+0.021
+0.269
+6.000
+0.333
+2.682
+
+
+J.J.Risk
+FOR PEER REVIEW
+RiskFinancial
+FinancialManag.
+Manag.2021,
+2021,14,
+14,x302
+
+1010ofof3331
+
+Figure 3. Network of authors’ keywords, overall period, and per year.
+
+foundofthe
+topicskeywords,
+mapped in
+four dimensions:
+basic
+themes, emerging or declining,
+Figure 3.We
+Network
+authors’
+overall
+period, and per
+year.
+niche themes, and motor themes.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+11 of 31
+
+Interestingly, data mining and neural networks were part of the fundamental themes
+12 of 33 it
+Since we consider mostly finished documents in our sample,
+means the work from the researchers has started a bit earlier, likely one or two years before.
+
+J. Risk Financial Manag. 2021, 14, x FOR
+PEER REVIEW
+in 2017
+(see Figure 4).
+
+Figure 4. Topic modeling, overall period, and per year.
+Figure 4. Topic modeling, overall period, and per year.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+12 of 31
+
+In 2017, a generic algorithm was an emerging theme as well as network theory. We see
+here a burgeoning reflection about what will become the contribution from data science in
+finance. Comparing 2017 and 2020, and 2021, it is interesting to see that the motor themes
+are about the predictive capacity of machine learning-based models. We can also observe
+the emerging sub-field of deep learning in finance. We can easily extrapolate and imagine
+that deep learning in finance will have a prominent future in the field.
+We want to insist on the inductive nature of machine learning: it is inductive by nature
+but
+does
+not come with the former empirical baggage of being potentially biased
+J. Risk Financial Manag. 2021, 14, x FOR
+PEER
+REVIEW
+13 and
+of 33
+lacking theoretical grounds (the falsification potential, etc.). Inductive in the context of ML
+implies finding causal patterns in empirical data.
+
+4.
+4. Intellectual
+Intellectual Structures
+Structures of
+of Our
+Our Sample
+Sample
+An
+interesting
+analysis
+stems
+the investigation
+of authors
+which and
+authors
+and
+An interesting analysis stems fromfrom
+the investigation
+of which
+organizaorganizations
+are
+driving
+the
+dynamics
+of
+this
+topic.
+tions are driving the dynamics of this topic.
+4.1. Authors
+Authors
+In the intellectual
+intellectual structure,
+structure, authors
+authors are
+are interesting
+interesting to
+to consider. We
+We can see that the
+In
+top authors have published more than 30 papers on this topic in our sample (Figure 5).
+
+Figure
+overall period,
+period, and
+and per
+per year.
+year.
+Figure 5.
+5. Top
+Top authors
+authors in
+in terms
+terms of
+of production,
+production, overall
+
+We can go a little deeper and look at the average productivity of all the authors (see
+Figure 6). It
+It has
+has not evolved much through time, and on average, every author produces
+two articles a year on this topic.
+We can also look at the authors’ dominance ranking through time (see Figure 7). The
+authors’ dominance is computed by looking at how many times an author is a first author
+in aa multi-authored
+multi-authored paper. It can be a weak
+weak indicator
+indicator as the
+the alphabetical
+alphabetical order is respected
+most of the time, irrespective of the marginal contributions, as assumed by this indicator.
+indicator.
+authors unfavored
+unfavored by
+by the
+the alphabetical
+alphabetical order,
+order,
+Interestingly, it is interesting to see that authors
+such as Zhang or Wang, are still making the top 10
+10 of
+of this
+this ranking.
+ranking.
+
+
+J. Risk Financial Manag. 2021, 14, x FOR PEER REVIEW
+J.J.Risk
+RiskFinancial
+FinancialManag.
+Manag.2021,
+2021,14,
+14,302
+x FOR PEER REVIEW
+
+Figure 6. Scientific productivity, overall period, and per year.
+Figure 6. Scientific productivity, overall period, and per year.
+Figure 6. Scientific productivity, overall period, and per year.
+
+Figure
+7. Author
+dominance
+ranking,
+overall
+period,
+and
+perper
+year.
+Figure
+7. Author
+dominance
+ranking,
+overall
+period,
+and
+year.
+Figure 7. Author dominance ranking, overall period, and per year.
+
+14 of 33
+13
+14of
+of31
+33
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+14 of 31
+
+4.2. Articles
+Table 7 illustrates the citations of the articles in our sample.
+Table 7. Most cited manuscripts, overall period, and per year.
+Article
+Overall Time Period
+Schaap Mg., 2001, J Hydrol
+Jordan Mi, 2015, Science
+Kim Kj, 2003, Neurocompeting
+Pan Wt, 2012, Knowledge-Based Syst
+Tay Feh, 2001, Omega-Int H Manage
+Sci
+2017
+Wei, Y, 2017, Ieee Trans Pattern Anal
+Mach Intell
+Bao W, 2017, Plos One
+Deng Y, 2017, Ieee Trans Neural
+Netw Learn Syst
+Barboza F, 2017, Expert Syst Appl
+Krauss C, 2017, Eur J Oper Res
+2018
+Fischer T, 2018, Eur J Oper Res
+Termeh Svr, 2018, Sci Total Environ
+Han J, 2018, Proc Natl Acad Sci USA
+Kim Hy, 2018, Expert Syst Appl
+Cai Y, 2018, Remote Sens Environ
+2019
+Altan A, 2019, Chaos Solitons
+Fractals
+Cao J, 2019, Physica A
+Long W, 2019, Knowledge-Based
+Syst
+Strubell E, 2019, 57th Annual
+Meeting of the Association for
+Computational Linguistics (ACl
+2019)
+Plawiak P, 2019, Appl Soft Comput
+2020
+Pang X, 2020, J Supercomput
+Akhtar Ms, 2020, Ieee Comput Intell
+Mag
+Ahmed R, 2020, Renew Sust Energ
+Rev
+Sezer Ob, 2020, Appl Soft Comput
+Gu S, 2020, Rev Financ Stud
+2021
+Marcelino P, 2021, Int J Pavement
+Eng
+Talwar M, 2021, J Retail Consum
+Serv
+Carta S, 2021, Expert Syst Appl
+Brodny J, 2021, J Clean Prod
+Hu Z, 2021, Appl Syst Innov
+
+Total Citations
+
+Total Citations
+per Year
+
+NTC
+
+1361
+1189
+748
+725
+
+64.8
+169.9
+39.4
+72.5
+
+20.06
+78.27
+18.34
+33.93
+
+596
+
+28.4
+
+8.79
+
+199
+
+39.8
+
+18.25
+
+198
+
+39.6
+
+18.16
+
+142
+
+28.4
+
+13.03
+
+135
+115
+
+27.0
+23.0
+
+12.38
+10.55
+
+258
+144
+129
+108
+102
+
+64.5
+36.0
+32.2
+27.0
+25.5
+
+31.17
+17.40
+15.58
+12.38
+12.32
+
+90
+
+30.0
+
+17.98
+
+60
+
+20.0
+
+11.99
+
+55
+
+18.3
+
+10.99
+
+48
+
+16.0
+
+9.59
+
+43
+
+14.3
+
+8.59
+
+44
+
+22.0
+
+19.51
+
+41
+
+20.5
+
+18.18
+
+38
+
+19.0
+
+16.85
+
+32
+29
+
+16.0
+14.5
+
+14.19
+12.86
+
+12
+
+12
+
+25.81
+
+8
+
+8
+
+17.21
+
+6
+5
+4
+
+6
+5
+4
+
+12.90
+10.75
+8.60
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+15 of 31
+
+We can go a little further and look now at the articles that authors in our sample
+include in their references. As such, those references are the foundations of this nascent
+literature in machine learning in finance. Let us look at the top authors in the references of
+each paper (see Figure 8).
+We can also look at the most cited references in terms of journals beyond their authors.
+The most cited authors and the most cited references will match, but it is interesting to see
+the nuances (see Figure 9).
+It is REVIEW
+interesting to note that the literature has not moved too much from the top papers
+J. Risk Financial Manag. 2021, 14, x FOR PEER
+16 of 33
+from 2017 to 2021.
+
+Figure 8. Analysis of cited references, overall period, and per year.
+Figure 8. Analysis of cited references, overall period, and per year.
+
+We can also look at the most cited references in terms of journals beyond their
+authors. The most cited authors and the most cited references will match, but it is
+interesting to see the nuances (see Figure 9).
+It is interesting to note that the literature has not moved too much from the top papers
+from 2017 to 2021.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+J. Risk Financial Manag. 2021, 14, x FOR PEER REVIEW
+
+16 of 31
+17 of 33
+
+Figure
+Figure 9.
+9. Most
+Most cited
+cited manuscripts,
+manuscripts, overall
+overall period,
+period, and
+and per
+per year.
+year.
+
+5.
+5. Social
+Social Structures
+Structures of
+of Our
+Our Sample
+Sample
+In
+this
+section,
+we
+will
+spend
+time
+on different
+measures
+to capture
+theconnecsocial
+In this section, we will spend
+time
+on different
+measures
+to capture
+the social
+connections:
+the co-citations
+of the
+authors,
+the co-citations
+of articles,
+the of
+co-citations
+of
+tions: the co-citations
+of authors,
+co-citations
+of articles, the
+co-citations
+journals, and
+journals,
+and the collaborations
+across institutions.
+the collaborations
+across institutions.
+5.1. Co-Citations
+Co-Citations of
+of Authors
+Authors
+5.1.
+Figure 10 highlights the
+that
+it is
+Figure
+the evolution
+evolutionof
+ofauthors’
+authors’collaborations.
+collaborations.We
+Wecan
+canobserve
+observe
+that
+it
+still
+a narrow
+network
+of of
+collaborators.
+WeWe
+areare
+showing
+thethe
+nascent
+nature
+of the
+field.
+We
+is
+still
+a narrow
+network
+collaborators.
+showing
+nascent
+nature
+of the
+field.
+represent
+herehere
+the network
+of the
+authors.
+We
+represent
+the network
+of top
+the top
+authors.
+As
+we
+can
+see
+in
+the
+previous
+figure,
+the top
+top authors
+authors are
+are still working nearby within
+As we can see in the previous figure, the
+their
+groups
+of
+collaborators.
+The
+next
+question
+is
+to
+know
+whether itit is
+is still
+still the
+the case
+case for
+their groups of collaborators. The next question is to know whether
+co-citations
+of
+articles.
+co-citations of articles.
+5.2. Co-Citations of Articles
+When a reference was addressed by two articles published in the same journal, this
+reference was included in the co-citation network of references (see Figure 11). Therefore,
+the co-citation network addressed the expected references to the concept of uncertainty in
+articles published by a journal.
+
+
+J. Risk Financial Manag. 2021, 14, x FOR PEER REVIEW
+J. Risk Financial Manag. 2021, 14, 302
+
+Figure 10. Authors’ collaboration networks, overall period, and per year.
+
+Figure 10. Authors’ collaboration networks, overall period, and per year.
+
+18 of 33
+17 of 31
+
+
+5.2. Co-Citations of Articles
+When a reference was addressed by two articles published in the same journal, this
+J. Risk Financial Manag. 2021, 14, 302 reference was included in the co-citation network of references (see Figure 11). Therefore,
+18 of 31
+
+the co-citation network addressed the expected references to the concept of uncertainty in
+articles published by a journal.
+
+Figure 11. Co-citations of articles, overall period, and per year.
+
+Figure 11. Co-citations of articles, overall period, and per year.
+
+In our sample, most of the authors in finance are residents of the People’s Republic of
+China, the United States, the United Kingdom, and India (see Table 8). While the dominant
+presence of authors from the advanced economies is undisputed, it is also noticeable that
+the law of large numbers ensures the participation of authors from several Emerging
+Market Economies (EMEs).
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+19 of 31
+
+Table 8. Corresponding authors’ countries, overall period, and per year.
+Country
+Overall Time Period
+China
+United States
+India
+United Kingdom
+Brazil
+2017
+China
+India
+United States
+Iran
+Brazil
+2018
+China
+India
+United States
+Iran
+Turkey
+2019
+China
+United States
+India
+Russia
+Spain
+2020
+China
+India
+United States
+United Kingdom
+Iran
+2021
+China
+India
+United States
+Italy
+Turkey
+
+Articles
+
+Frequency
+
+SCP
+
+MCP
+
+MCP_Ratio
+
+1438
+476
+293
+256
+147
+
+0.2885
+0.0955
+0.0588
+0.0514
+0.0295
+
+1253
+389
+268
+195
+138
+
+185
+87
+25
+61
+9
+
+0.1287
+0.1828
+0.0853
+0.2383
+0.0612
+
+90
+36
+28
+18
+12
+
+0.2535
+0.1014
+0.0789
+0.0507
+0.0338
+
+74
+33
+20
+16
+11
+
+16
+3
+8
+2
+1
+
+0.1778
+0.0833
+0.2857
+0.1111
+0.0833
+
+106
+35
+34
+18
+16
+
+0.2437
+0.0805
+0.0782
+0.0414
+0.0368
+
+89
+32
+22
+15
+15
+
+17
+3
+12
+3
+1
+
+0.1604
+0.0857
+0.3529
+0.1667
+0.0625
+
+172
+55
+36
+23
+19
+
+0.2976
+0.0952
+0.0623
+0.0398
+0.0329
+
+136
+48
+33
+22
+9
+
+36
+7
+3
+1
+10
+
+0.2093
+0.1273
+0.0833
+0.0435
+0.5263
+
+177
+44
+43
+29
+21
+
+0.2990
+0.0743
+0.0726
+0.0490
+0.0355
+
+147
+35
+34
+20
+18
+
+30
+9
+9
+9
+3
+
+0.169
+0.205
+0.209
+0.310
+0.143
+
+53
+13
+9
+7
+7
+
+0.3397
+0.0833
+0.0577
+0.0449
+0.0449
+
+42
+13
+6
+7
+6
+
+11
+0
+3
+0
+1
+
+0.208
+0.000
+0.333
+0.000
+0.143
+
+Note: SCP = single country publications; MCP = multiple country publications; MCP_Ratio = share of multiple
+country publications in the total number of publications.
+
+Table 9 provides Supplementary Materials on the total citations per country. Asia and
+China, in particular, dominate the ranking.
+Figure 12 shows an apparent increase in the contributions coming from Asia: China
+and India being at the forefront of academic production.
+Starting from a bibliographic matrix, two groups of descriptive measures are computed: (1) the summary statistics of the network and (2) the leading indices of centrality
+and prestige of vertices.
+This group of statistics presented in Table 8 allows us to describe the structural properties of a network: (1) ‘size’: is the number of vertices composing the network; (2) ‘density’:
+is the proportion of present edges from all possible edges in the network; (3) ‘transitivity’
+is the ratio of triangles to connected triples; (4) ‘diameter’ is the longest geodesic distance
+(length of the shortest path between two nodes) in the network; (5) ‘degree distribution’
+is the cumulative distribution of vertex degrees, and (6) ‘degree centralization’ is the
+normalized degree of the overall network.
+When it comes to countries’ collaborations, China and the USA are at the center of
+the graph (see Figure 13). Most of the international collaborations are between China and
+the USA. There seems to be a slight regionalization of collaborations, China with Asian
+countries, though it is much less apparent in the case of the USA, which seems to be a bit
+more eclectic in terms of collaborations.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+20 of 31
+
+Table 9. Total citations per country, overall period, and per year.
+Country
+Overall Time Period
+China
+United States
+United Kingdom
+South Korea
+India
+2017
+China
+United States
+India
+Brazil
+Germany
+2018
+United States
+China
+Iran
+Germany
+India
+2019
+China
+United States
+Brazil
+Iran
+South Korea
+2020
+China
+United States
+India
+United Kingdom
+Australia
+2021
+China
+Portugal
+Norway
+India
+Italy
+
+Total Citations
+
+Average Article Citations
+
+17154
+16876
+4691
+4482
+2999
+
+11.929
+35.454
+18.324
+32.715
+10.235
+
+1413
+463
+404
+260
+207
+
+15.70
+16.54
+11.22
+21.67
+34.50
+
+555
+511
+285
+270
+232
+
+16.324
+4.821
+15.833
+54.000
+6.629
+
+607
+421
+165
+132
+126
+
+3.529
+7.655
+9.706
+9.429
+7.875
+
+352
+127
+107
+72
+63
+
+1.989
+2.953
+2.432
+2.483
+5.727
+
+13
+12
+9
+7
+6
+
+0.245
+12.000
+3.000
+0.538
+0.857
+
+J. Risk Financial Manag. 2021, 14, x FOR PEER REVIEW
+Note: SCP = single country publications; MCP = multiple country publications; MCP_Ratio = share
+of multiple country publications in the total number of publications.
+
+22 of 33
+
+Figure
+12. The
+most productive
+(according
+to authors’
+residence).
+Figure 12.
+The most
+productive
+countriescountries
+(according
+to authors’
+residence).
+
+Starting from a bibliographic matrix, two groups of descriptive measures are
+computed: (1) the summary statistics of the network and (2) the leading indices of
+centrality and prestige of vertices.
+This group of statistics presented in Table 8 allows us to describe the structural
+properties of a network: (1) ‘size’: is the number of vertices composing the network; (i2)
+
+
+J. Risk Financial Manag. 2021, 14, x FOR PEER REVIEW
+J. Risk Financial Manag. 2021, 14, 302
+
+23 of 33
+21 of 31
+
+Figure 13. Country collaboration networks, overall period, and per year.
+
+Considering the results mentioned above, it confirms that Asia and China are some-
+
+Figure
+13.at
+Country
+collaboration
+networks, overall
+period,
+per year.
+how
+the forefront
+of the academic
+production
+onand
+neural
+networks and the larger machine
+
+learning domain in finance. It is interesting to the connections with other countries, notably
+in Europe. Below, we will also investigate the connections at the institutional level.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+22 of 31
+
+5.3. Co-Citations of Journals
+We will look at which journals have contributed to developing the field’s methodological transformation in what follows. Through time (see Table 10), we will see that it mostly
+started in more engineering journals to penetrate the finance field. Still, nowadays, the
+ranking is dominated by more engineering-oriented journals.
+Table 10. Top journals, overall period, and per year.
+Sources
+Overall Time Period
+Expert Systems with Applications
+Applied Soft Computing
+Ieee Access
+Neurocomputing
+Neural Computing & Applications
+2017
+Expert Systems with Applications
+Applied Soft Computing
+Physica a-Statistical Mechanics and Its Applications
+2017 Ieee International Conference on Big Data (Big Data)
+Agro Food Industry High-tech
+2018
+Expert Systems with Applications
+Applied Soft Computing
+Neurocomputing
+2018 26th Signal Processing and Communications Applications Conference
+(Sui)
+2018 International Joint Conference on Neural Networks (ijcnn)
+2019
+Ieee Access
+Expert Systems with Applications
+Physica a-Statistical Mechanics and Its Applications
+Sustainability
+Applied Soft Computing
+2020
+Ieee Access
+Expert Systems with Applications
+2020 International Joint Conference on Neural Networks (ijcnn)
+Soft Computing
+Neural Computing & Applications
+2021
+Ieee Access
+Expert Systems with Applications
+Computational Economics
+Annals of Operational Research
+Complexity
+
+Articles
+305
+75
+74
+71
+56
+12
+6
+5
+4
+4
+12
+9
+8
+7
+7
+24
+19
+11
+11
+9
+37
+17
+13
+13
+11
+10
+8
+5
+4
+4
+
+Figure 14 is an excellent illustration of the evolution of the knowledge map seen
+through journal co-citations. It is interesting to see the origin of the transformation and the
+pace of the penetration of machine learning in finance journals and through which channels.
+It is worth noticing the pivotal role played by the “Expert Systems with Applications” journal.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+J. Risk Financial Manag. 2021, 14, x FOR PEER REVIEW
+
+23 of 31
+25 of 33
+
+Figure 14. Journals source co-citation analysis, overall period, and per year.
+Figure
+14.Co-Citations
+Journals source
+co-citation analysis, overall period, and per year.
+5.4.
+of Institutions
+
+Related to Figure 13, it is interesting to study the collaborations through a different
+5.4. Co-Citations of Institutions
+indicator: the co-citations of institutions.
+Related
+to Figure
+13, it is interesting
+to study
+collaborations
+through
+different
+The network
+of university
+collaboration
+is alsothe
+well
+developed (see
+Figurea 15),
+indicatindicator:
+the
+co-citations
+of
+institutions.
+ing a strong presence of Chinese, U.S., and Indian universities. It is interesting to notice a
+
+
+J. Risk Financial Manag. 2021, 14, x FOR PEER REVIEW
+
+26 of 33
+
+J. Risk Financial Manag. 2021, 14, 302
+
+24 of 31
+
+The network of university collaboration is also well developed (see Figure 15),
+indicating a strong presence of Chinese, U.S., and Indian universities. It is interesting to
+notice a slight geographical concentration of China and Europe, the U.S. and Canada.
+slight geographical
+of China
+and Europe, the U.S. and Canada. Geography
+Geography
+seems to concentration
+be a factor in the
+collaborations.
+seems to be a factor in the collaborations.
+
+Figure 15. University collaboration networks, overall period, and per year.
+Figure 15. University collaboration networks, overall period, and per year.
+
+To conclude, we visualize the main items of three fields (e.g., authors, keywords,
+journals) and how they are related through a so-called Sankey diagram. The three fields
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+25 of 31
+
+J. Risk Financial Manag. 2021, 14, x FOR PEER REVIEW
+
+27 of 33
+
+plot in Figure 16 also reveals the rising importance of deep learning and neural networks
+in finance and its most robust channel for articulating academic contributions, the Experts
+To conclude, we visualize the main items of three fields (e.g., authors, keywords,
+Systems
+with Applications Journal for the overall period, and IEEE Access for most of the
+journals) and how they are related through a so-called Sankey diagram. The three fields
+latest
+five
+years.
+plot in Figure
+16 also reveals the rising importance of deep learning and neural networks
+In
+the
+pastitsfive
+years,
+IEEE
+Access
+been a prominent
+vehicle for developing
+in finance and
+most
+robust
+channel
+forhas
+articulating
+academic contributions,
+the Experts the
+academic
+conversation
+onJournal
+neural for
+networks
+in finance
+and,
+deepof
+learning
+Systems with
+Applications
+the overall
+period,
+andmost
+IEEEimportantly,
+Access for most
+the
+inlatest
+finance.
+five years.
+Overall
+
+2021
+
+Figure 16. Cont.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+J. Risk Financial Manag. 2021, 14, x FOR PEER REVIEW
+
+26 of 31
+
+28 of 33
+
+2020
+
+2019
+
+2018
+
+Figure 16. Cont.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+J. Risk Financial Manag. 2021, 14, x FOR PEER REVIEW
+
+27 of 31
+
+29 of 33
+
+2017
+
+Figure 16. Three fields plot, overall period and per year.
+Figure 16. Three fields plot, overall period and per year.
+
+6. Conclusions
+In the past five years, IEEE Access has been a prominent vehicle for developing the
+Neuralconversation
+networks in on
+finance
+arenetworks
+becominginincreasingly
+popular
+to analyze
+finanacademic
+neural
+finance and,
+most tools
+importantly,
+deep
+cial
+market
+learning
+in trends
+finance.based on preprocessing and transforming a large amount of information
+into machine-readable data. It would be a mistake to attribute this development solely to
+6. Conclusions
+the
+outstanding computing power and storage capacity growth.
+ML
+can networks
+make essential
+contributions
+to the
+technical analysis
+financial
+market
+Neural
+in finance
+are becoming
+increasingly
+popular of
+tools
+to analyze
+trends.
+It has
+a wide
+variety
+of applications:
+supervised,
+unsupervised,
+financial
+market
+trends
+based
+on preprocessing
+and transforming
+a and
+largesemi-supervised
+amount of
+learning;
+reinforcement
+learning; inverse
+imitation
+learning;
+information
+into machine-readable
+data.reinforcement
+It would be learning;
+a mistake
+to attribute
+thisselflearning;
+feature
+learning;
+sparse dictionary
+learning;
+detection,
+A subfield
+development
+solely
+to the outstanding
+computing
+poweranomaly
+and storage
+capacityetc.
+growth.
+can make of
+essential
+contributions
+to science,
+the technical
+analysis of
+financial market
+at theML
+intersection
+linguistics,
+computer
+and artificial
+intelligence—Natural
+trends. It Processing
+has a wide(NLP)—has
+variety of found
+applications:
+supervised,
+unsupervised,
+Language
+numerous
+applications
+in finance. and semisupervised
+learning;
+reinforcement
+learning;
+reinforcement
+imitationSLR
+This article
+demonstrated
+the basic
+stepsinverse
+required
+to conduct alearning;
+metadata-based
+learning;
+self-learning;
+feature
+learning;
+sparse
+dictionary
+learning;
+anomaly
+detection,
+in the finance field.
+etc. The
+A subfield
+of linguistics,existing
+computer
+science, trends,
+and artificial
+method at
+canthe
+helpintersection
+generate topic-specific
+knowledge,
+and gaps
+intelligence—Natural
+Language
+Processing
+(NLP)—has
+found
+numerous
+applications
+in
+observed and the derivation of a conclusion suitable for policymakers and the scientific
+finance.
+community.
+This article
+demonstrated
+theconducted
+basic steps arequired
+to conductsystematic
+a metadata-based
+Indeed,
+in this
+article, we
+metadata-based
+reviewSLR
+of the
+in
+the
+finance
+field.
+academic contributions to finance between 1990 and 2021. A metadata-based systematic
+The method
+help generate
+topic-specific
+existing
+knowledge,
+trends, andliterature
+gaps
+literature
+review can
+complements
+more
+conventional
+approaches
+to systematic
+observed
+and
+the
+derivation
+of
+a
+conclusion
+suitable
+for
+policymakers
+and
+the
+scientific
+reviews. It allows to collect more significant amounts of documents and then analyze
+community.
+the
+current dynamics within the collected documents. This article leverages the text
+Indeed, in this article, we conducted a metadata-based systematic review of the
+information
+found in this dataset. Titles, abstracts, keywords, authors’ names, institutions,
+academic contributions to finance between 1990 and 2021. A metadata-based systematic
+and references are transformed into quantitative indicators. From there, using text-as-data
+literature review complements more conventional approaches to systematic literature
+techniques such as NLP as well as graph theory, we could provide a mapping capturing
+reviews. It allows to collect more significant amounts of documents and then analyze the
+multiple dimensions. In particular, we used a theoretical framework that organizes the
+current dynamics within the collected documents. This article leverages the text
+literature’s mapping through three dimensions: conceptual, intellectual, and social. Beyond
+information found in this dataset. Titles, abstracts, keywords, authors’ names, institutions,
+this mapping, we also used two techniques to deal with the data: NLP and graph theory.
+and references are transformed into quantitative indicators. From there, using text-as-data
+The results are a mapping of the literature through these three dimensions. Researchers
+techniques such as NLP as well as graph theory, we could provide a mapping capturing
+can
+use
+mapping to
+a sub-sample
+perform the
+systematic
+literature
+review
+multiplethis
+dimensions.
+In select
+particular,
+we used to
+a theoretical
+framework
+that
+organizes
+the of
+their
+choice.
+literature's mapping through three dimensions: conceptual, intellectual, and social.
+Thisthis
+mapping
+is helpful
+researchers,
+university
+willing
+to underBeyond
+mapping,
+we also for
+used
+two techniques
+to deal administrators
+with the data: NLP
+and graph
+stand
+the
+evolution
+of
+the
+finance
+field,
+and
+policymakers.
+Concerning
+the
+latter,
+the
+theory.
+conversation in academic circles about machine learning in finance finds its parallel in the
+financial industry with the development of the so-called fintech. It is relevant to map col-
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+28 of 31
+
+laboration networks both at the authors’ level and the institutional level for policymakers.
+It is also relevant to be able to visualize the knowledge maps.
+For further research, the appearance of artificial intelligence and machine learning,
+in particular in finance, is quite attractive in the context of the old-time debate between
+the theorists and the chartists. While the opposing theorists and chartists debate is still
+relevant, we conjecture that ML techniques could shed some new light on theoretical
+advancement. MLAs are not an atheoretical approach, as it is premised on inductive
+reasoning, which generates causal relationships based on the state of information at the
+moment of estimation. The main advantage of ML is the ability to process vast information,
+simultaneously ignoring ideological standpoints or inclinations to a particular school
+of thought.
+Author Contributions: Conceptualization, T.W. and A.S.; methodology, T.W.; software, T.W.; validation, T.W. and A.S.; formal analysis, T.W. and A.S.; investigation, T.W.; resources, T.W.; data
+curation, T.W.; writing—original draft preparation, A.S.; writing—review and editing, A.S. and T.W.;
+visualization, T.W.; supervision, T.W.; project administration, A.S. All authors have read and agreed
+to the published version of the manuscript.
+Funding: This research received no external funding.
+Institutional Review Board Statement: Not applicable.
+Informed Consent Statement: Not applicable.
+Acknowledgments: The authors express their deep gratitude to CIRANO (Montreal, Canada), Martin
+Paquette (CIRANO), Marine Leroi (CIRANO), and Aïchata Kone (HEC Montréal) for their excellent
+support. The usual caveats apply.
+Conflicts of Interest: The authors declare no conflict of interest.
+
+Appendix A
+References
+Adcock, R., and N. Gradojevic. 2019. Non-fundamental, non-parametric Bitcoin forecasting. Physica A: Statistical Mechanics and Its
+Applications 531:121727.
+Atsalakis, G. S., I. G. Atsalaki, F. Pasiouras, and C. Zopounidis. 2019. Bitcoin price forecasting with neuro-fuzzy techniques.
+European Journal of Operational Research 276: 770–80.
+Bekiros, S. D., and D. A. Georgoutsos. 2008. Direction-of-change forecasting using a volatility-based recurrent neural network.
+Journal of Forecasting 27: 407–17.
+Blake, A. P., and G. Kapetanios. 2000. A radial basis function artificial neural network test for ARCH. Economics Letters 69: 15–23.
+Chung-Ming, Kuan, and Halbert White. 1994, Artificial neural networks: An econometric perspective, Econometric Reviews 13: 1–91.
+Cui, Herui, Ruoyao Wang, and Haoran Wang. 2020. An Evolutionary Analysis of Green Finance Sustainability Based on
+Multi-Agent Game. Journal of Cleaner Production 269: 121799
+Donaldson, R., and M. Kamstra. 1997. An artificial neural network-garch model for international stock return volatility. Journal of
+Empirical Finance 4: 17–46.
+Falcone, Pasquale Marcello. 2020. Environmental Regulation and Green Investments: The Role of Green Finance. International
+Journal of Green Economics 14: 159–73.
+Fernandez-Rodrıguez, F., C. Gonzalez-Martel, and S. Sosvilla-Rivero. 2000. On the profitability of technical trading rules based on
+artificial neural networks: Evidence from the Madrid stock market. Economics Letters 69: 89–94.
+Fischer, T., and C. Krauss. 2018. Deep learning with long short-term memory networks for financial market predictions. European
+Journal of Operational Research 270: 654–69.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+29 of 31
+
+References
+Garcia, R., and R. Gencay. 2000. Pricing and hedging derivative securities with neural networks and a homogeneity hint. Journal of
+Econometrics 94: 93–115.
+Gencay, R., and T. Stengos. 1998. Moving average rules, volume and the predictability of security returns with feedforward
+networks. Journal of Forecasting 17: 401–14.
+Gerritsen, D. F., E. Bouri, E. Ramezanifar, and D. Roubaud. 2020. The profitability of technical trading rules in the Bitcoin market.
+Finance Research Letters 34: 101263.
+Gradojevic, N., and R. Gencay. 2013. Fuzzy logic, trading uncertainty and technical trading. Journal of Banking and Finance 37:
+578–86.
+Gu, S., B. Kelly, and D. Xiu. 2020. Empirical Asset Pricing via Machine Learning. The Review of Financial Studies 33: 2223–73.
+Hans, F. P., and van Griensven Kasper. 1998. Forecasting Exchange Rates Using Neural Networks for Technical Trading Rules.
+Studies in Nonlinear Dynamics & Econometrics 2: 1–8.
+Hsieh, D. A. 1989. Testing for nonlinear dependence in daily foreign exchange rates. The Journal of Business 62: 339–68.
+Huang, J.-Z., W. Huang, and J. Ni. 2019. Predicting Bitcoin returns using high-dimensional technical indicators. The Journal of
+Finance and Data Science 5: 140–55.
+Hutchinson, J. M., A. W. Lo, and T. Poggio. 1994. A nonparametric approach to pricing and hedging derivative securities via
+learning networks. The Journal of Finance 49: 851–89.
+Kaucic, M. 2010. Investment using evolutionary learning methods and technical rules. European Journal of Operational Research 207:
+1717–27.
+Krauss, C., X. A. Do, and N. Huck. 2017. Deep neural networks, gradient-boosted trees, random forests: Statistical arbitrage on the
+S&P 500. European Journal of Operational Research 259: 689–702.
+Kristjanpoller, W., and M. C. Minutolo. 2018. A hybrid volatility forecasting framework integrating GARCH, artificial neural
+network, technical analysis and principal components analysis. Expert Systems with Applications 109: 1–11.
+Lo, A.W. 2004. The adaptive markets hypothesis. The Journal of Portfolio Management 30: 15–29.
+Lo, A.W., H. Mamaysky, and J. Wang. 2000. Foundations of Technical Analysis: Computational Algorithms, Statistical Inference,
+and Empirical Implementation. The Journal of Finance 55: 1705–65.
+Menkhoff, L. 1997. Examining the use of technical currency analysis. International Journal of Finance & Economics 2: 307–18.
+Menkhoff, L. 2010. The use of technical analysis by fund managers: International evidence. Journal of Banking & Finance 34: 2573–86.
+Neely, C. J., D. E. Rapach, J. Tu, and G. Zhou. 2014. Forecasting the equity risk premium: The role of technical indicators.
+Management Science 60: 1772–91.
+Neely, C., P. Weller, and J. Ulrich. 2009. The Adaptive Markets Hypothesis: Evidence from the Foreign Exchange Market. Journal of
+Financial and Quantitative Analysis 44: 467–88.
+Taylor, M. P., and H. Allen. 1992. The use of technical analysis in the foreign exchange market. Journal of International Money and
+Finance 11: 304–14.
+
+References
+Aria, Massimo, and Corrado Cuccurullo. 2017. bibliometrix: An R-tool for comprehensive science mapping analysis. Journal of
+Informetrics 11: 959–75. [CrossRef]
+Aria, Massimo, V. Della Corte, and A. Piscitelli. 2017. Business Orientation and Governance Choices in Cultural Firms: A Survey
+Research in Area of Naples. Italian Journal of Applied Statistics 29. [CrossRef]
+Atsalakis, George S., Ioanna G. Atsalaki, Fotios Pasiouras, and Constantin Zopounidis. 2019. Bitcoin price forecasting with neuro-fuzzy
+techniques. European Journal of Operational Research 276: 770–80. [CrossRef]
+Bekiros, Stelios D., and Dimitris Georgoutsos. 2008. Direction-of-change forecasting using a volatility-based recurrent neural network.
+Journal of Forecasting 27: 407–17. [CrossRef]
+Berardi, Michele. 2011. Fundamentalists vs. chartists: Learning and predictor choice dynamics. Journal of Economic Dynamic Control 35:
+776–92. [CrossRef]
+Blake, Andrew P., and George Kapetanios. 2000. A radial basis function artificial neural network test for ARCH. Economics Letters 69:
+15–23. [CrossRef]
+Chung-Ming, Kuan, and Halbert White. 1994. Artificial neural networks: An econometric perspective. Econometric Reviews 13: 1–91.
+Day, Richard H., and Weihong Huang. 1990. Bulls, bears and market sheep. Journal of Economic Behavior & Organization 14: 299–329.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+30 of 31
+
+De Spiegeleer, Jan, Dilip B. Madan, Sofie Reyners, and Wim Schoutens. 2018. Machine learning for quantitative finance: Fast derivative
+pricing, hedging and fitting. Quantitative Finance 18: 1635–43. [CrossRef]
+del Amo, Iñigo Fernández, John Ahmet Erkoyuncu, Rajkumar Roy, Riccardo Palmarini, and Demetrius Onoufriou. 2018. A systematic
+review of Augmented Reality content-related techniques for knowledge transfer in maintenance applications. Computers in
+Industry 103: 47–71. [CrossRef]
+Dixon, Matthew F., Igor Halperin, and Paul Bilokon. 2020. Machine Learning in Finance: From Theory to Practice. Cham: Springer.
+Donaldson, Glen R., and Mark Kamstra. 1997. An artificial neural network-GARCH model for international stock return volatility.
+Journal of Empirical Finance 4: 17–46. [CrossRef]
+Fernandez-Rodrıguez, F., C. Gonzalez-Martel, and S. Sosvilla-Rivero. 2000. On the profitability of technical trading rules based on
+artificial neural networks: Evidence from the Madrid stock market. Economics Letters 69: 89–94. [CrossRef]
+Fischer, Thomas, and Christopher Krauss. 2018. Deep learning with long short-term memory networks for financial market predictions.
+European Journal of Operational Research 270: 654–69. [CrossRef]
+Frankel, Jeffrey A., and Kenneth A. Froot. 1990. Chartists, Fundamentalists, and Trading in the Foreign Exchange Market. The American
+Economic Review 80: 181–85.
+Garcia, Rene, and Ramazan Gencay. 2000. Pricing and hedging derivative securities with neural networks and a homogeneity hint.
+Journal of Econometrics 94: 93–115. [CrossRef]
+Gavrishchaka, Valeriy, and Supriya Banerjee. 2006. Support Vector Machine as an Efficient Framework for Stock Market Volatility
+Forecasting. Computational Management Science 3: 147–60. [CrossRef]
+Gencay, Ramazan, and Thanasisa Stengos. 1998. Moving average rules, volume, and the predictability of security returns with
+feedforward networks. Journal of Forecasting 17: 401–14. [CrossRef]
+Gerritsen, Dirk F., Elie Bouri, Ehsan Ramezanifar, and David Roubaud. 2020. The profitability of technical trading rules in the Bitcoin
+market. Finance Research Letters 34: 101263. [CrossRef]
+Glasserman, Paul, Kriste Krstovski, Paul Laliberte, and Harry Mamaysky. 2020. Choosing News Topics to Explain Stock Market
+Returns. In Proceedings of the ACM International Conference on A.I. in Finance (ICAIF’ 20), New York, NY, USA, October 15–16;
+New York: ACM. [CrossRef]
+Gradojevic, Nikola, and Ramazan Gencay. 2013. Fuzzy logic, trading uncertainty and technical trading. Journal of Banking and Finance
+37: 578–86. [CrossRef]
+Grant, Maria J., and Andrew Booth. 2009. A typology of reviews: An analysis of 14 review types and associated methodologies. Health
+Information & Libraries Journal 26: 91–108. [CrossRef]
+Gu, Shihao, Bryan Kelly, and Dacheng Xiu. 2020. Empirical Asset Pricing via Machine Learning. The Review of Financial Studies 33:
+2223–73. [CrossRef]
+Hans, Franses P., and Kasper van Griensven. 1998. Forecasting Exchange Rates Using Neural Networks for Technical Trading Rules.
+Studies in Nonlinear Dynamics & Econometrics 2: 1–8.
+Hsieh, David A. 1989. Testing for nonlinear dependence in daily foreign exchange rates. The Journal of Business 62: 339–68. [CrossRef]
+Huang, Jian, Junyi Chai, and Stella Cho. 2020. Deep learning in finance and banking: A literature review and classification. Frontiers of
+Business Research in China 14: 1–24. [CrossRef]
+Hutchinson, James M., Andrew W. Lo, and Tomaso Poggio. 1994. A nonparametric approach to pricing and hedging derivative
+securities via learning networks. The Journal of Finance 49: 851–89. [CrossRef]
+Jiang, Xinxin, Shirui Pan, Jing Jiang, and Guodong Long. 2018. Cross-domain deep learning approach for multiple financial market
+predictions. In Proceedings of the 2018 International Joint Conference on Neural Networks (IJCNN), Rio de Janeiro, Brazil,
+July 8–13; pp. 1–8.
+Kaucic, Massimiliano. 2010. Investment using evolutionary learning methods and technical rules. European Journal of Operational
+Research 207: 1717–27. [CrossRef]
+Kraus, Mathias, and Stefan Feuerriegel. 2017. Decision Support from Financial Disclosures with Deep Neural Networks and Transfer
+Learning. Available online: https://arxiv.org/pdf/1710.03954.pdf (accessed on 18 March 2021).
+Krauss, Christopher, Xuan Anh Do, and Nicolas Huck. 2017. Deep neural networks, gradient-boosted trees, random forests: Statistical
+arbitrage on the S&P 500. European Journal of Operational Research 259: 689–702.
+Kristjanpoller, Werner, and Marcel C. Minutolo. 2018. A hybrid volatility forecasting framework integrating GARCH, artificial neural
+network, technical analysis, and principal components analysis. Expert Systems with Applications 109: 1–11. [CrossRef]
+Lee, Cheng-Fee, and John Lee, eds. 2010. Handbook of Quantitative Finance and Risk Management. New York: Springer.
+Lo, Andrew W. 2004. The adaptive markets hypothesis. The Journal of Portfolio Management 30: 15–29. [CrossRef]
+Lo, Andrew W., Harry Mamaysky, and Jiang Wang. 2000. Foundations of Technical Analysis: Computational Algorithms, Statistical
+Inference, and Empirical Implementation. The Journal of Finance 55: 1705–65. [CrossRef]
+Loughran, Tim, and Bill McDonald. 2011. When is a Liability not a Liability? Textual Analysis, Dictionaries, and 10-Ks. Journal of
+Finance 66: 35–65. [CrossRef]
+Malinauskaite, Laura, David Cook, Brynhildur Davíðsdóttir, Helga Ögmundardóttir, and Joe Roman. 2019. Ecosystem services in the
+Arctic: A thematic review. Ecosystem Services 36: 100898. [CrossRef]
+Markowitz, Harry M. 1952. Portfolio Selection. The Journal of Finance 7: 77–91.
+
+
+J. Risk Financial Manag. 2021, 14, 302
+
+31 of 31
+
+Matsubara, Takashi, Ryo Akita, and Kuniaki Uehara. 2018. Stock price prediction by deep neural generative model of news articles.
+IEICE Transactions on Information and Systems 4: 901–8. [CrossRef]
+Mengist, Wondimagegn, Teshome Soromessa, and Gudina Legese. 2020. Method for conducting systematic literature review and
+meta-analysis for environmental science research. MethodsX 7: 11. [CrossRef] [PubMed]
+Menkhoff, Lukas. 1997. Examining the use of technical currency analysis. International Journal of Finance & Economics 2: 307–18.
+Menkhoff, Lukas. 2010. The use of technical analysis by fund managers: International evidence. Journal of Banking & Finance 34: 2573–86.
+Minh, Dang, Abolghasem Sadeghi-Niaraki, Huy Huynh, Kyungbok Min, and Hyeonjoon Moon. 2017. Deep learning approach for
+short-term stock trends prediction based on two-stream gated recurrent unit network. IEEE Access 6: 55392–404. [CrossRef]
+Mitra, Gautam, and Xiang Yu, eds. 2016. The Handbook of Sentiment Analysis in Finance. New York: Albury Books.
+Mitra, Leela, and Gautam Mitra. 2011. The Handbook of News Analytics in Finance. Hoboken: John Wiley & Sons.
+Neely, Christopher, David E. Rapach, Jun Tu, and Guofu Zhou. 2014. Forecasting the equity risk premium: The role of technical
+indicators. Management Science 60: 1772–1791. [CrossRef]
+Neely, Christopher, Paul Weller, and Joshua Ulrich. 2009. The Adaptive Markets Hypothesis: Evidence from the Foreign Exchange
+Market. Journal of Financial and Quantitative Analysis 44: 467–88. [CrossRef]
+Perevochtchikova, Maria, José Álvaro Hernández Flores, Wilmer Marín, Alfonso Langle Flores, Arturo Ramos Bueno, and Iskra
+Alejandra Rojo Negrete. 2019. Systematic review of integrated studies on functional and thematic ecosystem services in Latin
+America, 1992–2017. Ecosystem Services 36: 100900. [CrossRef]
+Popper, Karl Raimund. 1962. Conjectures and Refutations; The Growth of Scientific Knowledge. New York: Basic Books.
+Prasch, Robert, and Thierry Warin. 2016. Systemic Risk and Financial Regulations: A Theoretical Perspective. Journal of Banking
+Regulation 17: 188–99. [CrossRef]
+Schumaker, Robert P., and Hsinchun Chen. 2010. A discrete stock price prediction engine based on financial news. Computer 43: 51–56.
+[CrossRef]
+Sharpe, William F. 1963. A Simplified Model for Portfolio Analysis. Management Science 9: 277–93. [CrossRef]
+Sharpe, William F. 1964. Capital Asset Prices—A Theory of Market Equilibrium under Conditions of Risk. Journal of Finance 19: 425–42.
+Taylor, Mark, and Hellen Allen. 1992. The use of technical analysis in the foreign exchange market. Journal of International Money and
+Finance 11: 304–14. [CrossRef]
+Warin, Thierry. 2005. Popper’s Falsifiability and Mises’ a-Priorism: Is Dogmatism Everywhere? Epistemologia 28: 121–38.
+
+
+

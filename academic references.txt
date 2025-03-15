@@ -17,15 +17,18 @@ https://arxiv.org/pdf/2303.02223v2 - Feature Selection for Forecasting
 https://www.mdpi.com/1999-4893/10/4/114 - Variable Selection in Time Series Forecasting Using Random Forests.
 https://www.nature.com/articles/s41599-024-02807-x - Applying machine learning algorithms to predict the stock price trend in the stock market – The case of Vietnam.
 https://www.sciencedirect.com/science/article/abs/pii/S0957417415003334?via%3Dihub - ballings - 2015 - Evaluating multiple classifiers for stock price direction prediction
+https://www.cemmap.ac.uk/wp-content/uploads/2020/08/CWP3515.pdf - VARIABLE SELECTION AND ESTIMATION IN HIGH-DIMENSIONAL MODELS - 
+https://www.researchgate.net/publication/38322399_Persistence_in_High-dimensional_Linear_Predictor-selection_and_the_Virtue_of_Over-parametrization - Persistence in High-dimensional Linear Predictor-selection and the Virtue of Over-parametrization
+https://www.tandfonline.com/doi/epdf/10.1080/09540091.2023.2286188?needAccess=true - A multi-feature stock price prediction model based on multi-feature calculation, LASSO feature selection, and Ca-LSTM network
+LASSO - Tib-shirani, 1996) everyone mentions this guy!
+https://www.yourdatateacher.com/2021/05/05/feature-selection-in-machine-learning-using-lasso-regression/
 
 
-If I was to request the same considerations for trying to create a replication of this papers model instead, what would that look like?
 
 
 
 
-
-
+If I was to request the same considerations for trying to create a replication of this papers model instead, what would that look like? 
 
 
 
@@ -123,7 +126,39 @@ López Gil's Process:
 
 
 
+supervised learning:
+   - classifications:
+	- logistic regression
+	- naive bayes
+	- KNN
+	- decision tree
+	- SVN
+	- random forrest
 
+   - regression:
+	- linear regression
+	- decision tree
+	- support vector regression
+	- casso regression
+	- ridge regression
+
+
+unsupervised learning:
+   - clustering:
+	- K means clustering
+	- DBSCAN Clustering
+	- Gaussian mixture
+	- agglomerative clustering
+	- hierarchical clustering
+	- mean shift clustering
+
+
+reinforcement learning:
+   - decision making:
+	- markov decision process
+	- Q learning
+	- R learning
+	- TD learning
 
 
 

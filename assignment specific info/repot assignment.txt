@@ -9,19 +9,6 @@ main catagories of core machine learning algo's
 
 (one hot encoding (bitvector respresentation)
 
-----------------------------------------------
-Production Cycle!!:
-----------------------------------------------
-1. have complete and processed dataset.
-1.2: to reduce dimentionality, "sigluar value decomposition"  princeiple component analysis &/or univarate analysis
-2. features selection
-3. choose model
-4. train model
-5. evaluation
-6. redo feature selection with hyperparameter tuning. (grid search, random search, bayesian search[recomended])
-
-
-
 ----------------------------------------------------
 features desired:
 ---------------------------------------------------
@@ -103,27 +90,97 @@ features aquired:
 
 
 -----------------------------------------------
+
 abs
 intro
 problem statement
 objective and aims
 AI approach
-library?
-data cle??
+ - propsed approach
+library and dataset
+EDA (exploratory data analysis)
+data cleaning (before or after data vis?)
 data vis
-data preprep
+data re-processing
+feature selection
+ - hyperparameter tuning
 model select
-model eval?
+ - learning models
+   - list of different models
+   - advanced models we're looking at
+ - model evaluations
+   - feature selection comparison
+   - hyperparameter tuning comparison
+summery
 conclusion
 recommendatsions
 future
 ref
 appendix
+
 ----------------------------------------------------
+code to do list:
+----------------------------------------------------
+data collection:                                              17/17 completed!
+data pre-processing: interpolation, normalization, denoising: 3/3 completed!
+DATA EDA STEPS!! data ranges + mean/medians, missing values:  0/2 incomplete :C
+DATA VIS! need to include: quality, relationship, outlier:    0/3 incomplete :C
+feature selection:                                            3/3 completed!
+create 3 working models:                                      1/3 incomplete :C
+cross train models with each unquie feature catagory:         0/3 incomplete :C
+evaluate models with metrics deliniating each dataset:        0/3 incomplete :C
+hyperparameter tuning:                                        0/3 incomplete :C
+ALL CODE ORGANIZED AND AI CITED !!                                incomplete :C !!!!
+--------------------------------------------
+						|
+MAY CAUSE ME ISSUES!!!!  look at next line!!!   V
+===========================================================================================================
+"Demonstrated a methodical approach to data exploration and preprocessing within the implementation."
+	- my data was NOT "cleaned" my "exploration" of the data needs graphs! (See data VIS).
+===========================================================================================================
 
+1. have complete and processed dataset.
+1.2: to reduce dimentionality, "sigluar value decomposition"  princeiple component analysis &/or univarate analysis
+2. features selection
+3. choose model
+4. train model
+5. evaluation
+6. redo feature selection with hyperparameter tuning. (grid search, random search, bayesian search[recomended])
 
+THE MODEL I AM USING IS A: Multi-head Attention Networks + xLSTM-TS
 
-
+TRADITIONAL METHODS (Pre-2000s):
+Statistical Methods:
+GARCH (Generalized Autoregressive Conditional Heteroskedasticity)
+ARIMA (Autoregressive Integrated Moving Average)
+Linear regression models
+INTERMEDIATE PERIOD (2000-2015):
+Classical Machine Learning:
+Support Vector Machine (SVM)
+Support Vector Regression (SVR)
+Random Forest
+K-Nearest Neighbors (KNN)
+Naive-Bayes
+CURRENT PERIOD (2015-Present):
+Deep Learning Models:
+LSTM (Long Short-Term Memory)
+GRU (Gated Recurrent Units)
+Bidirectional LSTM
+Multi-head Attention Networks
+Hybrid Models combining:
+LSTM + Wavelet Transform
+LSTM + GARCH
+Neural Networks + Technical Analysis
+Ensemble Methods:
+XGBoost
+Random Forest ensembles
+Combined ML approaches (e.g., Random Forest + XGBoost)
+EMERGING TRENDS:
+Advanced Architectures:
+Deep Learning with attention mechanisms
+Multi-input LSTM
+Transformer-based models
+CNN-LSTM hybrids
 
 How These Visualizations Inform Your Process:
 
@@ -178,10 +235,7 @@ The TradingView script is valuable as a reference for understanding how MVRV Z-S
 
 
 
-
-
-
-
+does this new code suggestion diviate from the orgininal implementation?
 
 
 
@@ -191,3 +245,34 @@ I would like for you to analyise both the papers methods, and the code implement
 
 
 
+
+
+
+
+boruta vs tyralis selection methods:
+
+Key Differences:
+Feature Importance Calculation:
+Tyralis: Uses sequential permutation importance in rolling windows
+Boruta: Creates shadow (random) copies of features and compares real vs shadow importance
+Selection Criteria:
+Tyralis: Uses 75th percentile threshold of importance scores
+Boruta: Uses statistical testing to compare features against their shadow copies
+Temporal Consideration:
+Tyralis: Explicitly considers time series nature with rolling windows
+Boruta: Time-agnostic, treats data as independent observations
+Statistical Rigor:
+Tyralis: More focused on predictive performance
+Boruta: More focused on statistical significance through shadow feature comparison
+Computational Approach:
+Tyralis: Single pass with rolling windows
+Boruta: Iterative process with multiple Random Forest fits
+Performance Implications:
+Tyralis might be better for:
+Time series specific applications
+When temporal dependencies are crucial
+When computational speed is important
+Boruta might be better for:
+More robust feature selection
+Reducing false positives
+When statistical significance is crucial
