@@ -126,9 +126,9 @@ data pre-processing: interpolation, normalization, denoising: 3/3 completed!
 DATA EDA STEPS!! data ranges + mean/medians, missing values:  0/2 incomplete :C
 DATA VIS! need to include: quality, relationship, outlier:    0/3 incomplete :C
 feature selection:                                            3/3 completed!
-create 3 working models:                                      2/3 incomplete :C
-cross train models with each unquie feature catagory:         2/3 incomplete :C
-evaluate models with metrics deliniating each dataset:        0/3 incomplete :C
+create 3 working models:                                      3/3 ncomplete!
+cross train models with each unquie feature catagory:         3/3 complete!
+evaluate models with metrics deliniating each dataset:        3/3 complete!
 bayesian search hyperparameter tuning:                        0/3 incomplete :C
 ALL CODE ORGANIZED AND AI CITED !!                                incomplete :C !!!!
 --------------------------------------------
@@ -321,8 +321,7 @@ does this new code suggestion diviate from the orgininal implementation?
 I would like for you to analyise both the papers methods, and the code implementation of each. Compare them purely on they're mathematical parity with they're respective papers and give me a text output that I can copy and paste that updates the first text block describing the implementations. I need to know how accurate it is to the papers and how both work and relate to eachother. And I need to check if the original text in that block is indeed accurate or if it needs changing. Thank you.
 
 
-
-
+Thank you that was very helpful, I would like to findout if it is only hyperparameter tuning that is causing the DDR model to perform so badly? Please check the source paper again for completeness and missing features is possible 
 
 
 
