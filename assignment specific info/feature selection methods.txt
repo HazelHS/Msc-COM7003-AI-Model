@@ -1,41 +1,42 @@
-Performance Metrics from Chen et al.:
-- Single Random Forest: Baseline
-- López Gil's method: +8% improvement
-- Tang's method: +11% improvement
-- Chen's method: +15% improvement
+Now for feature selection:
 
-López Gil: 3-fold CV with combined RF/MI scores
-Tang: Fixed threshold with RF importance
-Chen: Adaptive weighting based on market volatility
+[https://arxiv.org/pdf/2303.02223v2] - Pabuccu's - "Feature Selection for Forecasting" - Actually used "FSA" and "boruta" for validation: https://github.com/scikit-learn-contrib/boruta_py
 
+[https://doi.org/10.1002/for.3071] - Teng's did not feature select, he manually did it based on domain "expertize" - https://doi.org/10.1002/for.3071 - "Stock movement prediction: A multi-input LSTM approach"
 
-Would you like me to:
-Implement Chen's full methodology with adaptive weighting?
-Add their market regime detection code?
-Include their specific performance metrics for comparison?
-The main tradeoff is complexity vs. performance. Chen's method is more complex to implement but offers better performance, especially in volatile markets. For cryptocurrency prediction, this could be particularly valuable given the market's inherent volatility.
+[https://www.mdpi.com/1999-4893/10/4/114] - tyralis's method - "Variable Selection in Time Series Forecasting Using Random Forests" - https://doi.org/10.3390/a10040114 - using both his prediction and feature selection method.
+
+LASSO feature selection method: https://www.tandfonline.com/doi/epdf/10.1080/09540091.2023.2286188?needAccess=true
+
+The original text block overestimated the mathematical parity of the implementations. This updated analysis provides a more accurate assessment of the actual implementation fidelity to the original papers.
+
+the code for this section, as well as help with understanding the underlying papers math, methods and processes were completed with the aid of both Clude sonnet 3.5 and deepseek r-1.
 
 
+boruta vs tyralis selection methods:
 
-
-"We use 5-fold time series cross-validation (López Gil used 3-fold)" and "We select features above mean score (Tang used a fixed threshold)" Thank you for providing this information it is extremely helpful.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Key Differences:
+Feature Importance Calculation:
+Tyralis: Uses sequential permutation importance in rolling windows
+Boruta: Creates shadow (random) copies of features and compares real vs shadow importance
+Selection Criteria:
+Tyralis: Uses 75th percentile threshold of importance scores
+Boruta: Uses statistical testing to compare features against their shadow copies
+Temporal Consideration:
+Tyralis: Explicitly considers time series nature with rolling windows
+Boruta: Time-agnostic, treats data as independent observations
+Statistical Rigor:
+Tyralis: More focused on predictive performance
+Boruta: More focused on statistical significance through shadow feature comparison
+Computational Approach:
+Tyralis: Single pass with rolling windows
+Boruta: Iterative process with multiple Random Forest fits
+Performance Implications:
+Tyralis might be better for:
+Time series specific applications
+When temporal dependencies are crucial
+When computational speed is important
+Boruta might be better for:
+More robust feature selection
+Reducing false positives
+When statistical significance is crucial

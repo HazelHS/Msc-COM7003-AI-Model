@@ -126,10 +126,10 @@ data pre-processing: interpolation, normalization, denoising: 3/3 completed!
 DATA EDA STEPS!! data ranges + mean/medians, missing values:  0/2 incomplete :C
 DATA VIS! need to include: quality, relationship, outlier:    0/3 incomplete :C
 feature selection:                                            3/3 completed!
-create 3 working models:                                      1/3 incomplete :C
-cross train models with each unquie feature catagory:         0/3 incomplete :C
+create 3 working models:                                      2/3 incomplete :C
+cross train models with each unquie feature catagory:         2/3 incomplete :C
 evaluate models with metrics deliniating each dataset:        0/3 incomplete :C
-hyperparameter tuning:                                        0/3 incomplete :C
+bayesian search hyperparameter tuning:                        0/3 incomplete :C
 ALL CODE ORGANIZED AND AI CITED !!                                incomplete :C !!!!
 --------------------------------------------
 						|
@@ -147,40 +147,117 @@ MAY CAUSE ME ISSUES!!!!  look at next line!!!   V
 5. evaluation
 6. redo feature selection with hyperparameter tuning. (grid search, random search, bayesian search[recomended])
 
-THE MODEL I AM USING IS A: Multi-head Attention Networks + xLSTM-TS
 
-TRADITIONAL METHODS (Pre-2000s):
-Statistical Methods:
-GARCH (Generalized Autoregressive Conditional Heteroskedasticity)
-ARIMA (Autoregressive Integrated Moving Average)
-Linear regression models
-INTERMEDIATE PERIOD (2000-2015):
-Classical Machine Learning:
-Support Vector Machine (SVM)
-Support Vector Regression (SVR)
-Random Forest
-K-Nearest Neighbors (KNN)
-Naive-Bayes
-CURRENT PERIOD (2015-Present):
-Deep Learning Models:
+
+
+----------------------------------------------------------------------
+THE MODEL I AM USING IS A: Multi-head Attention Networks + xLSTM-TS
+----------------------------------------------------------------------
+
+The xLSTM-TS model (Lopez's implementation) would best be categorized as a supervised learning - regression model, but it's more complex than the basic models listed because it's a deep learning architecture that combines multiple techniques. Here's how we can break it down:
+Primary Classification:
+Supervised Learning - Regression
+Because it learns from labeled data (historical prices) to predict continuous values (future prices)
+However, it's more accurately described as a "Hybrid Deep Learning Architecture" because it combines:
+Sequential/Time Series Components:
 LSTM (Long Short-Term Memory)
-GRU (Gated Recurrent Units)
-Bidirectional LSTM
-Multi-head Attention Networks
+For capturing temporal dependencies
+Handles long-term patterns in time series data
+Attention Mechanisms:
+Multi-head attention
+Self-attention layers
+For weighting important temporal relationships
+Helps focus on relevant historical patterns
+Neural Network Elements:
+Bidirectional processing
+Multiple hidden layers
+Batch normalization
+Dropout regularization
+Your implementation specifically includes:
+---------
+A hybrid deep learning architecture
+Combining sequential modeling (LSTM)
+With attention mechanisms
+For time series regression
+--------------------------------------------------------------------------
+TRADITIONAL METHODS (Pre-2000s):
+ - Statistical Methods:
+ - GARCH (Generalized Autoregressive Conditional Heteroskedasticity)
+ - ARIMA (Autoregressive Integrated Moving Average)
+ - Linear regression models
+
+INTERMEDIATE PERIOD (2000-2015):
+ - Classical Machine Learning:
+ - Support Vector Machine (SVM)
+ - Support Vector Regression (SVR)
+ - Random Forest
+ - K-Nearest Neighbors (KNN)
+ - Naive-Bayes
+ - CURRENT PERIOD (2015-Present):
+
+Deep Learning Models:
+ - LSTM (Long Short-Term Memory)
+ - GRU (Gated Recurrent Units)
+ - Bidirectional LSTM
+ - Multi-head Attention Networks
+
 Hybrid Models combining:
-LSTM + Wavelet Transform
-LSTM + GARCH
-Neural Networks + Technical Analysis
+ - LSTM + Wavelet Transform
+ - LSTM + GARCH
+ - Neural Networks + Technical Analysis
+
 Ensemble Methods:
-XGBoost
-Random Forest ensembles
-Combined ML approaches (e.g., Random Forest + XGBoost)
+ - XGBoost
+ - Random Forest ensembles
+ - Combined ML approaches (e.g., Random Forest + XGBoost)
+
 EMERGING TRENDS:
-Advanced Architectures:
-Deep Learning with attention mechanisms
-Multi-input LSTM
-Transformer-based models
-CNN-LSTM hybrids
+ - Advanced Architectures:
+ - Deep Learning with attention mechanisms
+ - Multi-input LSTM
+ - Transformer-based models
+ - CNN-LSTM hybrids
+------------------------------------------------------------------
+
+supervised learning:
+   - classifications:
+	- logistic regression
+	- naive bayes
+	- KNN
+	- decision tree
+	- SVN
+	- random forrest
+
+   - regression:
+	- linear regression
+	- decision tree
+	- support vector regression
+	- casso regression
+	- ridge regression
+
+
+unsupervised learning:
+   - clustering:
+	- K means clustering
+	- DBSCAN Clustering
+	- Gaussian mixture
+	- agglomerative clustering
+	- hierarchical clustering
+	- mean shift clustering
+
+
+reinforcement learning:
+   - decision making:
+	- markov decision process
+	- Q learning
+	- R learning
+	- TD learning
+-------------------------------------------------------
+
+
+
+
+
 
 How These Visualizations Inform Your Process:
 

@@ -22,8 +22,8 @@ https://www.researchgate.net/publication/38322399_Persistence_in_High-dimensiona
 https://www.tandfonline.com/doi/epdf/10.1080/09540091.2023.2286188?needAccess=true - A multi-feature stock price prediction model based on multi-feature calculation, LASSO feature selection, and Ca-LSTM network
 LASSO - Tib-shirani, 1996) everyone mentions this guy!
 https://www.yourdatateacher.com/2021/05/05/feature-selection-in-machine-learning-using-lasso-regression/
-
-
+https://www.sciencedirect.com/science/article/pii/S0957417418306134 - Improving financial trading decisions using deep Q-learning:Predicting the number of shares, action strategies, and transferlearning
+https://ieeexplore.ieee.org/document/7407387 - Deep Direct Reinforcement Learning for Financial Signal Representation and Trading
 
 
 
