@@ -129,10 +129,10 @@ feature selection:                                            3/3 completed!
 create 2 working models:                                      2/2 ncomplete!
 cross train models with each unquie feature catagory:         3/3 complete!
 evaluate models with metrics deliniating each dataset:        3/3 complete!
-bayesian search hyperparameter tuning:                        0/2 incomplete :C
+bayesian search hyperparameter tuning:                        1/1 complete!
 ALL CODE ORGANIZED AND AI CITED !!                                incomplete :C !!!!
 --------------------------------------------
-						|
+												|
 MAY CAUSE ME ISSUES!!!!  look at next line!!!   V
 ===========================================================================================================
 "Demonstrated a methodical approach to data exploration and preprocessing within the implementation."
