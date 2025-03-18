@@ -1,8 +1,9 @@
 https://api.blockchain.info - on chain BTC metrics.
 yfinance [yahoo finance] API - for stock exchange info for: Germany DAX, NASDAQ (already in USD), Dow Jones (already in USD), Nikkei, Euro STOXX 50, Hang Seng, DXY, Gold futures, BTC/USD, BTC Volume and BTC/Gold Ratio.
-https://arxiv.org/html/2408.12408v1#S3.SS3 - An Evaluation of Deep Learning Models for Stock Market Trend Prediction
+https://arxiv.org/html/2408.12408v1 - lopez gil - An Evaluation of Deep Learning Models for Stock Market Trend Prediction
 https://doi.org/10.1002/for.3071 - Stock movement prediction: A multi-input LSTM approach [Tangs]
 https://www.mdpi.com/2078-2489/12/10/388 - [Peng. 2021] Predicting Stock Movements: Using Multiresolution Wavelet Reconstruction and Deep Learning in Neural Networks (minorly improved denoising methods)
+https://www.mdpi.com/1999-4893/10/4/114 - tyralis's method
 
 yet to read:
 https://www.mdpi.com/1911-8074/14/7/302 - Machine Learning in Finance: A Metadata-Based Systematic Review of the Literature 
