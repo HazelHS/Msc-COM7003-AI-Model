@@ -1,1 +1,42 @@
-ds
+abs
+
+report will:
+1. entire production cyle (x2 models)
+2. models from case studies, reflective of major areas in the domain research
+3. models are: rondom forest, xLSTM-TS (long short term memory) x? TS?
+4. general practices, theory and maths of the models functioning.
+5. recommendations for further research.
+6. case studies evaluations on their models implementations (for time series forecasting)
+7. why explore btc specifically? Use case, domain "familiarality". (why the features chosen to include in the datasets)
+8. evaluations resulting in practical considerations and key areas essential for the models performance. 
+9. conclusion, implications: more fancy financial instruments that require ever increasing compuational overhead = they dont know they are the money cows.
+
+intro
+problem statement
+
+
+
+objective and aims
+AI approach
+ - propsed approach
+library and dataset
+EDA (exploratory data analysis)
+data cleaning (before or after data vis?)
+data vis
+data re-processing
+feature selection
+ - hyperparameter tuning
+model select
+ - learning models
+   - list of different models
+   - advanced models we're looking at
+ - model evaluations
+   - feature selection comparison
+   - hyperparameter tuning comparison
+summery
+conclusion
+recommendatsions
+future
+ref
+appendix
+
