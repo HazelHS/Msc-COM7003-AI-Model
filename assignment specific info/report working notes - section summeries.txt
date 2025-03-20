@@ -40,3 +40,168 @@ future
 ref
 appendix
 
+
+important details about the xLSTM-TS model:
+
+Detailed Explanations of xLSTM-TS Implementation Considerations
+
+1. Directional Loss Scaling Factor (division by 10)
+Impact on Model Behavior
+The division by 10 in your directional loss reduces the magnitude of the directional component relative to the MSE component. This has several effects:
+It prevents the directional loss from dominating the combined loss function
+It helps balance the training process to focus on both accurate values (MSE) and trends (directional)
+It can prevent excessive oscillations during training when direction changes
+Is It Desirable?
+Yes, this scaling is generally desirable and follows good practice, even if not explicitly mentioned in the paper. Without scaling, binary cross-entropy (used for directional loss) can produce much larger values than MSE, especially early in training. The note about making it "more comparable to MSE" is correct.
+The authors likely applied some form of normalization but didn't explicitly document it. The specific value (10) could be tuned as a hyperparameter, but your implementation's excellent results suggest your scaling choice is appropriate.
+
+2. Conv1D for Positional Information in xLSTM Blocks
+Deviation from Original xLSTM
+The original xLSTM architecture (Beck et al., 2024) likely implements matrix-memory and scalar-memory cells with specialized gating mechanisms that:
+Use exponential gating functions rather than standard sigmoid/tanh activations
+Employ specialized memory update equations with matrix/scalar representations
+Handle positional information through dedicated mechanisms integrated into the memory structure
+Your Conv1D implementation is an approximation that:
+Uses convolutions to capture local temporal patterns
+Feeds these patterns into standard LSTM cells
+Approximates the specialized memory dynamics through this combination
+
+----------------------------------------------
+
+Alignment
+Layer Sequence: ✅ Perfect match in sequence of layers
+Block Configuration: ✅ Perfect match in configuration parameters
+Output Size: ⚠️ Paper mentions output_size=1, your implementation uses output_size=7 (for 7-day forecasting)
+GlobalAveragePooling: ⚠️ Not explicitly mentioned in paper architecture table
+
+Block Implementation: Your implementation uses standard TensorFlow layers to approximate the unique mathematical properties of xLSTM. The original xLSTM paper describes specialized exponential gating mechanisms and memory structures that aren't directly available in TensorFlow.
+
+-----------------------------------------------
+
+mLSTM Mathematical Parity
+The original xLSTM paper (Beck et al. 2024) describes mLSTM with exponential gating mechanisms and matrix memory. Your implementation takes a pragmatic approach, using:
+Convolutional Processing: ⚠️ Uses Conv1D to approximate positional information extraction
+Standard LSTM: ⚠️ Uses standard LSTM rather than true mLSTM with matrix memory
+Multi-head Attention: ✅ Correctly implements attention mechanism
+Projection & Residual: ✅ Correctly implements projection with residual connection
+
+Loss Function Parity
+Combined MSE and Directional Loss: ✅ Correctly implements the combined loss
+Alpha Value: ✅ Uses 0.7 as specified in paper
+Directional Calculation: ✅ Correctly calculates direction using sign of differences
+Scaling Factor: ⚠️ Additional scaling (division by 10) for directional component not mentioned in paper
+
+------------------------------------------------
+
+This still won't perfectly match the mathematical formulation of xLSTM, but it's a closer approximation without implementing the exact equations from scratch.
+3. Standard LSTM vs True sLSTM
+Detailed Differences
+The true sLSTM (scalar memory LSTM) from the original paper likely has several key differences:
+Memory Structure:
+Standard LSTM: Uses cell state and hidden state vectors
+sLSTM: Uses scalar memory cells with simplified update mechanisms
+Gating Mechanism:
+Standard LSTM: Uses sigmoid/tanh activations for gates
+sLSTM: Uses exponential gating functions (exp(x) or variants)
+Update Rules:
+Standard LSTM: Has complex update rules with multiple gates
+sLSTM: Likely uses simplified update rules optimized for scalar operations
+Parallelization:
+Standard LSTM: Limited parallelism due to recurrent connections
+sLSTM: Better parallelism through simplified scalar operations
+System Effects
+These differences affect:
+Training Dynamics: Exponential gating can provide more stable gradients during backpropagation
+Long-term Dependencies: May handle differently how far back in the sequence information is preserved
+Computational Efficiency: True sLSTM may be more efficient due to simplified operations
+Memory Capacity: Different capacities for storing and recalling complex patterns
+However, your implementation still achieves excellent results, suggesting it successfully approximates the key mathematical properties that make xLSTM effective for this specific problem.
+4. GlobalAveragePooling and Its Effects
+What Is GlobalAveragePooling?
+GlobalAveragePooling1D is a layer that:
+Takes a 3D tensor of shape (batch_size, sequence_length, features)
+Averages each feature across the entire sequence
+Outputs a 2D tensor of shape (batch_size, features)
+In your model, it collapses the temporal dimension before the final dense layer, essentially computing the average representation across all time steps.
+How It Affects the System
+Sequence Information: It removes temporal order information, condensing sequence patterns into a single vector
+Parameter Reduction: Reduces parameters by eliminating the need for flattening
+Regularization: Acts as a form of regularization against overfitting
+Translation Invariance: Makes the model somewhat invariant to when patterns occur in the sequence
+Paper's Likely Approach
+If not explicitly mentioned, the paper might be using:
+Final sequence state (last time step)
+Attention-weighted averaging
+A single prediction head for each forecast day
+
+-------------------------------------------------------
+
+random forest:
+
+-------------------------------------------------------
+
+Random Forest Implementation Analysis: Parity with Tyralis & Papacharalampous Paper
+I've analyzed your random forest implementation for time series forecasting and compared it against the mathematical descriptions from "Variable Selection in Time Series Forecasting Using Random Forests" by Tyralis and Papacharalampous (2017). Your implementation shows strong mathematical parity with the paper's approach.
+Key Areas of Alignment
+Overall Architecture:
+Your implementation properly uses lagged variables as predictors (via the create_sequences_multi_day function)
+You're using RandomForestRegressor with MultiOutputRegressor for multi-day forecasts
+The parameter values (n_estimators=500, max_features='sqrt', etc.) match the paper's recommendations
+Data Processing:
+Your train/val/test split (70/15/15) maintains temporal order as described in the paper
+You apply proper scaling with MinMaxScaler before model training
+Your sequence creation approach correctly handles the time series structure
+Parameter Settings:
+Using 500 trees matches the paper's recommendation
+Your default parameter values (min_samples_split=2, min_samples_leaf=1, bootstrap=True) align with the paper's defaults
+You properly implement n_jobs=-1 to utilize multiple cores as suggested
+Variable Selection:
+Your approach allows controlling sequence length (equivalent to controlling number of lagged variables)
+This aligns with the paper's key finding that "a low number of recent lagged variables performs better"
+Notable Enhancements
+Bayesian Optimization:
+Your hyperparameter tuning via BayesSearchCV is more sophisticated than the paper's bootstrap resampling
+This can potentially yield better model optimization
+Multi-day Forecasting:
+You've extended the one-step ahead approach to 7-day forecasting, showing good application of the core principles
+Detailed Diagnostics:
+Your code includes more comprehensive error reporting and validation metrics
+The feature importance analysis is well-implemented
+Mathematical Parity
+Your implementation correctly captures the key mathematical principle identified in the paper: the tradeoff between using more lagged variables (which can provide more information) versus maintaining a larger training set (which decreases as the number of lagged variables increases).
+The paper concludes: "RF have performed better mostly when using a few recently lagged predictor variables" - your implementation allows controlling this parameter through the sequence_length variable, which is mathematically equivalent to their approach.
+Conclusion
+Your random forest implementation demonstrates excellent mathematical parity with the approach described in the Tyralis & Papacharalampous paper. The core principles of variable selection, parameter settings, and model evaluation are faithfully reproduced, with some valuable enhancements for multi-day forecasting and hyperparameter optimization.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The Paradox Explained
+Looking at your two charts:
+First chart (random_forest_denoised): Smaller visual gap but worse metrics (27.37% MAE, 44.67% RMSE)
+Second chart (boruta_denoised): Larger visual gap but better metrics (13.66% MAE, 17.42% RMSE)
+This counter-intuitive result has several explanations:
+1. Directional Accuracy vs. Point Accuracy
+Notice that the second model (boruta_denoised) has much higher recall (74.82%). This suggests it's better at capturing the direction of movement, which is often more important for time series forecasting than precise values.
+The first model might have points that are closer in absolute value, but if it's predicting drops when the actual value rises (or vice versa), that results in larger errors.
+
+3. Mean vs. Point-by-Point Differences
+Error metrics (MAE/RMSE) are averages across all points. The visual gap you see might be most prominent in certain regions, but if the model performs well elsewhere, the overall metrics improve.
+
