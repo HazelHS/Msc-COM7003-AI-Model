@@ -177,22 +177,6 @@ Your random forest implementation demonstrates excellent mathematical parity wit
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 The Paradox Explained
 Looking at your two charts:
 First chart (random_forest_denoised): Smaller visual gap but worse metrics (27.37% MAE, 44.67% RMSE)
@@ -204,4 +188,124 @@ The first model might have points that are closer in absolute value, but if it's
 
 3. Mean vs. Point-by-Point Differences
 Error metrics (MAE/RMSE) are averages across all points. The visual gap you see might be most prominent in certain regions, but if the model performs well elsewhere, the overall metrics improve.
+
+
+
+-------------------------------------------
+xLSTM-TS Model: An In-Depth Explanation
+-------------------------------------------
+
+Documentation for the API can be found here: https://yfinance-python.org/
+
+
+What is xLSTM-TS?
+The xLSTM-TS (eXtended Long Short-Term Memory for Time Series) is a specialized neural network architecture designed specifically for financial time series forecasting. It represents an evolution of traditional LSTM networks by incorporating multiple advanced components:
+Multi-Block Architecture: The model uses a combination of specialized LSTM blocks:
+mLSTM (multi-head attention LSTM) blocks that capture complex temporal patterns
+sLSTM (skip-connection LSTM) blocks that help with long-range dependencies
+Attention Mechanisms: Incorporates multi-head attention to focus on the most relevant parts of the input sequence when making predictions
+Positional Encoding: Uses convolutional layers to approximate positional information, helping the model understand the relative position of data points
+Specialized Loss Function: Implements a directional loss function that combines both prediction accuracy (MSE) and trend direction prediction
+Architecture Components
+The xLSTM-TS architecture includes:
+Initial linear projection layer
+Multiple stacked mLSTM and sLSTM blocks
+Layer normalization between blocks
+Attention-based temporal weighting
+Final projection layer for multi-day forecasting
+Historical Development
+The xLSTM-TS model was introduced in the research paper "An Evaluation of Deep Learning Models for Stock Market Trend Prediction" by López et al. (2024). It builds upon several important developments in neural network architecture:
+LSTM Origins (1997): Hochreiter & Schmidhuber introduced the original LSTM to address the vanishing gradient problem in recurrent neural networks
+Attention Mechanisms (2014-2017): The development of attention mechanisms in sequence models, particularly through the work of Bahdanau and later the Transformer architecture by Vaswani et al.
+Specialized Financial Models (2018-2022): Growing interest in specialized deep learning architectures for financial time series, with various LSTM variants being proposed
+xLSTM-TS (2024): Introduced as a specialized architecture combining the strengths of previous approaches while addressing specific challenges in financial forecasting
+Applications and Performance
+The xLSTM-TS model has demonstrated strong performance in:
+Multi-day ahead forecasting for cryptocurrency and stock market prediction
+Capturing both the magnitude and direction of price movements
+Handling the volatility and non-stationarity common in financial time series
+What distinguishes xLSTM-TS from earlier models is its ability to balance short-term pattern recognition with longer-term trend awareness, making it particularly suited for markets with complex dynamics like cryptocurrency trading.
+The model's specialized directional loss function helps it focus not just on minimizing prediction error but also on correctly forecasting price movement directions, which is often more important in trading applications than absolute accuracy.
+Current State and Future Development
+As a relatively recent architecture, xLSTM-TS represents the current frontier in specialized time series forecasting models. Ongoing research continues to refine its components, particularly the balance between different types of LSTM blocks and attention mechanisms for different forecasting horizons.
+
+
+
+
+Features selection:
+
+LASSO:
+
+LASSO Feature Selection in Stock Market Prediction
+Looking at your implementation of LASSO feature selection and comparing it with the Chen et al. paper, I can explain how these approaches mathematically align and why LASSO is particularly effective for financial time series modeling.
+Mathematical Foundation of LASSO in the Paper
+The Chen et al. paper utilizes LASSO (Least Absolute Shrinkage and Selection Operator) as a regression analysis method that performs feature selection. The mathematical formulation in the paper is:
+$$(\hat{\alpha}, \hat{\beta}) = \arg\min\left\{\sum_{i=1}^{N}\left[y_i - \alpha - \sum_{j=1}^{p}\beta_j x_{ij}\right]^2\right\}, \text{ subject to } \sum_{i=1}^{P}|\beta_i| \leq t$$
+Where:
+$y_i$ is the dependent variable (stock price)
+$x_{ij}$ are the independent variables (features)
+$\alpha$ is the regression constant
+$\beta_j$ are the coefficients of the $P$ independent variables
+$t$ is the penalty coefficient that controls feature selection
+When $t < t_0$ (some threshold), certain coefficients become exactly zero, effectively removing those features from the model.
+
+-------------------------------------------
+
+Mathematical Similarities and Relationships
+Objective Function Equivalence:
+The scikit-learn Lasso implementation minimizes:
+$$\frac{1}{2n} ||y - Xw||2^2 + \alpha ||w||_1$$
+- This is mathematically equivalent to the paper's formulation, where:
+$||y - Xw||2^2$ corresponds to $\sum{i=1}^{N}[y_i - \alpha - \sum_{j=1}^{p}\beta_j x_{ij}]^2$
+$\alpha ||w||1$ corresponds to the constraint $\sum{i=1}^{P}|\beta_i| \leq t$
+The regularization parameter $\alpha$ in your code is equivalent to $1/t$ in the paper
+Feature Standardization:
+Your implementation uses StandardScaler() to normalize features
+This is crucial for LASSO because the penalty is applied equally to all coefficients
+The paper implicitly assumes feature standardization when applying LASSO
+Automatic Regularization Selection:
+Your code enhances the paper's approach by using cross-validation (LassoCV) to find optimal $\alpha$
+This addresses a limitation in the paper where they don't specify how $t$ is determined
+Feature Selection Mechanism:
+Both approaches select features by identifying non-zero coefficients:
+Paper: Features remain when $\beta_i \neq 0$ after optimization
+Your code: selected_features = X.columns[lasso.coef_ != 0].tolist()
+Both methods rank features by coefficient magnitude
+Application to Financial Time Series:
+The paper applies LASSO to 57 technical indicators, reducing to 6 key features
+Your implementation similarly works with cryptocurrency features, selecting the most predictive ones
+Both approaches recognize that in financial data, many features contain noise or redundant information
+Why LASSO Works Well for Stock/Crypto Prediction
+Sparsity in Financial Predictors:
+Most technical indicators are correlated or redundant
+LASSO identifies the minimal subset that captures essential price dynamics
+Interpretability:
+As noted in the paper: "LASSO feature selection method... [enhances] prediction accuracy and interpretability"
+Your implementation provides clear feature importance scores
+Reduced Overfitting:
+Financial markets contain significant noise
+LASSO's regularization prevents fitting to this noise
+The paper mentions: "including multiple features can introduce noise and increasing the training time"
+Computational Efficiency:
+Both implementations reduce the feature space dramatically
+This enables more efficient model training, especially important for the LSTM networks used in both approaches
+Your implementation aligns perfectly with the methodological approach from the paper while adding valuable enhancements like cross-validation and explicit feature importance ranking, making it well-suited for cryptocurrency prediction tasks.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

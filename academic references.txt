@@ -7,6 +7,8 @@ https://www.mdpi.com/1999-4893/10/4/114 - tyralis's method
 
 yet to read:
 https://www.mdpi.com/1911-8074/14/7/302 - Machine Learning in Finance: A Metadata-Based Systematic Review of the Literature 
+	- lovely "Sankey diagram" charts, showing the evolution of paper contributions to time series forcasting in financial AI shit!
+	
 https://link.springer.com/article/10.1186/s40537-022-00676-2 - Forex market forecasting using machine learning: Systematic Literature Review and meta-analysis
 https://dl.acm.org/doi/10.1145/3699966 - Deep Learning Algorithms for Cryptocurrency Price Prediction: A Comparative Analysis.
 https://arxiv.org/html/2405.11431v1 - Review of deep learning models for crypto price prediction: implementation and evaluation
